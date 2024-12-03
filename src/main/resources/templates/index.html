@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>KASH - Iniciar Sesión</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../css/principal2.css">
+    </head>
+    <body>
+        <header>
+            <div class="logo">
+                <img class="logo" src="../img/logo kash.png" alt="Logo de KASH">
+                <h1>KASH</h1>
+            </div>
+            <nav>
+                <li><a th:href="@{/foro}">Ir a foro</a></li>
+                <li><a th:href="@{/registrar}">Registrar Usuario</a></li>
+            </nav>
+        </header>
+        <main>
+            <section class="division">
+                <div class="Contenido">
+                    <form th:action="@{/ingresar} " method="Get " class="formulario">
+                        <h2>Iniciar sesión</h2><br>
+                        <h4>Usuario: </h4>
+                        <input type="text" id="usuario" name="usuario"  placeholder="Ingrese el usuario"><br>
+                        <h4>Contraseña: </h4>
+                        <input type="password" id="pass" name="pass"  placeholder="Ingrese la contraseña"><br>
+                        <div class="enlaces">
+                            <button type="submit" class="boton">Ingresar</button><br><br>
+                            <a th:href="@{/contraseña}" class="link">Olvidé mi contraseña</a>
+                        </div>
+                    </form>
+
+                </div>
+                <div class="Contenido2">
+                    <div class="carrusel">
+                        <ul>
+                            <li><img src="../img/sena1.jpg" alt=""></li>
+                            <li><img src="../img/sena2.jpg" alt=""></li>
+                            <li><img src="../img/sena3.jpg" alt=""></li>
+                            <li><img src="../img/sena4.png" alt=""></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+        <footer> 
+            <div class="footer_nav">
+                <img class="logo1" src="../img/gov.co.png" alt="Logo Gov.co">
+                <img class="logo2" src="../img/cpdlv.png" alt="Logo CPDLV">
+                <img class="logo3" src="../img/logoSena.png" alt="Logo Sena">
+            </div>
+        </footer>
+    </body>
+</html>

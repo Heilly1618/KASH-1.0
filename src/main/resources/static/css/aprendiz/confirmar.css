@@ -1,0 +1,176 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(255, 255, 255);
+    display: flex;
+    flex-direction: column;
+}
+
+.barra {
+    width: 60px; 
+    background-color:rgb(4, 55, 77);
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    position: fixed;
+    transition: width 0.3s ease;
+    z-index: 2;
+}
+.barra:hover {
+    width: 200px; 
+}
+
+.barra:hover .link {
+    display: inline; 
+}
+
+.barra a {
+    padding: 10px 15px;
+    text-decoration: none;
+    font-size: 14px;
+    color: white;
+    display: block;
+    transition: color 0.3s ease, background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.barra a:hover {
+    color: #f0f0f0;
+}
+
+.selection {
+    display: flex;
+    flex-direction: row; 
+    align-items: center; 
+    width: 100%;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 5px;
+    padding: 10px 15px;
+}
+
+.selection:hover {
+    background-color: rgb(5, 35, 48);
+    transform: translateX(10px); /* Desplazar el elemento hacia la derecha */
+}
+
+.selection .link {
+    display: none;
+    margin-left: 5px; 
+    white-space: nowrap; 
+}
+
+.icono {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.icono:hover {
+    transform: rotate(20deg); 
+}
+
+.barra.expanded .link {
+    display: inline; 
+}
+
+.barra.expanded {
+    width: 200px; 
+}
+
+.cuerpo {
+    margin-left: 60px; 
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+header {
+    width: calc(100% - 60px);
+    padding: 15px;
+    position: fixed;
+    top: 0;
+    left: 60px; 
+    z-index: 1; 
+    background-color: rgb(57,169,0);
+    height: 70px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+}
+
+header img {
+    width: 50px;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+@media screen and (max-width: 600px) {
+    .barra {
+        width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px 0;
+    }
+
+    .barra a {
+        float: none;
+        padding: 10px;
+        text-align: center;
+        width: auto;
+    }
+
+    .cuerpo {
+        margin-left: 0;
+    }
+}
+
+.div-container {
+    margin-top: 10px;
+}
+.cerrar_sesion {
+    display: none; /* Ocultar el botón por defecto */
+    margin-left: 5px;
+    white-space: nowrap;
+}
+
+.barra:hover .cerrar_sesion {
+    display: block; /* Mostrar el botón cuando la barra esté en hover */
+}
+
+.btn-cerrar-sesion {
+    background-color: rgb(4, 55, 77);
+    color: white;
+    padding: 10px 20px; /* Ajustar el padding */
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%; /* Hacer que el botón ocupe el ancho completo */
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-cerrar-sesion:hover {
+    background-color: rgb(5, 35, 48);
+}

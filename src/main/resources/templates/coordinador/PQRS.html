@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>COORDINADOR PQRS</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/PQRS.css"></link>
+    </head>
+     <body>
+    <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/perfil.png" alt="">
+                <a th:href="@{/coordinador}" class="link">mi perfil</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
+                <p>WELCOME</p>
+                <h1>KASH</h1>
+            </header>
+    </body>
+</html>

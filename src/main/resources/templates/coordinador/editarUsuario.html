@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>COORDINADOR</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/editar.css">
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/perfil.png" alt="">
+                <a th:href="@{/coordinador}" class="link">mi perfil</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt=""/>
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt=""/>
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt=""/>
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt=""/>
+                <p>WELCOME</p>
+                <h1>KASH</h1>
+            </header>
+        </div>
+
+        <div class="form-container">
+            <h2>Editar Usuario</h2>
+            <form th:action="@{/coordinador/editar}"  th:object="${usuarioParaActualizar}" method="post">
+
+                <label for="idUsuario">Número de documento:</label>
+                <input type="text" id="idUsuario" name="idUsuario" th:value="${usuarios.idUsuario}" readonly/>
+
+                <label for="numero">Número:</label>
+                <input type="text" id="numero" name="numero" th:value="${usuarios.numero}"   required/>
+
+                <label for="fNacimiento">Fecha de Nacimiento:</label>
+                <input type="date" id="fNacimiento" name="fNacimiento" th:value="${usuarios.fNacimiento}" required/>
+
+                <label for="tDocumento">Tipo de Documento:</label>
+                <select id="tDocumento" name="tDocumento" required>
+                    <option value="CC" th:selected="${usuarios.tDocumento == 'CC'}" >Cédula de Ciudadanía</option>
+                    <option value="TI" th:selected="${usuarios.tDocumento == 'TI'}" >Tarjeta de Identidad</option>
+                    <option value="CE" th:selected="${usuarios.tDocumento == 'CE'}" >Cédula de Extranjería</option>
+                    <option value="PAS" th:selected="${usuarios.tDocumento == 'PAS'}">Pasaporte</option>
+                </select>
+
+                <label for="nombres">Nombre:</label>
+                <input type="text" id="nombres" name="nombres" th:value="${usuarios.nombres}"  required/>
+
+                <label for="primerA">Primer Apellido:</label>
+                <input type="text" id="primerA" name="primerA" th:value="${usuarios.primerA}" required/>
+
+                <label for="segundoA">Segundo Apellido:</label>
+                <input type="text" id="segundoA" name="segundoA" th:value="${usuarios.segundoA}" />
+
+                <label for="correo">Correo:</label>
+                <input type="email" id="correo" name="correo" th:value="${usuarios.correo}" required/>
+
+                <label for="usuario">Usuario:</label>
+                <input type="text" id="usuario" name="usuario" th:value="${usuarios.usuario}"  required/>
+
+                <label for="rolSeleccionado">Rol:</label>
+                <select id="rolSeleccionado" name="rolSeleccionado" required>
+                    <option value="asesor" th:selected="${usuarios.rolSeleccionado == 'asesor'}" >Asesor</option>
+                    <option value="estudiante" th:selected="${usuarios.rolSeleccionado == 'aprendiz'}">Aprendiz</option>
+                </select>
+
+                <label for="trimestre">Trimestre:</label>
+                <select id="trimestre" name="trimestre" required>
+                    <option value="1" th:selected="${usuarios.trimestre == '1'}" >Primer Trimestre</option>
+                    <option value="2" th:selected="${usuarios.trimestre == '2'}" >Segundo Trimestre</option>
+                    <option value="3" th:selected="${usuarios.trimestre == '3'}" >Tercer Trimestre</option>
+                    <option value="4" th:selected="${usuarios.trimestre == '4'}" >Cuarto Trimestre</option>
+                    <option value="5" th:selected="${usuarios.trimestre == '5'}" >Quinto Trimestre</option>
+                    <option value="6" th:selected="${usuarios.trimestre == '6'}" >Sexto Trimestre</option>
+                    <option value="7" th:selected="${usuarios.trimestre == '7'}" >Séptimo Trimestre</option>
+                </select>
+
+                <label for="pass">Contraseña:</label>
+                <input type="password" id="pass" name="pass" th:value="${usuarios.pass}"  required/>
+
+                <button type="submit">Guardar Cambios</button>
+            </form>
+        </div>
+    </body>
+</html>

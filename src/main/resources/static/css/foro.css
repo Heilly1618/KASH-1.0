@@ -1,0 +1,387 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f0f0f0;
+}
+
+header {
+  background-color: rgb(94, 179, 25);
+  width: 100%;
+  height: 70px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header img {
+  width: 50px;
+}
+
+header h1 {
+  text-align: center;
+}
+
+main {
+  padding: 20px;
+}
+
+/* Estilos para el modal */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Estilos para el contenido del modal */
+.modal-content {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  position: relative;
+}
+
+/* Estilo para el botón de cerrar */
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+form {
+  background-color: rgb(230, 230, 230);
+  width: 200px;
+  padding: 40px;
+  margin: 20px;
+  margin-top: 25px;
+  border-radius: 25px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  color: #000;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+input {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  width: 200px;
+  margin-top: 5px;
+}
+
+form label {
+  color: rgb(94, 179, 25);
+}
+
+.formulario .enlaces {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+form .boton {
+  text-decoration: none;
+  background-color: rgb(57, 169, 0);
+  color: white;
+  padding: 10px 30px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+/* Estilos para los botones flotantes */
+.btn-flotante, .btn-flotante2 {
+  position: fixed;
+  bottom: 20px;
+  background-color: rgb(4, 50, 77);
+  border: none;
+  border-radius: 50%;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.btn-flotante {
+  right: 20px; /* A la derecha */
+}
+
+.btn-flotante2 {
+  left: 20px; /* A la izquierda */
+}
+
+.btn-flotante img, .btn-flotante2 img {
+  width: 24px;
+  height: 24px;
+}
+
+.btn-flotante:hover, .btn-flotante2:hover {
+  background-color: #0056b3;
+  transform: scale(1.1);
+}
+
+/* Estilos para el formulario PQR */
+.formulario-pqr {
+  display: none;
+  position: fixed;
+  z-index: 2;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formulario-pqr form {
+  display: flex;
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  position: relative;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.formulario-pqr form img {
+  width: 50px;
+  margin-bottom: 20px;
+  align-self: center;
+}
+
+.formulario-pqr form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.formulario-pqr input, .formulario-pqr textarea {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  outline: none;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.formulario-pqr textarea {
+  resize: vertical;
+}
+
+.formulario-pqr .button-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.formulario-pqr button {
+  background-color: rgb(57, 169, 0);
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.formulario-pqr button:hover {
+  background-color: rgb(45, 142, 0);
+  transform: scale(1.05);
+}
+
+#cerrarPQR {
+  background-color: #e74c3c;
+}
+
+#cerrarPQR:hover {
+  background-color: #c0392b;
+}
+
+.no-foros {
+  color: #ff0000;
+  font-size: 18px;
+  text-align: center;
+  margin: 20px;
+  font-weight: bold;
+}
+
+.autor-fecha {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.contenido {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.estrellas {
+  display: flex;
+  align-items: center;
+}
+
+.estrellas input {
+  display: none;
+}
+
+.estrellas label {
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.estrellas label:hover,
+.estrellas label:hover ~ label {
+  color: #ffcc00;
+}
+
+.estrellas input:checked + label {
+  color: #ffcc00;
+}
+
+.estrellas input:checked ~ label {
+  color: #ffcc00;
+}
+
+.foro-item {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 10px 0;
+  background-color: #f9f9f9;
+  transition: box-shadow 0.3s;
+}
+
+.foro-item:hover {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-comentar {
+  background-color: rgb(57, 169, 0);
+  color: white;
+  padding: 5px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-comentar:hover {
+  background-color: rgb(45, 142, 0);
+}
+
+.botones-comentarios {
+  display: flex;
+  justify-content: space-between;
+}
+
+#formComentario {
+  background-color: #f4f7f6;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  width: 80%;
+  max-width: 600px;
+  margin: 20px auto;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+#formComentario:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+#formComentario label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+#formComentario input[type="text"],
+#formComentario input[type="password"],
+#formComentario textarea {
+  padding: 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  width: 100%;
+  margin-bottom: 20px;
+  background-color: #ffffff;
+  transition: border-color 0.3s;
+}
+
+#formComentario input[type="text"]:focus,
+#formComentario input[type="password"]:focus,
+#formComentario textarea:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+
+#formComentario textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+#formComentario button[type="submit"] {
+  background-color: #4caf50;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+#formComentario button[type="submit"]:hover {
+  background-color: #388e3c;
+  transform: translateY(-3px);
+}
+
+#formComentario #cerrar {
+  background-color: #f44336;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+#formComentario #cerrar:hover {
+  background-color: #d32f2f;
+  transform: translateY(-3px);
+}
+
+#formComentario .form-group {
+  margin-bottom: 15px;
+}

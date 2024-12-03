@@ -1,0 +1,199 @@
+        /*cuerpo*/
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            margin: 0px;
+            padding: 0px;
+            border: 10px;
+            background-color: rgb(255, 255, 255);
+            position:static;
+        }
+
+        /*Encabezado de la pagina*/
+        header{
+            background-color: rgb(4,50,77);
+            width: 100%;
+            height: 70px;
+            justify-content: space-between;
+            display: flex;
+            align-items: center ;
+        }
+        header nav{
+            justify-content: flex-end;
+            display: flex;
+        }
+        .logo{
+            display: flex;
+        }
+        header img{
+            width: 50px;
+        }
+        header  h1{
+            justify-content: flex-end;
+            display:flex;
+            align-items: center;
+            top: 0;
+            text-align: center;
+            color: white;
+        }
+        header li{
+            justify-content: center; 
+            list-style: none;
+            width: 250px;
+            display:flex;
+            align-items: center;
+        }
+        header a{   
+            text-decoration: none;
+            color: white    ;
+            position: relative;
+        }
+
+
+        /*Cuerpo de la pagina*/
+        .division {
+            display: flex;
+            justify-content: space-around; /* Asegura que los elementos queden bien distribuidos */
+            padding: 20px; /* Añade un poco de espacio en el contenedor principal */
+        }
+        
+        .Contenido {
+            height: auto;
+            width: 50%; /* Ajusta el tamaño del contenedor del formulario */
+        }
+        
+        .Contenido2 {
+            height: auto;
+            width: 1000%; /* Ajusta el tamaño del contenedor del carrusel */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0; /* Elimina cualquier espacio innecesario */
+        }
+        
+        /*Formulario de la pagina*/
+        form {
+        background-color: rgb(230, 230, 230);
+        width: 200px;
+        padding: 40px;
+        margin: 20px;
+        margin-top: 25px;
+        border-radius: 25px;
+        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+        color: #000;
+        overflow: hidden;
+        justify-content: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input{
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            width: 200px;
+        }
+
+        form h4{
+            color: rgb(57, 167, 0);
+        align-self: flex-start;
+        }
+
+        form h2{
+            color: rgb(57, 167, 0); 
+        }
+        .formulario .enlaces {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        form .boton{
+            text-decoration: none;
+            background-color: rgb(57, 169, 0);
+            color: white;
+            padding: 10px 30px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+
+        /*Carrusel de la pagina*/
+        .carrusel {
+            width: 600px;
+            height: 200px;
+            margin: 50px auto 0;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .carrusel ul {
+            display: flex;
+            padding: 0;
+            margin: 0;
+            width: 400%; /* 4 imágenes, cada una ocupa 100% del ancho */
+            animation: slide 16s infinite ease-in-out;
+        }
+        
+        .carrusel li {
+            list-style: none;
+            width: 100%; /* Cada imagen ocupa el 100% del contenedor carrusel */
+        }
+        
+        .carrusel img {
+            width: 600px;
+            height: 200px;
+        }
+        
+        @keyframes slide {
+            0% { margin-left: 0%; }          /* Primera imagen */
+            20% { margin-left: 0%; }         /* Mantiene la primera imagen */
+            
+            25% { margin-left: -100%; }      /* Segunda imagen */
+            45% { margin-left: -100%; }      /* Mantiene la segunda imagen */
+            
+            50% { margin-left: -200%; }      /* Tercera imagen */
+            70% { margin-left: -200%; }      /* Mantiene la tercera imagen */
+            
+            75% { margin-left: -300%; }      /* Cuarta imagen */
+            95% { margin-left: -300%; }      /* Mantiene la cuarta imagen */
+            
+            100% { margin-left: 0%; }        /* Vuelve a la primera imagen */
+        }
+        
+        footer{
+            width: 100%;
+            height: 60px;
+            position: absolute;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            font-size: 13px;
+            background-color: rgb(4,50,77);
+            border-top: 1px solid #d3cfcf;
+            margin-top: auto;
+        }
+
+        .logo1{
+                width: 150px;
+                height: 40px;
+                margin-right: 500px;
+        }
+        .logo2{
+            width: 110px;
+            height: 50px;
+            margin-right: 500px;
+        }
+        .logo3{
+            width: 90px;
+            height: 50px;
+        }
+        .footer_nav{
+            display: flex;
+            position: relative;
+        }
+
+        
