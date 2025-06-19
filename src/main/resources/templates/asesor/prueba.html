@@ -1,56 +1,309 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html xmlns:th="http://www.thymeLeaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>ASESOR ASISTENCIA</title>
+        <title>ASESOR PRUEBAS</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/asesor/prueba.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
-            <div class="barra">
-                <div class="selection">
-                    <img class="icono" src="../../img/perfil.png" alt="">
-                    <a th:href="@{/asesor}" class="link">mi perfil</a>
-                </div>
-                <div class="selection">
-                    <img class="icono" src="../../img/componente.png" alt="">
-                    <a th:href="@{/asesor/componente}" class="link">Registrar componentes</a>
-                </div>
-                <div class="selection">
-                    <img class="icono" src="../../img/asesoria.png" alt="">
-                    <a th:href="@{/asesor/asesorias}" class="link">Solicitud de asesorias</a>
-                </div>
-                <div class="selection">
-                    <img class="icono" src="../../img/confirmar.png" alt="">
-                    <a th:href="@{/asesor/confirmar}" class="link">Confirmar asesorias</a>
-                </div>
-                <div class="selection">
-                    <img class="icono" src="../../img/asistencia.png" alt="">
-                    <a th:href="@{/asesor/asistencia}" class="link">Asistencia</a>
-                </div>
-                <div class="selection">
-                    <img class="icono" src="../../img/prueba.png" alt="">
-                    <a th:href="@{/asesor/prueba}" class="link">Asignar pruebas</a>
-                </div>
-                <div class="cerrar_sesion">
-                    <button class="btn-cerrar-sesion"><a th:href="@{/index}" >Cerrar sesión</a></button>
-                </div>
-            </div>
-            <div class="cuerpo">
-                <header>
-                    <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-                    <p>WELCOME</p>
-                    <h1>KASH</h1>
-                </header>
-                <div class="Perfil">
+        <!-- Scripts -->
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Configuración del modal de ayuda
+                addHelpModal('Ayuda - Gestión de Pruebas', [
+                    { title: 'Creación', description: 'Cree nuevas pruebas para evaluar a los aprendices de sus grupos.' },
+                    { title: 'Asignación', description: 'Asigne pruebas a grupos específicos con fecha límite para su realización.' },
+                    { title: 'Resultados', description: 'Visualice el rendimiento de los aprendices y sus resultados.' }
+                ], 'Las pruebas son una herramienta importante para evaluar el avance de los aprendices en los temas tratados durante las asesorías.');
+                
+                // Manejo global de eventos de ventana para todos los modales
+                window.addEventListener('click', function(event) {
+                    // Modal de perfil
+                    var modalPerfil = document.getElementById('modalPerfil');
+                    if (modalPerfil && event.target === modalPerfil) {
+                        cerrarModalPerfil();
+                    }
                     
-                   
+                    // Modal de prueba
+                    var modalPrueba = document.getElementById('modalPrueba');
+                    if (modalPrueba && event.target === modalPrueba) {
+                        cerrarModalPrueba();
+                    }
+                    
+                    // Modales de aprendices (si hay alguno abierto)
+                    document.querySelectorAll('[id^="modalApr-"]').forEach(modal => {
+                        if (event.target === modal) {
+                            modal.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            function mostrarPruebasPorGrupo(grupoId) {
+                document.querySelectorAll('[id^="pruebas-grupo-"]')
+                        .forEach(d => d.style.display = 'none');
+                const block = document.getElementById('pruebas-grupo-' + grupoId);
+                if (block)
+                    block.style.display = 'block';
+            }
+
+            function mostrarAprendicesEnModal(pruebaId) {
+                console.log("Abriendo modal para prueba:", pruebaId);
+                const modal = document.getElementById('modalApr-' + pruebaId);
+                if (modal) {
+                    modal.style.display = 'flex';
+                } else {
+                    console.warn("No se encontró el modal con ID:", 'modalApr-' + pruebaId);
+                }
+            }
+
+            function cerrarAprModal(pruebaId) {
+                document.getElementById('modalApr-' + pruebaId).style.display = 'none';
+            }
+            
+            function seleccionarGrupo(selectElement) {
+                const grupoId = selectElement.value;
+                if (grupoId) {
+                    document.getElementById('grupoInput').value = grupoId;
+                    abrirModalPrueba();
+                }
+            }
+            
+            function abrirModalPrueba() {
+                document.getElementById('modalPrueba').style.display = 'block';
+            }
+            
+            function cerrarModalPrueba() {
+                document.getElementById('modalPrueba').style.display = 'none';
+            }
+            
+            function cerrarModalVerPruebas() {
+                const modal = document.getElementById("modalVerPruebas");
+                modal.classList.remove("mostrar");
+            }
+
+            function abrirModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'block';
+            }
+            
+            function cerrarModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'none';
+            }
+            
+            let contadorPreguntas = 0;
+            function agregarPregunta() {
+                const cont = document.getElementById('contenedorPreguntas');
+                const div = document.createElement('div');
+                div.className = 'pregunta';
+                div.setAttribute('data-index', contadorPreguntas);
+                div.innerHTML = `
+                    <button type="button" class="btn-eliminar-pregunta" onclick="eliminarPregunta(this)">X</button>
+                    <label>Enunciado de la pregunta:</label>
+                    <input type="text" name="Pregunta_${contadorPreguntas}" class="input-estilizado" required><br><br>
+                    <label>Respuestas:</label><br>
+                    ${[0, 1, 2, 3].map(j => `
+                        <div class="respuesta">
+                            <input type="radio" name="Correcta_${contadorPreguntas}" value="${j}" required>
+                            <input type="text" name="respuesta_${contadorPreguntas}_${j}" placeholder="Respuesta ${j + 1}" required>
+                            <button type="button" class="btn-eliminar-respuesta" onclick="eliminarRespuesta(this)">X</button>
+                        </div>
+                    `).join('')}
+                `;
+                cont.appendChild(div);
+                contadorPreguntas++;
+                document.getElementById('totalPreguntas').value = contadorPreguntas;
+            }
+            
+            function eliminarPregunta(btn) {
+                btn.closest('.pregunta').remove();
+            }
+            
+            function eliminarRespuesta(btn) {
+                btn.closest('.respuesta').remove();
+            }
+        </script>
+
+        <!-- Barra de navegación -->
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/asesor/grupo}" class="link">Grupos</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/asesor/asesorias}" class="link">Asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/crearAsesorias.png" alt="">
+                <a th:href="@{/asesor/crearAsesorias}" class="link">Crear asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/asesor/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/asesor/prueba}" class="link">Pruebas</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion">
+                    <a th:href="@{/index}">Cerrar sesión</a>
+                </button>
+            </div>
+        </div>
+
+        <div class="cuerpo">
+            <!-- Header -->
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+                <h2>BIENVENIDO, <span th:text="${nombre}"></span></h2>
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${asesor.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Modal Perfil -->
+            <div id="modalPerfil" class="modal-perfil">
+                <div class="modal-contenido">
+                    <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+                    <div class="Datos">
+                        <div class="columna-izquierda">
+                            <form th:action="@{/asesor/subirFoto}" method="POST" enctype="multipart/form-data">
+                                <div class="Foto">
+                                    <img th:src="@{/fotoAsesor/{id}(id=${asesor.idUsuario})}" 
+                                         alt="Foto de perfil" 
+                                         onerror="this.src='../../img/perfil.png'; this.onerror=null;" />
+                                </div>
+                                <input type="file" name="foto" accept="image/*" required>
+                                <input type="hidden" name="redirectUrl" th:value="${redirectUrl}" />
+                                <button type="submit">Subir Foto</button>
+                            </form>
+                        </div>
+                        <div class="columna-derecha Datos2">
+                            <p><strong>Usuario:</strong> <span th:text="${asesor.usuario}"></span></p>
+                            <p><strong>Nombre:</strong> <span th:text="${asesor.nombres + ' ' + asesor.primerA + ' ' + asesor.segundoA}"></span></p>
+                            <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
+                            <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
+                            <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                            <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
+                            <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
+                            <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-        </body>
+            <!-- Sección de asignar pruebas -->
+            <div class="Prueba">
+                <h2 class="titulo-asignacion">Asignar Pruebas</h2>
+                <div class="card-asignacion">
+                    <select id="grupo" class="input-grupo" onchange="seleccionarGrupo(this)">
+                        <option value="" disabled selected>Seleccione un grupo</option>
+                        <option th:each="grupo : ${grupos}" th:value="${grupo.id}" th:text="${grupo.nombre}">Grupo</option>
+                    </select>
+
+                </div>
+            </div>
+
+            <!-- Modal para crear prueba -->
+            <div id="modalPrueba" class="modal">
+                <div class="modal-contenido-prueba">
+                    <span class="cerrar-modal" onclick="cerrarModalPrueba()">&times;</span>
+                    <form th:action="@{/guardar}" method="post">
+                        <input type="hidden" name="grupo.id" id="grupoInput" />
+                        <label>Tema:</label>
+                        <input type="text" name="tema" class="input-estilizado" required><br>
+                        <label>Fecha de Inicio:</label>
+                        <input type="date" name="fechaInicio" class="input-estilizado" required><br>
+                        <label>Fecha de Fin:</label>
+                        <input type="date" name="fechaFin" class="input-estilizado" required><br>
+                        <div id="contenedorPreguntas"></div>
+                        <input type="hidden" name="totalPreguntas" id="totalPreguntas" value="0">
+                        <button type="button" class="btn-agregar" onclick="agregarPregunta()">+ Agregar Pregunta</button><br>
+                        <button type="submit" class="btn-guardar">Guardar Prueba</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección de grupos y resultados -->
+            <div class="Grupos">
+                <h2 class="titulo-grupos">Resultados por grupo</h2>
+                <div class="grid-grupos">
+                    <div class="card-grupo" th:each="grupo : ${grupos}">
+                        <div class="card-header">
+                            <h3 th:text="${grupo.nombre}">Nombre del Grupo</h3>
+                            <span class="estado">Activo</span>
+                        </div>
+                        <div class="card-body">
+                            <p th:if="${!#lists.isEmpty(pruebasPorGrupo[grupo.id])}">
+                                Cantidad de pruebas: <span th:text="${#lists.size(pruebasPorGrupo[grupo.id])}">0</span>
+                            </p>
+                            <p th:if="${#lists.isEmpty(pruebasPorGrupo[grupo.id])}">
+                                Este grupo aún no tiene pruebas.
+                            </p>
+                            <div class="botones-card">
+                                <button th:onclick="|mostrarPruebasPorGrupo(${grupo.id})|" class="btn-asesorias">
+                                    Ver Resultados
+                                </button>
+                            </div>
+                            <!-- Contenedor oculto con pruebas -->
+                            <div th:id="${'pruebas-grupo-' + grupo.id}" style="display:none; margin-top:1em;">
+                                <div th:each="prueba : ${pruebasPorGrupo[grupo.id]}" class="prueba-item">
+                                    <p><strong>Prueba:</strong> <span th:text="${prueba.tema}">Nombre de Prueba</span></p>
+                                    <button type="button" class="btn-asesorias" th:onclick="'mostrarAprendicesEnModal(' + ${prueba.id} + ')'">
+                                        Ver respuestas de aprendices
+                                    </button>
+
+
+                                    <!-- Modal para esta prueba -->
+                                    <div th:id="'modalApr-' + ${prueba.id}" class="modal" style="display:none;">
+                                        <div class="modal-contenido-prueba">
+                                            <span class="cerrar-modal" th:onclick="'cerrarAprModal(' + ${prueba.id} + ')'">&times;</span>
+                                            <h3>Respuestas de Aprendices</h3>
+                                            <div th:if="${respuestasPorPrueba[prueba.id]} != null">
+                                                <div th:each="entry : ${respuestasPorPrueba[prueba.id].entrySet()}">
+                                                    <p><strong>Aprendiz:</strong>
+                                                        <span th:text="${entry.key.nombres + ' ' + entry.key.primerA + ' ' + entry.key.segundoA}"></span>
+                                                    </p>
+
+                                                    <ul>
+                                                        <li th:each="resp : ${entry.value}">
+                                                            <div>
+                                                                <strong>Pregunta:</strong> <span th:text="${resp.pregunta.enunciado}">[Pregunta]</span><br>
+                                                                <strong>Respuesta:</strong> <span th:text="${resp.respuestaSeleccionada.texto}">[Respuesta]</span>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+
+                                                    <hr>
+                                                </div>
+                                            </div>
+                                            <div th:if="${respuestasPorPrueba[prueba.id]} == null || respuestasPorPrueba[prueba.id].isEmpty()">
+                                                <p>No hay respuestas para esta prueba.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
+    </body>
 </html>

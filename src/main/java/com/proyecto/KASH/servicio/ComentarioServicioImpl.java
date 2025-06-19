@@ -16,5 +16,9 @@ public class ComentarioServicioImpl implements ComentarioServicio {
         return repositorio.findByIdForo(idForo); // Llamada al repositorio con el parámetro
     }
 
-    
-}
+    @Override
+    public void eliminarComentario(Long idComentario) {
+        repositorio.deleteById(idComentario);
+    }
+
+ }

@@ -1,6 +1,7 @@
 *{
     margin: 0;
     padding: 0;
+    font-family: 'Nunito', sans-serif;
 }
 body{
     margin: 0px;
@@ -8,6 +9,7 @@ body{
     border: 10px;
     background-color:#e7ebe6;
     position:static;
+    font-family: 'Nunito', sans-serif;
 }
 header{
     background-color: rgb(4,50,77);
@@ -95,11 +97,11 @@ header a{
 }
 .card h3{
     margin-top: 10px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 .card h4{
     margin-top: 10px;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: 'Nunito', sans-serif;
 }
 .card p{
     padding: auto;
@@ -115,7 +117,7 @@ header a{
     width: 100px;
     padding: 10px;
     text-align: center;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-family: 'Nunito', sans-serif;
     font-size: 14px;
     background-color: rgb(24, 160, 12);
     color: #f4f4f4;

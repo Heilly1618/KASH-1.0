@@ -2,14 +2,30 @@ package com.proyecto.KASH.entidad;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
 public class Usuario {
 
+    public static Long getId() {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
     @Id
     @Column(name = "IDusuario", nullable = false, length = 100)
     private Long idUsuario;
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Componente> componente;
+
+    public List<Componente> getComponentes() {
+        return componentes;
+    }
+
+    public void setComponentes(List<Componente> componentes) {
+        this.componentes = componentes;
+    }
 
     @Column(name = "rol", nullable = false)
     private String rolSeleccionado;
@@ -43,6 +59,12 @@ public class Usuario {
 
     @Column(name = "pass", nullable = false)
     private String pass;
+
+    @Column(name = "estado", nullable = false)
+    private String estado = "activo"; // valor por defecto
+
+    @Column(name = "etapa")
+    private String etapa;
 
     // Getters y Setters
     public Long getIdUsuario() {
@@ -141,6 +163,25 @@ public class Usuario {
         this.pass = pass;
     }
 
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
+    }
+
+    public String getEtapa() {
+        return etapa;
+    }
+
+    public void setEtapa(String etapa) {
+        this.etapa = etapa;
+    }
+
+    
+    
+    
     public Usuario(Long idUsuario, String rolSeleccionado, String nombres, String primerA, String segundoA, LocalDate fNacimiento, String tDocumento, String trimestre, String correo, String numero, String usuario, String pass) {
         this.idUsuario = idUsuario;
         this.rolSeleccionado = rolSeleccionado;
@@ -183,13 +224,7 @@ public class Usuario {
         return "Usuario{" + "idUsuario=" + idUsuario + ", rolSeleccionado=" + rolSeleccionado + ", nombres=" + nombres + ", primerA=" + primerA + ", segundoA=" + segundoA + ", fNacimiento=" + fNacimiento + ", tDocumento=" + tDocumento + ", trimestre=" + trimestre + ", correo=" + correo + ", numero=" + numero + ", usuario=" + usuario + ", pass=" + pass + '}';
     }
 
-    public void LongPass(Long idUsuario) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
-    
-    
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Componente> componentes;
 
-   
-    
-    
 }

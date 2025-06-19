@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Coordinador - Gestión de Componentes</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/componentes.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>GESTIÓN DE COMPONENTES</h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="contenido">
+                <!-- Mensajes de éxito y error -->
+                <div th:if="${mensaje}" class="mensaje-exito">
+                    <p th:text="${mensaje}"></p>
+                </div>
+                <div th:if="${error}" class="mensaje-error">
+                    <p th:text="${error}"></p>
+                </div>
+                
+                <!-- Formulario para crear componentes -->
+                <div class="crear-componente">
+                    <h3>Crear nuevo componente</h3>
+                    <form th:action="@{/coordinador/componentes/crear}" method="post">
+                        <div class="form-group">
+                            <label for="nombreComponente">Nombre del componente:</label>
+                            <input type="text" id="nombreComponente" name="nombreComponente" required>
+                        </div>
+                        <button type="submit" class="btn-crear">
+                            <i class="fas fa-plus"></i> Crear componente
+                        </button>
+                    </form>
+                </div>
+                
+                <!-- Lista de componentes existentes -->
+                <div class="lista-componentes">
+                    <h3>Componentes disponibles</h3>
+                    <div class="tabla-container">
+                        <table class="tabla-componentes">
+                            <thead>
+                                <tr>
+                                    <th>Nombre del componente</th>
+                                    <th>Número de grupos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="componente : ${componentesDisponibles}">
+                                    <td th:text="${componente}"></td>
+                                    <td th:text="${gruposPorComponente.get(componente)}"></td>
+                                </tr>
+                                <tr th:if="${componentesDisponibles.isEmpty()}">
+                                    <td colspan="2" class="no-resultados">No hay componentes registrados</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de perfil -->
+        <div id="modalPerfil" class="modal-perfil" style="display:none;">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+                <!-- Contenido del modal de perfil -->
+            </div>
+        </div>
+        
+        <!-- Ventana modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Gestión de Componentes</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite gestionar los componentes disponibles en la plataforma. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Crear componentes:</strong> Puede crear nuevos componentes para que los usuarios se unan a grupos.</li>
+                    <li><strong>Ver componentes:</strong> Observe todos los componentes existentes y el número de grupos que contiene cada uno.</li>
+                </ul>
+                <p>Los componentes son las áreas temáticas en las que los asesores pueden crear grupos para impartir asesorías.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+        
+        <script>
+            // Mostrar modal de ayuda al cargar la página
+            window.onload = function() {
+                setTimeout(function() {
+                    showHelpModal();
+                    
+                    // Cerrar automáticamente después de 60 segundos
+                    setTimeout(function() {
+                        closeHelpModal();
+                    }, 60000);
+                }, 1000);
+            };
+            
+            function abrirModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'block';
+            }
+            
+            function cerrarModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'none';
+            }
+            
+            function showHelpModal() {
+                document.getElementById('helpModal').style.display = 'block';
+            }
+            
+            function closeHelpModal() {
+                document.getElementById('helpModal').style.display = 'none';
+            }
+            
+            // Cerrar el modal al hacer clic fuera de él
+            window.onclick = function(event) {
+                const modalPerfil = document.getElementById('modalPerfil');
+                const helpModal = document.getElementById('helpModal');
+                
+                if (event.target === modalPerfil) {
+                    cerrarModalPerfil();
+                }
+                
+                if (event.target === helpModal) {
+                    closeHelpModal();
+                }
+            };
+        </script>
+    </body>
+</html> 

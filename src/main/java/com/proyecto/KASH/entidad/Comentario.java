@@ -6,17 +6,10 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comentario")
-
 public class Comentario {
-
-    public static void setIdForo(Long idForo) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,10 +19,10 @@ public class Comentario {
     private int idForo;
 
     @Column(name = "nombre", nullable = false, length = 100)
-    public String nombre;
+    private String nombre;
 
     @Column(name = "contenido", nullable = false, length = 100)
-    public String contenido;
+    private String contenido;
 
     public Long getId() {
         return id;
@@ -39,12 +32,12 @@ public class Comentario {
         this.id = id;
     }
 
-    public int getIDforo() {
+    public int getIdForo() {
         return idForo;
     }
 
-    public void setIDforo(int IDforo) {
-        this.idForo = IDforo;
+    public void setIdForo(int idForo) {
+        this.idForo = idForo;
     }
 
     public String getNombre() {
@@ -63,9 +56,9 @@ public class Comentario {
         this.contenido = contenido;
     }
 
-    public Comentario(Long id, int IDforo, String nombre, String contenido) {
+    public Comentario(Long id, int idForo, String nombre, String contenido) {
         this.id = id;
-        this.idForo = IDforo;
+        this.idForo = idForo;
         this.nombre = nombre;
         this.contenido = contenido;
     }
@@ -75,14 +68,12 @@ public class Comentario {
         this.nombre = nombre;
         this.contenido = contenido;
     }
-    
-    public Comentario(){
-        
-    }
-    
-    @Override
-    public String toString() {
-        return "Comentario{" + "id=" + id + ", IDforo=" + idForo + ", nombre=" + nombre + ", contenido=" + contenido + '}';
+
+    public Comentario() {
     }
 
+    @Override
+    public String toString() {
+        return "Comentario{" + "id=" + id + ", idForo=" + idForo + ", nombre=" + nombre + ", contenido=" + contenido + '}';
+    }
 }

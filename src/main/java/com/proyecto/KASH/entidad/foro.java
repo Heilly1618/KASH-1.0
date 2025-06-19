@@ -1,13 +1,8 @@
 package com.proyecto.KASH.entidad;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.sql.Blob;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "foro")
@@ -27,7 +22,7 @@ public class foro {
     private String contenido;
 
     @Column(name = "fecha", nullable = false)
-    private LocalDate fecha;  // Fecha de creación del foro
+    private LocalDate fecha;  
 
     @Column(name = "IDusuario", nullable = false)
     private int idUsuario;
@@ -35,20 +30,25 @@ public class foro {
     @Column(name = "trimestre", nullable = false)
     private int trimestre;
 
+    @Lob
+    @Column(name = "foto", columnDefinition = "LONGBLOB")
+    private Blob foto;
+
     // Constructor con todos los campos excepto la fecha
-    public foro(Long id, String nombre, String tema, String contenido, int idUsuario, int trimestre) {
+    public foro(Long id, String nombre, String tema, String contenido, int idUsuario, int trimestre, Blob foto) {
         this.id = id;
         this.nombre = nombre;
         this.tema = tema;
         this.contenido = contenido;
-        this.fecha = LocalDate.now();  // Fecha actual
+        this.fecha = LocalDate.now();  
         this.idUsuario = idUsuario;
         this.trimestre = trimestre;
+        this.foto = foto;
     }
 
     // Constructor vacío necesario para JPA
     public foro() {
-        this.fecha = LocalDate.now();  // Establece la fecha actual por defecto
+        this.fecha = LocalDate.now();
     }
 
     // Getters y Setters
@@ -108,28 +108,24 @@ public class foro {
         this.trimestre = trimestre;
     }
 
-    public foro(Long id, String nombre, String tema, String contenido, LocalDate fecha, int idUsuario, int trimestre) {
-        this.id = id;
-        this.nombre = nombre;
-        this.tema = tema;
-        this.contenido = contenido;
-        this.fecha = fecha;
-        this.idUsuario = idUsuario;
-        this.trimestre = trimestre;
+    public Blob getFoto() {
+        return foto;
     }
-    
-    
-    
+
+    public void setFoto(Blob foto) {
+        this.foto = foto;
+    }
+
     @Override
     public String toString() {
-        return "Foro{" +
-                "id=" + id +
-                ", nombre='" + nombre + '\'' +
-                ", tema='" + tema + '\'' +
-                ", contenido='" + contenido + '\'' +
-                ", fecha=" + fecha +
-                ", idUsuario=" + idUsuario +
-                ", trimestre=" + trimestre +
-                '}';
+        return "Foro{"
+                + "id=" + id
+                + ", nombre='" + nombre + '\''
+                + ", tema='" + tema + '\''
+                + ", contenido='" + contenido + '\''
+                + ", fecha=" + fecha
+                + ", idUsuario=" + idUsuario
+                + ", trimestre=" + trimestre
+                + '}';
     }
 }

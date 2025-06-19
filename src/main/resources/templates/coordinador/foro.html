@@ -9,35 +9,327 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/coordinador/foros.css"></link>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
-     <body>
-    <div class="barra">
-            <div class="selection">
-                <img class="icono" src="../../img/perfil.png" alt="">
-                <a th:href="@{/coordinador}" class="link">mi perfil</a>
-            </div>
+    <body>
+        <div class="barra">
             <div class="selection">
                 <img class="icono" src="../../img/pqrs.png" alt="">
                 <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
             </div>
             <div class="selection">
-                <img class="icono" src="../../img/asesoria.png" alt="">
+                <img class="icono" src="../../img/usuarios.png" alt="">
                 <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
             </div>
-            <div class="selection">
+            <div class="selection active">
                 <img class="icono" src="../../img/foro.png" alt="">
                 <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
             </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
             <div class="cerrar_sesion">
-                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
             </div>
         </div>
-        </div>
-        <div class="cuerpo">
-            <header>
-                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-                <p>WELCOME</p>
+    </div>
+    <div class="cuerpo">
+        <header>
+            <div class="header-izquierda">
+                <img class="logo" src="../../img/logoKash.png" alt="Logo">
                 <h1>KASH</h1>
-            </header>
+            </div>
+
+            <h2>CONTROL DE FOROS</h2>
+
+            <div class="perfil-header">
+                <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                <div>
+                    <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                </div>
+            </div>
+        </header>
+        
+        <div id="modalPerfil" class="modal-perfil" style="display:none;">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+
+                <div class="Datos">
+                    <div class="columna-izquierda">
+                        <form th:action="@{/coordinador/subirFoto}" method="POST" enctype="multipart/form-data">
+                            <div class="Foto">
+                                <img th:src="@{|/fotoCoordinador/${coordinador.idUsuario}|}" alt="Foto de perfil" />
+                            </div>
+                            <input type="file" name="foto" accept="image/*" required>
+                            <button type="submit">Subir Foto</button>
+                        </form>
+                    </div>
+
+                    <div class="columna-derecha Datos2">
+                        <p><strong>Usuario:</strong> <span th:text="${coordinador.usuario}"></span></p>
+                        <p><strong>Nombre:</strong> <span th:text="${coordinador.nombres} + ' ' + ${coordinador.primerA} + ' ' + ${coordinador.segundoA}"></span></p>
+                        <p><strong>Tipo de documento:</strong> <span th:text="${coordinador.tDocumento}"></span></p>
+                        <p><strong>Número de documento:</strong> <span th:text="${coordinador.idUsuario}"></span></p>
+                        <p><strong>Rol:</strong> <span th:text="${coordinador.rolSeleccionado}"></span></p>
+                        <p><strong>Trimestre:</strong> <span th:text="${coordinador.trimestre}"></span></p>
+                        <p><strong>Correo:</strong> <span th:text="${coordinador.correo}"></span></p>
+                        <p><strong>Número de contacto:</strong> <span th:text="${coordinador.numero}"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="foros">
+            <h2 class="titulo">Lista de foros</h2>
+            
+            <!-- Filtros avanzados -->
+            <div class="filtros-container">
+                <form method="get" th:action="@{/coordinador/foro}" class="filtros-form">
+                    <div class="filtros-grupo">
+                        <div class="filtro">
+                            <label for="filtro">Buscar:</label>
+                            <input type="text" id="filtro" name="filtro" placeholder="Buscar foros..." th:value="${filtro}" class="filtro-input">
+                        </div>
+                        <div class="filtro">
+                            <label for="tema">Tema:</label>
+                            <select id="tema" name="tema" class="filtro-select">
+                                <option value="todos" th:selected="${tema == null || tema == 'todos'}">Todos</option>
+                                <option th:each="t : ${temas}" th:value="${t}" th:text="${t}" th:selected="${tema == t}"></option>
+                            </select>
+                        </div>
+                        <div class="filtro">
+                            <label for="trimestre">Trimestre:</label>
+                            <select id="trimestre" name="trimestre" class="filtro-select">
+                                <option value="todos" th:selected="${trimestre == null || trimestre == 'todos'}">Todos</option>
+                                <option th:each="t : ${trimestres}" th:value="${t}" th:text="${t}" th:selected="${trimestre == t}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filtros-botones">
+                        <button type="submit" class="btn-filtrar">
+                            <i class="fas fa-filter"></i> Aplicar filtros
+                        </button>
+                        <button type="button" onclick="limpiarFiltros()" class="btn-limpiar">
+                            <i class="fas fa-broom"></i> Limpiar filtros
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Botones de reportes -->
+            <div class="reportes-container">
+                <a class="btn-generar-reporte" th:href="@{/report-foros(tema=${tema}, trimestre=${trimestre})}" target="_blank">
+                    <i class="fas fa-file-pdf"></i> Generar reporte PDF
+                </a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número documento</th>
+                        <th>Nombre</th>
+                        <th>Tema</th>
+                        <th>Contenido</th>
+                        <th>Fecha</th>
+                        <th>Trimestre</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="foro : ${foros}">
+                        <td th:text="${foro.idUsuario}">ID Usuario</td>
+                        <td th:text="${foro.nombre}">Nombre</td>
+                        <td th:text="${foro.tema}">Tema</td>
+                        <td th:text="${foro.contenido}">Contenido</td>
+                        <td th:text="${foro.fecha}">Fecha</td>
+                        <td th:text="${foro.trimestre}">Trimestre</td>
+                        <td>
+                            <button type="button" class="btn-ver-comentarios"
+                                    th:onclick="'abrirModal(' + ${foro.id} + ')'">
+                                Ver Comentarios
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+        <div id="modalComentarios" class="modal">
+            <div class="modal-contenido">
+                <div class="modal-header">
+                    <h3>Comentarios del foro</h3>
+                    <span class="cerrar" onclick="cerrarModal()">&times;</span>
+                </div>
+                <div id="listaComentarios" class="comentarios-container">
+                    <!-- Aquí se cargan los comentarios -->
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Cargando comentarios...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cerrar" onclick="cerrarModal()">Cerrar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Ventana modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Gestión de Foros</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite gestionar todos los foros creados en la plataforma. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Filtros:</strong> Puede buscar foros por texto, filtrar por tema.</li>
+                    <li><strong>Reportes:</strong> Genere reportes en PDF con la información de los foros.</li>
+                    <li><strong>Comentarios:</strong> Visualice y modere los comentarios de cada foro haciendo clic en el botón "Ver Comentarios".</li>
+                </ul>
+                <p>Para obtener más información sobre cada función, pase el cursor sobre los botones o elementos de la interfaz.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+
+        <script>
+            function abrirModalPerfil() {
+                document.getElementById("modalPerfil").style.display = "flex";
+            }
+
+            function cerrarModalPerfil() {
+                document.getElementById("modalPerfil").style.display = "none";
+            }
+
+            function limpiarFiltros() {
+                document.getElementById("filtro").value = "";
+                document.getElementById("tema").value = "todos";
+                document.getElementById("trimestre").value = "todos";
+                document.forms[0].submit();
+            }
+
+            function abrirModal(foroId) {
+                var modal = document.getElementById("modalComentarios");
+                modal.style.display = "block";
+                
+                // Mostrar spinner de carga
+                var listaComentarios = document.getElementById("listaComentarios");
+                listaComentarios.innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Cargando comentarios...</p>
+                    </div>
+                `;
+                
+                // Cargar comentarios mediante AJAX
+                fetch('/coordinador/comentarios/' + foroId)
+                    .then(response => response.json())
+                    .then(data => {
+                        listaComentarios.innerHTML = "";
+                        
+                        if (data.length === 0) {
+                            listaComentarios.innerHTML = `
+                                <div class="sin-comentarios">
+                                    <i class="fas fa-comments" style="font-size: 32px; color: #ccc; margin-bottom: 10px;"></i>
+                                    <p>Este foro no tiene comentarios.</p>
+                                </div>
+                            `;
+                        } else {
+                            data.forEach(comentario => {
+                                var comentarioHTML = `
+                                    <div class="comentario-item">
+                                        <div class="comentario-info">
+                                            <span class="comentario-autor">${comentario.nombre}</span>
+                                            <span class="comentario-fecha">${comentario.fecha}</span>
+                                        </div>
+                                        <p class="comentario-texto">${comentario.contenido}</p>
+                                        <button onclick="eliminarComentario(${comentario.id}, ${foroId})">
+                                            <i class="fas fa-trash"></i> Eliminar comentario
+                                        </button>
+                                    </div>
+                                `;
+                                listaComentarios.innerHTML += comentarioHTML;
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al cargar comentarios:', error);
+                        listaComentarios.innerHTML = `
+                            <div class="error-container">
+                                <i class="fas fa-exclamation-circle" style="font-size: 32px; color: #ff5252; margin-bottom: 10px;"></i>
+                                <p>Error al cargar los comentarios. Por favor, intente nuevamente.</p>
+                            </div>
+                        `;
+                    });
+            }
+
+            function cerrarModal() {
+                document.getElementById("modalComentarios").style.display = "none";
+            }
+            
+            function eliminarComentario(comentarioId, foroId) {
+                if (confirm("¿Está seguro que desea eliminar este comentario?")) {
+                    fetch('/coordinador/eliminar-comentario/' + comentarioId, {
+                        method: 'POST'
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            // Recargar comentarios
+                            abrirModal(foroId);
+                        } else {
+                            alert("Error al eliminar el comentario");
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert("Error al eliminar el comentario");
+                    });
+                }
+            }
+            
+            // Funciones para la ventana de ayuda
+            function showHelpModal() {
+                document.getElementById("helpModal").style.display = "block";
+            }
+            
+            function closeHelpModal() {
+                document.getElementById("helpModal").style.display = "none";
+            }
+            
+            // Mostrar la ayuda automáticamente al cargar la página
+            window.onload = function() {
+                setTimeout(function() {
+                    showHelpModal();
+                    // Cerrar automáticamente después de 60 segundos
+                    setTimeout(function() {
+                        closeHelpModal();
+                    }, 60000);
+                }, 1000);
+            };
+
+            // Cerrar modales al hacer clic fuera de ellos
+            window.onclick = function(event) {
+                var modalComentarios = document.getElementById("modalComentarios");
+                var modalPerfil = document.getElementById("modalPerfil");
+                var helpModal = document.getElementById("helpModal");
+                
+                if (event.target == modalComentarios) {
+                    modalComentarios.style.display = "none";
+                }
+                
+                if (event.target == modalPerfil) {
+                    modalPerfil.style.display = "none";
+                }
+                
+                if (event.target == helpModal) {
+                    helpModal.style.display = "none";
+                }
+            }
+        </script>
     </body>
 </html>

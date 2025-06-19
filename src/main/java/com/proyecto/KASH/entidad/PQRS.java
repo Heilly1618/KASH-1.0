@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "PQRS")
+@Table(name = "pqrs")
 public class PQRS {
 
     @Id
@@ -37,6 +37,9 @@ public class PQRS {
 
     @Column(name = "detalles")
     private String detalles;
+
+    @Column(name = "estado")
+    private EstadoPQRS estado;
 
     // Getters and Setters
     public Long getId() {
@@ -101,5 +104,28 @@ public class PQRS {
 
     public void setDetalles(String detalles) {
         this.detalles = detalles;
+    }
+
+    public EstadoPQRS getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoPQRS estado) {
+        this.estado = estado;
+    }
+
+
+    @Override
+    public String toString() {
+        return "PQRS{"
+                + "id=" + id
+                + ", nombre='" + nombre + '\''
+                + ", idUsuario=" + idUsuario
+                + ", correo='" + email + '\''
+                + ", fecha='" + fecha + '\''
+                + ", tipo='" + tipo + '\''
+                + ", detalles='" + detalles + '\''
+                + ", estado='" + estado + '\''
+                + '}';
     }
 }

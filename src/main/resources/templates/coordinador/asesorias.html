@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>Coordinador - Asesorías</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/coordinador/asesorias.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/pqrs.png" alt="">
+                <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/usuarios.png" alt="">
+                <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/foro.png" alt="">
+                <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
+            </div>
+            <div class="selection active">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/coordinador/asesorias}" class="link">Control de asesorías</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/coordinador/componentes}" class="link">Gestión de componentes</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <div class="header-izquierda">
+                    <img class="logo" src="../../img/logoKash.png" alt="Logo">
+                    <h1>KASH</h1>
+                </div>
+
+                <h2>CONTROL DE ASESORÍAS</h2>
+
+                <div class="perfil-header">
+                    <img src="../../img/perfil.png" alt="Perfil" class="icono-perfil" onclick="abrirModalPerfil()">
+                    <div>
+                        <span class="rol-usuario">Rol: <span th:text="${coordinador.rolSeleccionado}"></span></span>
+                    </div>
+                </div>
+            </header>
+            
+            <div class="contenido">
+                <!-- Estadísticas -->
+                <div class="estadisticas">
+                    <div class="card-estadistica">
+                        <h3>Total Asesorías</h3>
+                        <div class="valor" th:text="${totalAsesorias}">0</div>
+                    </div>
+                    <div class="card-estadistica">
+                        <h3>Asesorías Activas</h3>
+                        <div class="valor" th:text="${asesoriasActivas}">0</div>
+                    </div>
+                    <div class="card-estadistica">
+                        <h3>Asesorías Completadas</h3>
+                        <div class="valor" th:text="${asesoriasCompletadas}">0</div>
+                    </div>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="filtros-container">
+                    <h2>Filtros de búsqueda</h2>
+                    <form id="filtroForm" th:action="@{/coordinador/asesorias/filtrar}" method="get">
+                        <div class="filtros">
+                            <div class="filtro-grupo">
+                                <label for="estado">Estado:</label>
+                                <select id="estado" name="estado">
+                                    <option value="todos" th:selected="${estadoFiltro == 'todos' || estadoFiltro == null}">Todos</option>
+                                    <option value="Activa" th:selected="${estadoFiltro == 'Activa'}">Activa</option>
+                                    <option value="Inactiva" th:selected="${estadoFiltro == 'Inactiva'}">Inactiva</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filtro-grupo">
+                                <label for="completada">Completada:</label>
+                                <select id="completada" name="completada">
+                                    <option value="todos" th:selected="${completadaFiltro == 'todos' || completadaFiltro == null}">Todos</option>
+                                    <option value="si" th:selected="${completadaFiltro == 'si'}">Sí</option>
+                                    <option value="no" th:selected="${completadaFiltro == 'no'}">No</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filtro-grupo">
+                                <label for="asesor">Asesor:</label>
+                                <select id="asesor" name="asesorId">
+                                    <option value="0" th:selected="${asesorIdFiltro == null}">Todos</option>
+                                    <option th:each="asesor : ${asesores}" 
+                                            th:value="${asesor.idUsuario}" 
+                                            th:text="${asesor.nombres + ' ' + asesor.primerA}"
+                                            th:selected="${asesor.idUsuario == asesorIdFiltro}">
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="filtro-grupo">
+                                <label for="aprendiz">Aprendiz:</label>
+                                <input type="text" id="aprendiz" name="aprendiz" th:value="${aprendizFiltro}" 
+                                       placeholder="Nombre del aprendiz">
+                            </div>
+                            
+                            <div class="filtro-grupo">
+                                <label for="fechaDesde">Fecha desde:</label>
+                                <input type="date" id="fechaDesde" name="fechaDesde" th:value="${fechaDesdeFiltro}">
+                            </div>
+                            
+                            <div class="filtro-grupo">
+                                <label for="fechaHasta">Fecha hasta:</label>
+                                <input type="date" id="fechaHasta" name="fechaHasta" th:value="${fechaHastaFiltro}">
+                            </div>
+                        </div>
+                        
+                        <div class="filtros-acciones">
+                            <button type="submit" class="btn-filtrar">
+                                <i class="fas fa-filter"></i> Aplicar filtros
+                            </button>
+                            <button type="button" class="btn-limpiar" onclick="limpiarFiltros()">
+                                <i class="fas fa-broom"></i> Limpiar filtros
+                            </button>
+                            <button type="button" class="btn-pdf" onclick="generarPDF()">
+                                <i class="fas fa-file-pdf"></i> Generar PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Tabla de asesorías -->
+                <div class="tabla-container">
+                    <table class="tabla-asesorias">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Grupo</th>
+                                <th>Asesor</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Link</th>
+                                <th>Estado</th>
+                                <th>Completada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="asesoria : ${asesorias}">
+                                <td th:text="${asesoria.id}"></td>
+                                <td th:text="${asesoria.grupo.nombre}"></td>
+                                <td th:text="${asesoria.grupo.asesor != null ? asesoria.grupo.asesor.nombres + ' ' + asesoria.grupo.asesor.primerA : 'No asignado'}"></td>
+                                <td th:text="${asesoria.fechaFormateada}"></td>
+                                <td th:text="${asesoria.horaFormateada}"></td>
+                                <td>
+                                    <a th:if="${asesoria.link != null && !asesoria.link.isEmpty()}" 
+                                       th:href="${asesoria.link}" 
+                                       target="_blank" 
+                                       class="link-asesoria">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                    <span th:unless="${asesoria.link != null && !asesoria.link.isEmpty()}">No disponible</span>
+                                </td>
+                                <td>
+                                    <span th:class="${asesoria.estado == 'Activa' ? 'estado-activa' : 'estado-inactiva'}" 
+                                          th:text="${asesoria.estado}"></span>
+                                </td>
+                                <td>
+                                    <span th:class="${asesoria.completada ? 'completada-si' : 'completada-no'}" 
+                                          th:text="${asesoria.completada ? 'Sí' : 'No'}"></span>
+                                </td>
+                            </tr>
+                            <tr th:if="${asesorias.isEmpty()}">
+                                <td colspan="8" class="no-resultados">No se encontraron asesorías con los filtros aplicados</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal de perfil (si existe) -->
+        <div id="modalPerfil" class="modal-perfil" style="display:none;">
+            <div class="modal-contenido">
+                <span class="cerrar-modal" onclick="cerrarModalPerfil()">&times;</span>
+                <!-- Contenido del modal de perfil -->
+            </div>
+        </div>
+        
+        <!-- Agregar el nuevo modal de ayuda -->
+        <div id="helpModal" class="help-modal">
+            <div class="help-modal-header">
+                <h3><i class="fas fa-question-circle"></i> Ayuda - Control de Asesorías</h3>
+                <button class="help-modal-close" onclick="closeHelpModal()">&times;</button>
+            </div>
+            <div class="help-modal-content">
+                <p>Esta sección le permite administrar todas las asesorías programadas en la plataforma. A continuación se detallan las principales funcionalidades:</p>
+                <ul>
+                    <li><strong>Estadísticas:</strong> Visualice el total de asesorías, activas y completadas.</li>
+                    <li><strong>Filtros:</strong> Puede filtrar por estado, asesor, aprendiz, fechas y más.</li>
+                    <li><strong>Reportes:</strong> Genere reportes en PDF con la información filtrada.</li>
+                </ul>
+                <p>Las asesorías se visualizan en una tabla con todos sus detalles, incluyendo enlaces para acceder a ellas.</p>
+            </div>
+            <div class="help-modal-footer">
+                <button onclick="closeHelpModal()">Entendido</button>
+            </div>
+        </div>
+        
+        <script src="../../js/help-modal.js"></script>
+        
+        <script>
+            // Funciones específicas de esta página
+            function limpiarFiltros() {
+                document.getElementById("estado").value = "todos";
+                document.getElementById("completada").value = "todos";
+                document.getElementById("asesor").value = "0";
+                document.getElementById("aprendiz").value = "";
+                document.getElementById("fechaDesde").value = "";
+                document.getElementById("fechaHasta").value = "";
+                document.getElementById("filtroForm").submit();
+            }
+            
+            function generarPDF() {
+                var estado = document.getElementById("estado").value;
+                var completada = document.getElementById("completada").value;
+                var asesorId = document.getElementById("asesor").value;
+                var aprendiz = document.getElementById("aprendiz").value;
+                var fechaDesde = document.getElementById("fechaDesde").value;
+                var fechaHasta = document.getElementById("fechaHasta").value;
+                
+                var url = "/reporte-asesorias?estado=" + estado + 
+                          "&completada=" + completada + 
+                          "&asesorId=" + asesorId + 
+                          "&aprendiz=" + aprendiz;
+                
+                if (fechaDesde) {
+                    url += "&fechaDesde=" + fechaDesde;
+                }
+                if (fechaHasta) {
+                    url += "&fechaHasta=" + fechaHasta;
+                }
+                
+                window.open(url, '_blank');
+            }
+            
+            function abrirModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'block';
+            }
+            
+            function cerrarModalPerfil() {
+                document.getElementById('modalPerfil').style.display = 'none';
+            }
+            
+            // Cerrar modal de perfil al hacer clic fuera de él
+            window.onclick = function(event) {
+                var modalPerfil = document.getElementById('modalPerfil');
+                if (event.target == modalPerfil) {
+                    cerrarModalPerfil();
+                }
+            };
+        </script>
+    </body>
+</html> 

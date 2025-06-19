@@ -8,34 +8,29 @@
     </head>
     <body>
         <header>
-            <img class="logo" src="../img/Logo-removebg-preview (1).png" alt="Logo">
-            <p>CREAR FORO</p>
-            <h1>KASH</h1>
+            <img class="logo" src="../img/logoKash.png" alt="Logo">
+            <h1>CREAR FORO</h1>
+            <h2>KASH</h2>
         </header>
-        <form th:action="@{/foroNuevo}" method="post">
+ 
+
+        <form th:action="@{/foroNuevo}" method="post" enctype="multipart/form-data">
+
             <h2>Formulario foro</h2>  
 
             <label for="nombre_completo"></label>
             <p>Nombre completo:</p>
-            <input class="pregunta" type="text" id="nombre" name="nombre" th:value="${usuarios.nombres}" readonly="" required><br><br>
+            <input class="pregunta" type="text" id="nombre" name="nombre" th:value="${usuario.nombres}" readonly="" required><br><br>
 
             <p>Número de documento:</p>
-            <input class="pregunta" type="text" id="idUsuario" name="idUsuario" th:value="${usuarios.idUsuario}" readonly="" required><br><br>
+            <input class="pregunta" type="text" id="idUsuario" name="idUsuario" th:value="${usuario.idUsuario}" readonly="" required><br><br>
 
             <p>Fecha:</p>
             <input class="pregunta" type="date" id="fecha" name="fecha" readonly required>
 
             <label for="trimestre" name="trimestre"></label>
             <p>Trimestre:</p>
-            <select class="pregunta" id="trimestre" name="trimestre" required>
-                <option value="1">Primer trimestre</option>
-                <option value="2">Segundo trimestre</option>
-                <option value="3">Tercer trimestre</option>
-                <option value="4">Cuarto trimestre</option>
-                <option value="5">Quinto trimestre</option>
-                <option value="6">Sexto trimestre</option>
-                <option value="7">Septimo trimestre</option>
-            </select><br><br>
+            <input class="pregunta" type="text" id="trimestre" name="trimestre" th:value="${usuario.trimestre}" readonly=""><br></br>
 
             <label for="tema"></label>
             <p>Tema:</p>
@@ -44,6 +39,9 @@
             <label for="contenido"></label>
             <p>Contenido:</p>
             <textarea class="pregunta" name="contenido" id="contenido"></textarea><br><br>
+
+            <label for="imagen">Imagen:</label>
+            <input type="file" name="imagen" accept="image/*"  placeholder="Agrega una imagen"/>
 
             <button type="submit" class="boton">Enviar</button>
         </form>

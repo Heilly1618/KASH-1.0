@@ -2,7 +2,7 @@ package com.proyecto.KASH.servicio;
 
 import com.proyecto.KASH.entidad.Usuario;
 import java.util.List;
-import java.util.Optional;
+import java.util.Optional;  
 
 
 public interface UsuarioServicio {
@@ -12,4 +12,16 @@ public interface UsuarioServicio {
     public void eliminarUsuario(Long idUsuario);
 
     public void actualizarUsuario(Usuario usuario);
+
+    public List<Usuario> obtenerTodosLosUsuarios();
+
+    public void cambiarContrasena(String correo, String nuevaContrasena);
+
+    public Optional<Usuario> buscarPorRol(String coordinador);
+
+    public Optional<Usuario> obtenerPorCorreo(String correo);
+    
+    Optional<Usuario> obtenerUsuarioPorCorreo(String correo);
+
+ 
 }
