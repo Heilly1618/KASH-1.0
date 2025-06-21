@@ -370,13 +370,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr th:if="${resultadosPorPrueba != null and resultadosPorPrueba[prueba.id] != null}" 
-                                    th:each="entrada : ${resultadosPorPrueba[prueba.id].entrySet()}">
+                                <tr th:if="${respuestasPorPrueba != null and respuestasPorPrueba[prueba.id] != null}" 
+                                    th:each="entrada : ${respuestasPorPrueba[prueba.id].entrySet()}">
                                     <td th:text="${entrada.key.nombres + ' ' + entrada.key.primerA}">Nombre Aprendiz</td>
                                     <td>Presentado</td>
                                     <td>-</td>
                                 </tr>
-                                <tr th:unless="${resultadosPorPrueba != null and resultadosPorPrueba[prueba.id] != null}">
+                                <tr th:unless="${respuestasPorPrueba != null and respuestasPorPrueba[prueba.id] != null}">
                                     <td colspan="3">No hay resultados disponibles</td>
                                 </tr>
                             </tbody>

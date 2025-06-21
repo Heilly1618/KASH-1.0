@@ -111,17 +111,32 @@ public class AsesorControlador {
                         .contentType(MediaType.IMAGE_JPEG)
                         .body(fotoBytes);
             } else {
-                // Si no se encuentra la foto, devolvemos una respuesta exitosa pero vacía
+                // Si no se encuentra la foto o el Blob es nulo, devolvemos una respuesta exitosa pero vacía
                 // El cliente mostrará la imagen por defecto definida en el atributo alt del HTML
-                return ResponseEntity.ok()
-                        .contentType(MediaType.IMAGE_JPEG)
-                        .body(new byte[0]);
+                // Opcional: podrías cargar una imagen por defecto desde los recursos estáticos aquí
+                // Si no se encuentra la foto o el Blob es nulo, cargar la imagen por defecto
+                try (java.io.InputStream in = new org.springframework.core.io.ClassPathResource("static/img/perfil.png").getInputStream()) {
+                    byte[] defaultImageBytes = org.springframework.util.StreamUtils.copyToByteArray(in);
+                    return ResponseEntity.ok()
+                            .contentType(MediaType.IMAGE_PNG) // Asumiendo que perfil.png es PNG
+                            .body(defaultImageBytes);
+                } catch (IOException e2) {
+                    System.err.println("Error al cargar la imagen por defecto: " + e2.getMessage());
+                    return ResponseEntity.notFound().build(); // Si la imagen por defecto falla, 404
+                }
             }
         } catch (Exception e) {
-            // En caso de cualquier error, simplemente devolvemos una respuesta exitosa pero vacía
-            return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
-                    .body(new byte[0]);
+            System.err.println("Error general al obtener foto del asesor para ID " + idUsuario + ": " + e.getMessage());
+            // En caso de cualquier otro error, intentar devolver la imagen por defecto
+            try (java.io.InputStream in = new org.springframework.core.io.ClassPathResource("static/img/perfil.png").getInputStream()) {
+                byte[] defaultImageBytes = org.springframework.util.StreamUtils.copyToByteArray(in);
+                return ResponseEntity.ok()
+                        .contentType(MediaType.IMAGE_PNG)
+                        .body(defaultImageBytes);
+            } catch (IOException e3) {
+                System.err.println("Error al cargar la imagen por defecto después de un error general: " + e3.getMessage());
+                return ResponseEntity.notFound().build(); // Si la imagen por defecto falla, 404
+            }
         }
     }
 
@@ -965,24 +980,37 @@ public class AsesorControlador {
 
         for (int i = 0; i < totalPreguntas; i++) {
             Pregunta pregunta = new Pregunta();
-            pregunta.setEnunciado(request.getParameter("Pregunta_" + i));
+            // Obtener el ID de la pregunta (si existe, para edición)
+            String preguntaIdStr = request.getParameter("preguntas[" + i + "].id");
+            if (preguntaIdStr != null && !preguntaIdStr.isEmpty() && !preguntaIdStr.equals("0")) {
+                pregunta.setId(Long.parseLong(preguntaIdStr));
+            }
+            
+            pregunta.setEnunciado(request.getParameter("preguntas[" + i + "].texto"));
+            pregunta.setPrueba(prueba); // Asociar la pregunta a la prueba
 
             String respuestaCorrectaStr = request.getParameter("Correcta_" + i);
-            int respuestaCorrecta = 0;
+            int respuestaCorrectaIndex = -1; // Usamos -1 para indicar que no se ha encontrado
             if (respuestaCorrectaStr != null && !respuestaCorrectaStr.isEmpty()) {
-                respuestaCorrecta = Integer.parseInt(respuestaCorrectaStr);
+                respuestaCorrectaIndex = Integer.parseInt(respuestaCorrectaStr);
             } else {
-                // Manejar el caso en que Correcta_<i> no se proporciona
-                // Puedes establecer un valor predeterminado o mostrar un error
                 System.err.println("Error: Correcta_" + i + " no se proporcionó en la solicitud.");
-                return "redirect:/asesor/prueba"; // Redirige a la página de prueba o muestra un mensaje de error
+                // Considerar si se debe redirigir o manejar de otra forma
+                // Por ahora, continuaremos con un valor por defecto o un error
             }
+            
             List<Respuesta> respuestas = new ArrayList<>();
+            String[] opciones = {
+                request.getParameter("preguntas[" + i + "].opcionA"),
+                request.getParameter("preguntas[" + i + "].opcionB"),
+                request.getParameter("preguntas[" + i + "].opcionC")
+            };
 
-            for (int j = 0; j < 4; j++) {
+            for (int j = 0; j < opciones.length; j++) {
                 Respuesta respuesta = new Respuesta();
-                respuesta.setTexto(request.getParameter("respuesta_" + i + "_" + j));
-                respuesta.setEsCorrecta(j == respuestaCorrecta);
+                respuesta.setTexto(opciones[j]);
+                respuesta.setEsCorrecta(j == respuestaCorrectaIndex);
+                respuesta.setPregunta(pregunta); // Asociar la respuesta a la pregunta
                 respuestas.add(respuesta);
             }
 
