@@ -84,6 +84,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                             <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
                             <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
                             <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${asesor.programa}"></span></p>
                             <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
                             <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
                             <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
@@ -142,6 +143,11 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                                     Ver detalles
                                 </a>
                                 <a class="btn-asesorias" href="/asesor/asesorias">Asesorías</a>
+                                
+                                <form th:action="@{/asesor/salirGrupo}" method="post" class="form-salir-grupo" onsubmit="return confirmarSalirAsesor(this)">
+                                    <input type="hidden" name="idGrupo" th:value="${grupo.idGrupo}" />
+                                    <button type="submit" class="btn-salir">Abandonar grupo</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -233,6 +239,10 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
             function confirmarIngreso(form) {
                 return confirm("¿Estás seguro de que deseas ingresar a este grupo?");
+            }
+
+            function confirmarSalirAsesor(form) {
+                return confirm("ATENCIÓN: Al salir del grupo se eliminarán las asesorías y pruebas asociadas. Los aprendices serán notificados y el grupo quedará disponible para otro asesor. ¿Estás seguro de que deseas abandonar este grupo?");
             }
 
             function toggleFiltro(idFormulario) {

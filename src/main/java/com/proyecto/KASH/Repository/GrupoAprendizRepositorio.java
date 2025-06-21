@@ -23,4 +23,6 @@ public interface GrupoAprendizRepositorio extends JpaRepository<GrupoAprendiz, I
     List<GrupoAprendiz> findByGrupo_Id(Integer id);
     
     boolean existsByUsuarioIdUsuarioAndGrupoId(Long idUsuario, int idGrupo);
+    
+    void deleteByGrupo_IdAndUsuario_IdUsuario(Integer idGrupo, Long idUsuario);
 }

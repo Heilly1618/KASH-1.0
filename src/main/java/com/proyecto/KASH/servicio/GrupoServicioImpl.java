@@ -91,7 +91,7 @@ public class GrupoServicioImpl implements GrupoServicio {
 
     @Override
     public Grupo obtenerPorId(Integer grupoId) {
-       return (Grupo) grupoRepositorio.findById(id);
+       return grupoRepositorio.findById(grupoId).orElse(null);
     }
 
     @Override
@@ -118,5 +118,49 @@ public class GrupoServicioImpl implements GrupoServicio {
     @Override
     public int contarGruposPorComponente(String nombreComponente) {
         return obtenerGruposPorComponente(nombreComponente).size();
+    }
+    
+    @Override
+    public List<Grupo> obtenerGruposSinAsesor() {
+        return grupoRepositorio.findGruposSinAsesor();
+    }
+    
+    @Override
+    public List<Grupo> listarGrupos() {
+        return grupoRepositorio.findAll();
+    }
+    
+    @Override
+    public Optional<Grupo> buscarPorId(Long id) {
+        return grupoRepositorio.findById(id.intValue());
+    }
+
+    @Override
+    public boolean crearGrupoSiNecesario(String nombreComponente) {
+        // Obtener todos los grupos para este componente
+        List<Grupo> gruposExistentes = obtenerGruposPorComponente(nombreComponente);
+        
+        // Verificar si todos los grupos están llenos o tienen asesorías activas
+        boolean necesitaNuevoGrupo = true;
+        
+        for (Grupo grupo : gruposExistentes) {
+            // Un grupo está disponible si no tiene asesor o si tiene menos de 5 estudiantes
+            if (grupo.getAsesor() == null && (grupo.getAprendices() == null || grupo.getAprendices().size() < 5)) {
+                necesitaNuevoGrupo = false;
+                break;
+            }
+        }
+        
+        // Si se necesita un nuevo grupo, crearlo
+        if (necesitaNuevoGrupo) {
+            Grupo nuevoGrupo = new Grupo();
+            nuevoGrupo.setNombre(nombreComponente);
+            nuevoGrupo.setEstado("Activo");
+            nuevoGrupo.setCantidad(0);
+            guardar(nuevoGrupo);
+            return true;
+        }
+        
+        return false;
     }
 }

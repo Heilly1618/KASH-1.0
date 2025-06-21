@@ -12,10 +12,15 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.proyecto.KASH.Repository.Usuario2Repositorio;
+import com.proyecto.KASH.entidad.Grupo;
+import com.proyecto.KASH.entidad.GrupoAprendiz;
 import com.proyecto.KASH.entidad.Usuario;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,6 +100,57 @@ public class UsuarioServicioImpl implements UsuarioServicio {
     @Override
     public Optional<Usuario> obtenerUsuarioPorCorreo(String correo) {
         return usuarioRepositorio.findByCorreo(correo);
+    }
+
+    @Autowired
+    private GrupoServicio grupoServicio;
+    
+    @Override
+    public List<Usuario> buscarUsuariosPorGrupo(Long idGrupo) {
+        List<Usuario> usuarios = new ArrayList<>();
+        Optional<Grupo> grupoOptional = grupoServicio.buscarPorId(idGrupo);
+        
+        if (grupoOptional.isPresent()) {
+            Grupo grupo = grupoOptional.get();
+            
+            // Obtener aprendices del grupo
+            if (grupo.getAprendices() != null) {
+                for (GrupoAprendiz ga : grupo.getAprendices()) {
+                    if (ga != null && ga.getUsuario() != null) {
+                        Usuario usuario = ga.getUsuario();
+                        usuarios.add(usuario);
+                    }
+                }
+            }
+            
+            // Agregar el asesor si existe
+            if (grupo.getAsesor() != null) {
+                usuarios.add(grupo.getAsesor());
+            }
+        }
+        
+        return usuarios;
+    }
+    
+    @Override
+    public List<String> listarComponentes() {
+        // Esta implementación asume que los nombres de los componentes son los mismos nombres de los grupos
+        return usuarioRepositorio.findDistinctComponentes();
+    }
+    
+    @Override
+    public Map<String, Integer> contarGruposPorComponente() {
+        // Esta implementación asume que los nombres de los componentes son los mismos nombres de los grupos
+        List<Object[]> resultados = usuarioRepositorio.countGruposPorComponente();
+        Map<String, Integer> resultado = new HashMap<>();
+        
+        for (Object[] fila : resultados) {
+            String componente = (String) fila[0];
+            Long cantidad = (Long) fila[1];
+            resultado.put(componente, cantidad.intValue());
+        }
+        
+        return resultado;
     }
 
     public ByteArrayInputStream generarPdfPersonalizado(List<Usuario> usuarios, List<String> campos) throws DocumentException {

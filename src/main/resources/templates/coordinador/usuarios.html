@@ -5,6 +5,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/coordinador/usuarios.css">
+        <link rel="stylesheet" href="../../css/help-modal.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
@@ -145,8 +146,8 @@
                                 <th>Nombre</th>
                                 <th>Primer Apellido</th>
                                 <th>Segundo Apellido</th>
-                                <th>Fecha de Nacimiento</th>
-                                <th>Tipo de Documento</th>
+                                <th>Programa</th>
+                                <th>Estado</th>
                                 <th>Trimestre</th>
                                 <th>Correo</th>
                                 <th>Número</th>
@@ -161,8 +162,8 @@
                                 <td th:text="${u.nombres}"></td>
                                 <td th:text="${u.primerA}"></td>
                                 <td th:text="${u.segundoA}"></td>
-                                <td th:text="${u.FNacimiento}"></td>
-                                <td th:text="${u.tDocumento}"></td>
+                                <td th:text="${u.programa != null ? u.programa : 'No asignado'}"></td>
+                                <td th:text="${u.estado != null ? u.estado : 'Activo'}" th:class="${u.estado != null && u.estado == 'Inactivo' ? 'estado-inactivo' : 'estado-activo'}"></td>
                                 <td th:text="${u.trimestre}"></td>
                                 <td th:text="${u.correo}"></td>
                                 <td th:text="${u.numero}"></td>
@@ -170,10 +171,10 @@
                                 <td>
                                     <div class="action-buttons">
                                         <a th:href="@{/coordinador/editar/{id}(id=${u.idUsuario})}" class="btn-editar">Editar</a>
-                                        <form th:action="@{/coordinador/eliminar}" method="post" class="delete-form">
-                                            <input type="hidden" name="idUsuario" th:value="${u.idUsuario}">
-                                            <button type="submit" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?')">Eliminar</button>
-                                        </form>
+                                        <button type="button" class="btn-inactivar" th:attr="data-id=${u.idUsuario}, data-nombre=${u.nombres + ' ' + u.primerA}" onclick="abrirModalInactivar(this)">
+                                            <span th:if="${u.estado == null || u.estado != 'Inactivo'}">Inactivar</span>
+                                            <span th:if="${u.estado != null && u.estado == 'Inactivo'}">Activar</span>
+                                        </button>
                                     </div>
                                 </td>
                             </tr>
@@ -236,19 +237,36 @@
             </div>
         </div>
 
-        <script>
-            // Mostrar modal de ayuda al cargar la página
-            window.onload = function() {
-                setTimeout(function() {
-                    document.getElementById('modalAyuda').style.display = 'block';
+        <!-- Modal para inactivar usuario -->
+        <div id="modalInactivar" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="cerrar-modal" onclick="cerrarModalInactivar()">&times;</span>
+                <h3 class="modal-title"><i class="fas fa-user-slash"></i> <span id="tituloModalInactivar">Inactivar usuario</span></h3>
+                
+                <form id="formInactivar" method="post" th:action="@{/coordinador/inactivar-usuario}">
+                    <input type="hidden" id="usuarioIdInactivar" name="idUsuario">
+                    <input type="hidden" id="accionTipo" name="accion" value="inactivar">
                     
-                    // Cerrar automáticamente después de 60 segundos
-                    setTimeout(function() {
-                        document.getElementById('modalAyuda').style.display = 'none';
-                    }, 60000);
-                }, 500);
-            };
-            
+                    <p id="mensajeConfirmacion">¿Estás seguro de que deseas inactivar a este usuario?</p>
+                    
+                    <div class="form-group">
+                        <label for="motivoInactivacion">Motivo:</label>
+                        <textarea id="motivoInactivacion" name="motivo" rows="4" placeholder="Escribe el motivo de la inactivación..." required></textarea>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-confirmar">
+                            <i class="fas fa-check"></i> Confirmar
+                        </button>
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalInactivar()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
             function abrirModal() {
                 document.getElementById('modalReporte').style.display = 'flex';
             }
@@ -265,10 +283,6 @@
                 document.getElementById('modalPerfil').style.display = 'none';
             }
             
-            function cerrarModalAyuda() {
-                document.getElementById('modalAyuda').style.display = 'none';
-            }
-            
             function limpiarFiltros() {
                 document.getElementById('filtro').value = '';
                 document.getElementById('rol').value = 'todos';
@@ -280,7 +294,8 @@
             window.onclick = function (event) {
                 const modalReporte = document.getElementById('modalReporte');
                 const modalPerfil = document.getElementById('modalPerfil');
-                const modalAyuda = document.getElementById('modalAyuda');
+                const helpModal = document.getElementById('helpModal');
+                const modalInactivar = document.getElementById('modalInactivar');
                 
                 if (event.target === modalReporte) {
                     modalReporte.style.display = 'none';
@@ -290,32 +305,44 @@
                     modalPerfil.style.display = 'none';
                 }
                 
-                if (event.target === modalAyuda) {
-                    modalAyuda.style.display = 'none';
+                if (event.target === helpModal) {
+                    helpModal.style.display = 'none';
+                }
+                
+                if (event.target === modalInactivar) {
+                    modalInactivar.style.display = 'none';
                 }
             }
 
-            // Funciones para la ventana de ayuda
-            function showHelpModal() {
-                document.getElementById("helpModal").style.display = "block";
+            function abrirModalInactivar(btn) {
+                const id = btn.getAttribute('data-id');
+                const nombre = btn.getAttribute('data-nombre');
+                const accion = btn.textContent.trim() === 'Inactivar' ? 'inactivar' : 'activar';
+                
+                document.getElementById('usuarioIdInactivar').value = id;
+                document.getElementById('accionTipo').value = accion;
+                
+                if (accion === 'inactivar') {
+                    document.getElementById('tituloModalInactivar').textContent = 'Inactivar usuario';
+                    document.getElementById('mensajeConfirmacion').textContent = `¿Estás seguro de que deseas inactivar al usuario ${nombre}?`;
+                    document.getElementById('motivoInactivacion').placeholder = 'Escribe el motivo de la inactivación...';
+                    document.getElementById('motivoInactivacion').required = true;
+                } else {
+                    document.getElementById('tituloModalInactivar').textContent = 'Activar usuario';
+                    document.getElementById('mensajeConfirmacion').textContent = `¿Estás seguro de que deseas activar al usuario ${nombre}?`;
+                    document.getElementById('motivoInactivacion').placeholder = 'Escribe el motivo de la activación (opcional)';
+                    document.getElementById('motivoInactivacion').required = false;
+                }
+                
+                document.getElementById('modalInactivar').style.display = 'flex';
             }
             
-            function closeHelpModal() {
-                document.getElementById("helpModal").style.display = "none";
+            function cerrarModalInactivar() {
+                document.getElementById('modalInactivar').style.display = 'none';
             }
-            
-            // Mostrar la ayuda automáticamente al cargar la página
-            window.onload = function() {
-                setTimeout(function() {
-                    showHelpModal();
-                    // Cerrar automáticamente después de 60 segundos
-                    setTimeout(function() {
-                        closeHelpModal();
-                    }, 60000);
-                }, 1000);
-            };
         </script>
 
+        <script src="../../js/help-modal.js"></script>
 
     </body>
 </html>

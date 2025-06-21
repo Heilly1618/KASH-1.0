@@ -1,11 +1,15 @@
 package com.proyecto.KASH.controlador;
 
 import com.proyecto.KASH.Repository.Usuario2Repositorio;
+import com.proyecto.KASH.Repository.GrupoRepositorio;
+import com.proyecto.KASH.entidad.Grupo;
 import com.proyecto.KASH.entidad.Usuario;
+import com.proyecto.KASH.servicio.GrupoServicio;
 import com.proyecto.KASH.servicio.UsuarioServicio;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,6 +28,12 @@ public class ListaUsuariosControlador {
 
     @Autowired
     private Usuario2Repositorio Repositorio;
+    
+    @Autowired
+    private GrupoServicio grupoServicio;
+    
+    @Autowired
+    private GrupoRepositorio grupoRepositorio;
 
     // Este método está duplicado en CoordinadorControlador, lo comentamos para evitar conflictos
     /*
@@ -133,6 +143,60 @@ public class ListaUsuariosControlador {
 
         // Redirigir a la lista de usuarios después de la edición
         return "redirect:/coordinador/usuarios";
+    }
+
+    @GetMapping("/coordinador/componentes/buscar")
+    public String buscarUsuariosPorGrupoOId(
+            @RequestParam(required = false) Long grupo,
+            @RequestParam(required = false) String idUsuario,
+            Model model, 
+            jakarta.servlet.http.HttpSession session) {
+        
+        Usuario coordinador = (Usuario) session.getAttribute("usuario");
+        if (coordinador == null) {
+            return "redirect:/index";
+        }
+        
+        List<Usuario> usuarios = new ArrayList<>();
+        
+        try {
+            // Buscar por grupo
+            if (grupo != null && grupo > 0) {
+                usuarios = Servicio.buscarUsuariosPorGrupo(grupo);
+            }
+            
+            // Buscar por ID de usuario (número de documento)
+            else if (idUsuario != null && !idUsuario.isEmpty()) {
+                try {
+                    Long id = Long.parseLong(idUsuario);
+                    Optional<Usuario> usuarioOptional = Servicio.buscarPorIdUsuario(id);
+                    if (usuarioOptional.isPresent()) {
+                        usuarios.add(usuarioOptional.get());
+                    }
+                } catch (NumberFormatException e) {
+                    model.addAttribute("error", "El ID del usuario debe ser un número");
+                }
+            } else {
+                model.addAttribute("error", "Debe especificar un criterio de búsqueda");
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Error al buscar usuarios: " + e.getMessage());
+        }
+        
+        // Preparar los datos para la vista
+        List<String> componentesDisponibles = Servicio.listarComponentes();
+        Map<String, Integer> gruposPorComponente = Servicio.contarGruposPorComponente();
+        
+        // Obtener todos los grupos para el filtro
+        List<Grupo> todosGrupos = grupoRepositorio.findAll();
+        
+        model.addAttribute("coordinador", coordinador);
+        model.addAttribute("componentesDisponibles", componentesDisponibles);
+        model.addAttribute("gruposPorComponente", gruposPorComponente);
+        model.addAttribute("grupos", todosGrupos);
+        model.addAttribute("usuariosFiltrados", usuarios);
+        
+        return "coordinador/componentes";
     }
 
 }

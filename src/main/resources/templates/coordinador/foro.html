@@ -9,6 +9,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/coordinador/foros.css"></link>
+        <link rel="stylesheet" href="../../css/help-modal.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
@@ -122,6 +123,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 
             <!-- Botones de reportes -->
             <div class="reportes-container">
+                <button class="btn-generar-reporte" onclick="abrirModalReporte()">
+                    <i class="fas fa-file-pdf"></i> Generar reporte personalizado
+                </button>
                 <a class="btn-generar-reporte" th:href="@{/report-foros(tema=${tema}, trimestre=${trimestre})}" target="_blank">
                     <i class="fas fa-file-pdf"></i> Generar reporte PDF
                 </a>
@@ -161,7 +165,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <div id="modalComentarios" class="modal">
             <div class="modal-contenido">
                 <div class="modal-header">
-                    <h3>Comentarios del foro</h3>
+                    <h3><i class="fas fa-comments"></i> Comentarios del foro</h3>
                     <span class="cerrar" onclick="cerrarModal()">&times;</span>
                 </div>
                 <div id="listaComentarios" class="comentarios-container">
@@ -172,7 +176,9 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-cerrar" onclick="cerrarModal()">Cerrar</button>
+                    <button type="button" class="btn-cerrar" onclick="cerrarModal()">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
                 </div>
             </div>
         </div>
@@ -210,7 +216,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 document.getElementById("filtro").value = "";
                 document.getElementById("tema").value = "todos";
                 document.getElementById("trimestre").value = "todos";
-                document.forms[0].submit();
+                window.location.href = "/coordinador/foro";
             }
 
             function abrirModal(foroId) {
@@ -235,33 +241,79 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                         if (data.length === 0) {
                             listaComentarios.innerHTML = `
                                 <div class="sin-comentarios">
-                                    <i class="fas fa-comments" style="font-size: 32px; color: #ccc; margin-bottom: 10px;"></i>
+                                    <i class="fas fa-comment-slash"></i>
                                     <p>Este foro no tiene comentarios.</p>
                                 </div>
                             `;
                         } else {
+                            // Añadir contador de comentarios
+                            listaComentarios.innerHTML = `
+                                <div class="comentarios-contador">
+                                    <span><i class="fas fa-comments"></i> ${data.length} comentario${data.length !== 1 ? 's' : ''}</span>
+                                    <span>Foro #${foroId}</span>
+                                </div>
+                            `;
+                            
+                            // Contenedor para los comentarios con scroll
+                            const comentariosWrapper = document.createElement('div');
+                            comentariosWrapper.className = 'comentarios-wrapper';
+                            
                             data.forEach(comentario => {
-                                var comentarioHTML = `
-                                    <div class="comentario-item">
+                                // Generar iniciales para el avatar
+                                const nombreCompleto = comentario.nombre || "Usuario Anónimo";
+                                const iniciales = nombreCompleto.split(' ')
+                                    .map(n => n[0])
+                                    .join('')
+                                    .substring(0, 2)
+                                    .toUpperCase();
+                                
+                                // Generar color de fondo aleatorio pero consistente para el mismo usuario
+                                const colorHash = hashCode(nombreCompleto);
+                                const avatarColor = `hsl(${colorHash % 360}, 70%, 80%)`;
+                                const textColor = `hsl(${colorHash % 360}, 70%, 30%)`;
+                                
+                                // Formatear fecha
+                                const fecha = new Date(comentario.fecha);
+                                const fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                });
+                                
+                                const comentarioEl = document.createElement('div');
+                                comentarioEl.className = 'comentario-item';
+                                comentarioEl.innerHTML = `
+                                    <div class="comentario-avatar" style="background-color: ${avatarColor}; color: ${textColor};">
+                                        ${iniciales}
+                                    </div>
+                                    <div class="comentario-contenido">
                                         <div class="comentario-info">
-                                            <span class="comentario-autor">${comentario.nombre}</span>
-                                            <span class="comentario-fecha">${comentario.fecha}</span>
+                                            <span class="comentario-autor">${nombreCompleto}</span>
+                                            <span class="comentario-fecha">
+                                                <i class="fas fa-calendar-alt"></i> ${fechaFormateada}
+                                            </span>
                                         </div>
                                         <p class="comentario-texto">${comentario.contenido}</p>
-                                        <button onclick="eliminarComentario(${comentario.id}, ${foroId})">
-                                            <i class="fas fa-trash"></i> Eliminar comentario
-                                        </button>
+                                        <div class="comentario-acciones">
+                                            <button class="btn-eliminar-comentario" onclick="eliminarComentario(${comentario.id}, ${foroId})">
+                                                <i class="fas fa-trash"></i> Eliminar
+                                            </button>
+                                        </div>
                                     </div>
                                 `;
-                                listaComentarios.innerHTML += comentarioHTML;
+                                comentariosWrapper.appendChild(comentarioEl);
                             });
+                            
+                            listaComentarios.appendChild(comentariosWrapper);
                         }
                     })
                     .catch(error => {
                         console.error('Error al cargar comentarios:', error);
                         listaComentarios.innerHTML = `
                             <div class="error-container">
-                                <i class="fas fa-exclamation-circle" style="font-size: 32px; color: #ff5252; margin-bottom: 10px;"></i>
+                                <i class="fas fa-exclamation-circle"></i>
                                 <p>Error al cargar los comentarios. Por favor, intente nuevamente.</p>
                             </div>
                         `;
@@ -292,44 +344,92 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 }
             }
             
-            // Funciones para la ventana de ayuda
-            function showHelpModal() {
-                document.getElementById("helpModal").style.display = "block";
+            // Funciones para el modal de reporte personalizado
+            function abrirModalReporte() {
+                document.getElementById('modalReporte').style.display = 'flex';
             }
             
-            function closeHelpModal() {
-                document.getElementById("helpModal").style.display = "none";
+            function cerrarModalReporte() {
+                document.getElementById('modalReporte').style.display = 'none';
             }
             
-            // Mostrar la ayuda automáticamente al cargar la página
-            window.onload = function() {
-                setTimeout(function() {
-                    showHelpModal();
-                    // Cerrar automáticamente después de 60 segundos
-                    setTimeout(function() {
-                        closeHelpModal();
-                    }, 60000);
-                }, 1000);
-            };
-
-            // Cerrar modales al hacer clic fuera de ellos
+            // Cerrar el modal al hacer clic fuera
             window.onclick = function(event) {
                 var modalComentarios = document.getElementById("modalComentarios");
                 var modalPerfil = document.getElementById("modalPerfil");
                 var helpModal = document.getElementById("helpModal");
+                var modalReporte = document.getElementById("modalReporte");
                 
-                if (event.target == modalComentarios) {
-                    modalComentarios.style.display = "none";
+                if (event.target === modalComentarios) {
+                    cerrarModal();
                 }
                 
-                if (event.target == modalPerfil) {
-                    modalPerfil.style.display = "none";
+                if (event.target === modalPerfil) {
+                    cerrarModalPerfil();
                 }
                 
-                if (event.target == helpModal) {
-                    helpModal.style.display = "none";
+                if (event.target === helpModal) {
+                    closeHelpModal();
                 }
+                
+                if (event.target === modalReporte) {
+                    cerrarModalReporte();
+                }
+            };
+
+            // Función para generar un hash numérico a partir de un string
+            function hashCode(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                return Math.abs(hash);
             }
         </script>
+        
+        <script src="../../js/help-modal.js"></script>
+        
+        <!-- Modal para reporte personalizado -->
+        <div id="modalReporte" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="cerrar-modal" onclick="cerrarModalReporte()">&times;</span>
+                <h3 class="modal-title"><i class="fas fa-file-pdf"></i> Generar reporte personalizado</h3>
+                
+                <form id="formReportePersonalizado" method="post" th:action="@{/reporte/coordinador/generar-reporte-foros-personalizado}" target="_blank">
+                    <div class="reporte-section">
+                        <h4>Selecciona los campos a incluir:</h4>
+                        <div class="checkbox-group">
+                            <div class="checkbox-column">
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="id" checked> ID</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="titulo" checked> Título</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="autor" checked> Autor</label>
+                            </div>
+                            <div class="checkbox-column">
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="fecha" checked> Fecha</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="estado" checked> Estado</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="descripcion" checked> Descripción</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="reporte-section">
+                        <h4>Formato del reporte:</h4>
+                        <div class="tipo-reporte">
+                            <label class="radio-item"><input type="radio" name="tipo" value="pdf" checked> <i class="fas fa-file-pdf"></i> PDF</label>
+                            <label class="radio-item"><input type="radio" name="tipo" value="excel"> <i class="fas fa-file-excel"></i> Excel</label>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-generar-reporte">
+                            <i class="fas fa-download"></i> Generar reporte
+                        </button>
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalReporte()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </body>
 </html>

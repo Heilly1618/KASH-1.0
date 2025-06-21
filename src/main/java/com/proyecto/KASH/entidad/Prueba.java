@@ -26,7 +26,7 @@ public class Prueba {
     @Column(name = "fecha")
     private LocalDate fecha = LocalDate.now();
 
-    @OneToMany(mappedBy = "prueba", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "prueba", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pregunta> preguntas = new ArrayList<>();
 
     @Column(name = "fecha_inicio")
@@ -64,7 +64,13 @@ public class Prueba {
     }
 
     public void setPreguntas(List<Pregunta> preguntas) {
-        this.preguntas = preguntas;
+        this.preguntas.clear();
+        if (preguntas != null) {
+            for (Pregunta pregunta : preguntas) {
+                pregunta.setPrueba(this);
+                this.preguntas.add(pregunta);
+            }
+        }
     }
 
     public LocalDate getFechaInicio() {
@@ -100,6 +106,17 @@ public class Prueba {
         this.tema = tema;
     }
     
+    // Método de conveniencia para añadir preguntas
+    public void addPregunta(Pregunta pregunta) {
+        preguntas.add(pregunta);
+        pregunta.setPrueba(this);
+    }
+
+    // Método de conveniencia para remover preguntas
+    public void removePregunta(Pregunta pregunta) {
+        preguntas.remove(pregunta);
+        pregunta.setPrueba(null);
+    }
     
 
 }

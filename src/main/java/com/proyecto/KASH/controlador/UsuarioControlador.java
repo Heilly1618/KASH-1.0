@@ -3,8 +3,10 @@ package com.proyecto.KASH.controlador;
 import com.proyecto.KASH.Repository.Usuario2Repositorio;
 import com.proyecto.KASH.entidad.Usuario;
 import com.proyecto.KASH.servicio.EmailService;
+import com.proyecto.KASH.servicio.ProgramaServicio;
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +26,14 @@ public class UsuarioControlador {
 
     @Autowired
     private EmailService emailService;
+    
+    @Autowired
+    private ProgramaServicio programaServicio;
 
     @GetMapping("/registrar")
     public String mostrarFormularioRegistro(Model model) {
         model.addAttribute("nuevoUsuario", new Usuario());
+        model.addAttribute("programas", programaServicio.listarNombresProgramas());
         return "registrar";
     }
 
@@ -41,11 +47,13 @@ public class UsuarioControlador {
             @RequestParam String fNacimiento,
             @RequestParam String tDocumento,
             @RequestParam String idUsuario,
-            @RequestParam String trimestre,
+            @RequestParam(required = false, defaultValue = "N/A") String trimestre,
             @RequestParam String correo,
             @RequestParam String numero,
             @RequestParam String usuario,
             @RequestParam String pass,
+            @RequestParam String programa,
+            @RequestParam(required = false) String etapa,
             RedirectAttributes redirectAttributes
     ) {
 
@@ -79,7 +87,7 @@ public class UsuarioControlador {
         }
 
         Long idUsuarioNum = Long.parseLong(idUsuario);
-        int trimestreNum = Integer.parseInt(trimestre);
+        int trimestreNum = "N/A".equals(trimestre) ? 0 : Integer.parseInt(trimestre);
         int edad = Period.between(fechaNacimiento, LocalDate.now()).getYears();
 
         if (edad < 14) {
@@ -107,8 +115,19 @@ public class UsuarioControlador {
             return "redirect:/registrar";
         }
 
-        if (rolSeleccionado.equals("asesor") && trimestreNum <= 3) {
+        if (rolSeleccionado.equals("asesor") && trimestreNum <= 3 && !"N/A".equals(trimestre)) {
             redirectAttributes.addFlashAttribute("error", "Para ser asesor debes estar en un trimestre mayor a 2.");
+            return "redirect:/registrar";
+        }
+        
+        if (programa == null || programa.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Debe seleccionar un programa.");
+            return "redirect:/registrar";
+        }
+        
+        // Validar que si etapa es "Lectiva", el trimestre no puede ser N/A
+        if ("Lectiva".equals(etapa) && "N/A".equals(trimestre)) {
+            redirectAttributes.addFlashAttribute("error", "Si estás en etapa lectiva, debes seleccionar un trimestre válido.");
             return "redirect:/registrar";
         }
 
@@ -120,7 +139,11 @@ public class UsuarioControlador {
 
         // --- Guardar Usuario ---
         Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setRolSeleccionado(rolSeleccionado);
+        if ("aprendiz".equals(rolSeleccionado)) {
+            nuevoUsuario.setRolSeleccionado("Aprendiz");
+        } else {
+            nuevoUsuario.setRolSeleccionado(rolSeleccionado);
+        }
         nuevoUsuario.setNombres(nombres);
         nuevoUsuario.setPrimerA(primerA);
         nuevoUsuario.setSegundoA(segundoA);
@@ -131,6 +154,8 @@ public class UsuarioControlador {
         nuevoUsuario.setCorreo(correo);
         nuevoUsuario.setNumero(numero);
         nuevoUsuario.setUsuario(usuario);
+        nuevoUsuario.setPrograma(programa);
+        nuevoUsuario.setEtapa(etapa);
         String passEncriptada = BCrypt.hashpw(pass, BCrypt.gensalt());
         nuevoUsuario.setPass(passEncriptada);
 

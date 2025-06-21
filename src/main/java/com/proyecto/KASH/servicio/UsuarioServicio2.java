@@ -31,4 +31,8 @@ public interface UsuarioServicio2 {
     List<Usuario> buscarUsuarioPorFiltro(String filtro);
     
     List<Usuario> obtenerUsuariosPorRol(String rol);
+    
+    Optional<Usuario> obtenerUsuarioPorId(Long idUsuario);
+    
+    void guardarUsuario(Usuario usuario);
 }

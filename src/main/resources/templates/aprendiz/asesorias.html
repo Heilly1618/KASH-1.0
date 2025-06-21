@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeLeaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Aprendiz Asesorías</title>
         <meta charset="UTF-8">
@@ -84,6 +84,7 @@
                                 </p>
                                 <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
                                 <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                                <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
                                 <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
                                 <p>
                                     <strong>Correo:</strong>
@@ -224,9 +225,55 @@
             </div>
         </div>
 
+        <!-- Scripts -->
         <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
         <script src="../../js/help-modal.js"></script>
-        <script>
+        <script src="../../js/add-help-modal.js"></script>
+        <script th:inline="javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                // Configuración del modal de ayuda desde el controlador
+                const helpTitle = /*[[${helpTitle}]]*/ 'Ayuda - Asesorías';
+                const helpItems = /*[[${helpItems}]]*/ [];
+                const helpFooter = /*[[${helpFooter}]]*/ '';
+                
+                // Convertir array de arrays a array de objetos para addHelpModal
+                const formattedItems = [];
+                if (helpItems && helpItems.length > 0) {
+                    for(let i = 0; i < helpItems.length; i++) {
+                        formattedItems.push({
+                            title: helpItems[i][0],
+                            description: helpItems[i][1]
+                        });
+                    }
+                }
+                
+                // Agregar el modal de ayuda
+                addHelpModal(helpTitle, formattedItems, helpFooter);
+                
+                // Otras funciones específicas de esta página
+                function abrirModalPerfil() {
+                    document.getElementById('modalPerfil').style.display = 'block';
+                }
+                
+                function cerrarModalPerfil() {
+                    document.getElementById('modalPerfil').style.display = 'none';
+                }
+                
+                // Asignar los eventos
+                const btnPerfil = document.querySelector('.icono-perfil');
+                if (btnPerfil) {
+                    btnPerfil.addEventListener('click', abrirModalPerfil);
+                }
+                
+                // Cerrar modal al hacer clic fuera
+                window.onclick = function(event) {
+                    var modalPerfil = document.getElementById('modalPerfil');
+                    if (modalPerfil && event.target === modalPerfil) {
+                        cerrarModalPerfil();
+                    }
+                };
+            });
+            
             function filtrarAsesorias(filtro) {
                 const todas = document.querySelectorAll('.card-asesoria');
                 todas.forEach(div => {
@@ -237,14 +284,6 @@
                         div.style.display = 'none';
                     }
                 });
-            }
-        
-            function abrirModalPerfil() {
-                document.getElementById('modalPerfil').style.display = 'block';
-            }
-
-            function cerrarModalPerfil() {
-                document.getElementById('modalPerfil').style.display = 'none';
             }
             
             function verTodasLasAsesorias(btn) {
@@ -338,20 +377,6 @@
             function cerrarModalAsesorias() {
                 document.getElementById('modalAsesorias').style.display = 'none';
             }
-            
-            // Cerrar modales al hacer clic fuera de ellos
-            window.onclick = function(event) {
-                const modalPerfil = document.getElementById('modalPerfil');
-                const modalAsesorias = document.getElementById('modalAsesorias');
-                
-                if (event.target === modalPerfil) {
-                    cerrarModalPerfil();
-                }
-                
-                if (event.target === modalAsesorias) {
-                    cerrarModalAsesorias();
-                }
-            };
         </script>
     </body>
 </html>

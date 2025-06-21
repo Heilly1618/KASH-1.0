@@ -66,6 +66,9 @@ public class Usuario {
     @Column(name = "etapa")
     private String etapa;
 
+    @Column(name = "programa", length = 30)
+    private String programa;
+
     // Getters y Setters
     public Long getIdUsuario() {
         return idUsuario;
@@ -177,6 +180,14 @@ public class Usuario {
 
     public void setEtapa(String etapa) {
         this.etapa = etapa;
+    }
+
+    public String getPrograma() {
+        return programa;
+    }
+
+    public void setPrograma(String programa) {
+        this.programa = programa;
     }
 
     

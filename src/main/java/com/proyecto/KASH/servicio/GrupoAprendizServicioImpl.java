@@ -55,4 +55,52 @@ public class GrupoAprendizServicioImpl implements GrupoAprendizServicio {
     public void guardarGrupoAprendiz(GrupoAprendiz grupoAprendiz) {
         grupoAprendizRepositorio.save(grupoAprendiz);
     }
+    
+    @Override
+    public boolean eliminarAprendizDeGrupo(Long idGrupo, Long idAprendiz) {
+        try {
+            grupoAprendizRepositorio.deleteByGrupo_IdAndUsuario_IdUsuario(idGrupo.intValue(), idAprendiz);
+            return true;
+        } catch (Exception e) {
+            System.out.println("Error al eliminar aprendiz del grupo: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public boolean existeAprendizEnGrupo(Long idAprendiz, int idGrupo) {
+        return verificarAprendizEnGrupo(idAprendiz, idGrupo);
+    }
+
+    @Override
+    public boolean registrarAprendizEnGrupo(Long idAprendiz, int idGrupo) {
+        try {
+            // Verificar si ya existe la relación
+            if (existeAprendizEnGrupo(idAprendiz, idGrupo)) {
+                return false;
+            }
+            
+            // Crear la relación grupo-aprendiz
+            GrupoAprendiz grupoAprendiz = new GrupoAprendiz();
+            
+            // Crear y asignar el grupo
+            Grupo grupo = new Grupo();
+            grupo.setId(idGrupo);
+            grupoAprendiz.setGrupo(grupo);
+            
+            // Crear y asignar el usuario
+            Usuario usuario = new Usuario();
+            usuario.setIdUsuario(idAprendiz);
+            grupoAprendiz.setUsuario(usuario);
+            
+            // Guardar la relación
+            guardarGrupoAprendiz(grupoAprendiz);
+            
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error al registrar aprendiz en grupo: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

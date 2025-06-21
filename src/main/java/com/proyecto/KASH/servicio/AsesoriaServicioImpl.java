@@ -14,12 +14,15 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import jakarta.persistence.EntityManager;
 
 @Service
 public class AsesoriaServicioImpl implements AsesoriaServicio {
@@ -32,6 +35,9 @@ public class AsesoriaServicioImpl implements AsesoriaServicio {
 
     @Autowired
     private GrupoRepositorio grupoRepositorio;
+
+    @Autowired
+    private EntityManager entityManager;
 
     public AsesoriaServicioImpl(AsesoriaRepositorio asesoriaRepositorio) {
         this.asesoriaRepositorio = asesoriaRepositorio;
@@ -178,18 +184,31 @@ public class AsesoriaServicioImpl implements AsesoriaServicio {
     }
 
     @Override
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * *")
     public void actualizarAsesoriasAutomatica() {
         List<Asesoria> asesorias = asesoriaRepositorio.findAll();
         LocalDate hoy = LocalDate.now();
+        boolean cambiosRealizados = false;
 
         for (Asesoria asesoria : asesorias) {
+            // Verificar si la fecha de la asesoría ya pasó
             if (asesoria.getFecha() != null && asesoria.getFecha().isBefore(hoy)) {
-                asesoria.setEstado("Inactiva");
-                asesoria.setCompletada(true);
+                // Solo actualizar si no está ya marcada como inactiva y completada
+                if (!"Inactiva".equals(asesoria.getEstado()) || !asesoria.isCompletada()) {
+                    asesoria.setEstado("Inactiva");
+                    asesoria.setCompletada(true);
+                    cambiosRealizados = true;
+                    
+                    System.out.println("Asesoría ID " + asesoria.getId() + " marcada como inactiva y completada automáticamente");
+                }
             }
         }
-
-        asesoriaRepositorio.saveAll(asesorias);
+        
+        if (cambiosRealizados) {
+            asesoriaRepositorio.saveAll(asesorias);
+            System.out.println("Actualización automática de asesorías completada: " + LocalDateTime.now());
+        }
     }
 
     public void actualizarEstadoAsesoria(Long idAsesoria, String nuevoEstado) {
@@ -244,8 +263,8 @@ public class AsesoriaServicioImpl implements AsesoriaServicio {
     }
 
     @Override
-    public Asesoria obtenerPorId(Long idAsesoria) {
-          return asesoriaRepositorio.findById(idAsesoria).orElse(null);
+    public Optional<Asesoria> obtenerPorId(int id) {
+        return asesoriaRepositorio.findById(id);
     }
 
     @Override
@@ -254,8 +273,25 @@ public class AsesoriaServicioImpl implements AsesoriaServicio {
     }
 
     @Override
+    public List<Asesoria> obtenerAsesoriasPorGrupo(int idGrupo) {
+        // Buscar el grupo primero
+        Optional<Grupo> grupoOpt = grupoRepositorio.findById(idGrupo);
+        if (grupoOpt.isPresent()) {
+            Grupo grupo = grupoOpt.get();
+            return obtenerAsesoriasPorGrupo(grupo);
+        }
+        return new ArrayList<>();
+    }
+
+    @Override
     public List<Asesoria> listarTodasLasAsesorias() {
         return asesoriaRepositorio.findAll();
+    }
+
+    @Override
+    @Transactional
+    public void eliminarAsesoria(int id) {
+        asesoriaRepositorio.deleteById(id);
     }
 
 }

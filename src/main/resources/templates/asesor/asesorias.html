@@ -80,6 +80,7 @@
                             <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
                             <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
                             <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${asesor.programa}"></span></p>
                             <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
                             <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
                             <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
@@ -206,6 +207,7 @@
                                 <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Estado</th>
                                 <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Completada</th>
                                 <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Link</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 2px solid #ddd;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody id="tablaAsesorias">
@@ -215,6 +217,35 @@
                 </div>
                 <div style="margin-top: 20px; text-align: right;">
                     <button type="button" onclick="cerrarModalAsesorias()" class="btn-cancelar">Cerrar</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal para cambiar fecha de asesoría -->
+        <div id="modalCambiarFecha" class="modal-confirmacion">
+            <div class="modal-contenido-confirmacion" style="width: 400px;">
+                <span class="close" onclick="cerrarModalCambiarFecha()" style="float:right; font-size: 24px; cursor: pointer;">&times;</span>
+                <h3 style="margin-bottom: 20px;">Cambiar fecha/hora de asesoría</h3>
+                <div>
+                    <input type="hidden" id="asesoriaIdCambioFecha">
+                    <input type="hidden" id="fechaActual">
+                    <input type="hidden" id="horaActual">
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label for="nuevaFecha" style="display: block; margin-bottom: 5px; font-weight: bold;">Nueva fecha:</label>
+                        <input type="date" id="nuevaFecha" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <small style="color: #666; display: block; margin-top: 5px;">Deja en blanco para mantener la fecha actual</small>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label for="nuevaHora" style="display: block; margin-bottom: 5px; font-weight: bold;">Nueva hora:</label>
+                        <input type="time" id="nuevaHora" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                        <small style="color: #666; display: block; margin-top: 5px;">Deja en blanco para mantener la hora actual</small>
+                    </div>
+                    <div id="mensajeErrorCambioFecha" style="color: red; margin-bottom: 15px; display: none;"></div>
+                </div>
+                <div style="margin-top: 20px; text-align: right;">
+                    <button type="button" onclick="verificarConflictos()" class="btn-confirmar">Guardar cambios</button>
+                    <button type="button" onclick="cerrarModalCambiarFecha()" class="btn-cancelar">Cancelar</button>
                 </div>
             </div>
         </div>
@@ -290,7 +321,7 @@
                 document.getElementById('tituloGrupoAsesorias').textContent = `Asesorías del grupo: ${nombreGrupo}`;
                 
                 // Limpiar tabla
-                document.getElementById('tablaAsesorias').innerHTML = '<tr><td colspan="5" style="text-align:center;">Cargando asesorías...</td></tr>';
+                document.getElementById('tablaAsesorias').innerHTML = '<tr><td colspan="6" style="text-align:center;">Cargando asesorías...</td></tr>';
                 
                 // Mostrar modal
                 document.getElementById('modalAsesorias').style.display = 'flex';
@@ -305,7 +336,7 @@
                         const asesorias = data.asesorias;
                         
                         if (asesorias.length === 0) {
-                            tabla.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay asesorías para este grupo</td></tr>';
+                            tabla.innerHTML = '<tr><td colspan="6" style="text-align:center;">No hay asesorías para este grupo</td></tr>';
                             return;
                         }
                         
@@ -356,18 +387,188 @@
                             }
                             row.appendChild(tdLink);
                             
+                            // Acciones
+                            const tdAcciones = document.createElement('td');
+                            tdAcciones.style.padding = '10px';
+                            tdAcciones.style.borderBottom = '1px solid #ddd';
+                            
+                            // Solo permitir cambiar fecha si no está completada
+                            if (!asesoria.completada) {
+                                const btnCambiarFecha = document.createElement('button');
+                                btnCambiarFecha.type = 'button';
+                                btnCambiarFecha.className = 'btn-cambiar-fecha';
+                                btnCambiarFecha.textContent = 'Cambiar fecha';
+                                btnCambiarFecha.style.backgroundColor = '#03314b';
+                                btnCambiarFecha.style.color = 'white';
+                                btnCambiarFecha.style.border = 'none';
+                                btnCambiarFecha.style.borderRadius = '4px';
+                                btnCambiarFecha.style.padding = '5px 10px';
+                                btnCambiarFecha.style.cursor = 'pointer';
+                                btnCambiarFecha.onclick = function() {
+                                    abrirModalCambiarFecha(asesoria.id);
+                                };
+                                tdAcciones.appendChild(btnCambiarFecha);
+                            } else {
+                                tdAcciones.textContent = 'No disponible';
+                            }
+                            
+                            row.appendChild(tdAcciones);
+                            
                             tabla.appendChild(row);
                         });
                     })
                     .catch(error => {
                         console.error('Error:', error);
                         document.getElementById('tablaAsesorias').innerHTML = 
-                            '<tr><td colspan="5" style="text-align:center;">Error al cargar las asesorías</td></tr>';
+                            '<tr><td colspan="6" style="text-align:center;">Error al cargar las asesorías</td></tr>';
                     });
             }
             
             function cerrarModalAsesorias() {
                 document.getElementById('modalAsesorias').style.display = 'none';
+            }
+            
+            function abrirModalCambiarFecha(asesoriaId) {
+                document.getElementById('asesoriaIdCambioFecha').value = asesoriaId;
+                document.getElementById('mensajeErrorCambioFecha').style.display = 'none';
+                
+                // Limpiar campos
+                document.getElementById('nuevaFecha').value = '';
+                document.getElementById('nuevaHora').value = '';
+                
+                // Establecer fecha y hora mínimas (hoy)
+                const hoy = new Date();
+                const fechaHoy = hoy.toISOString().split('T')[0];
+                document.getElementById('nuevaFecha').min = fechaHoy;
+                
+                // Obtener los datos actuales de la asesoría
+                fetch(`/asesor/asesoria/${asesoriaId}/datos`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            console.error('Error:', data.error);
+                        } else {
+                            // Guardar los valores actuales para usarlos si el usuario no ingresa nuevos valores
+                            document.getElementById('fechaActual').value = data.fecha;
+                            document.getElementById('horaActual').value = data.hora;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                
+                document.getElementById('modalCambiarFecha').style.display = 'flex';
+            }
+            
+            function cerrarModalCambiarFecha() {
+                document.getElementById('modalCambiarFecha').style.display = 'none';
+            }
+            
+            function verificarConflictos() {
+                const asesoriaId = document.getElementById('asesoriaIdCambioFecha').value;
+                let nuevaFecha = document.getElementById('nuevaFecha').value;
+                let nuevaHora = document.getElementById('nuevaHora').value;
+                const errorDiv = document.getElementById('mensajeErrorCambioFecha');
+                
+                // Si no se ingresó fecha o hora, usar los valores actuales
+                if (!nuevaFecha) {
+                    nuevaFecha = document.getElementById('fechaActual').value;
+                }
+                
+                if (!nuevaHora) {
+                    nuevaHora = document.getElementById('horaActual').value;
+                }
+                
+                // Validar que se tenga al menos una fecha y hora (ya sea nueva o actual)
+                if (!nuevaFecha || !nuevaHora) {
+                    errorDiv.textContent = 'Error al obtener los datos de la asesoría.';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Verificar que la fecha no sea anterior a hoy
+                const hoy = new Date();
+                const fechaSeleccionada = new Date(nuevaFecha);
+                fechaSeleccionada.setHours(0, 0, 0, 0);
+                hoy.setHours(0, 0, 0, 0);
+                
+                if (fechaSeleccionada < hoy) {
+                    errorDiv.textContent = 'La fecha no puede ser anterior a hoy.';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Validar horario (no entre 10 PM y 6 AM)
+                const hora = parseInt(nuevaHora.split(':')[0]);
+                if (hora >= 22 || hora < 6) {
+                    errorDiv.textContent = 'No se pueden programar asesorías entre las 10:00 PM y las 6:00 AM.';
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                
+                // Crear FormData para enviar
+                const formData = new FormData();
+                formData.append('asesoriaId', asesoriaId);
+                formData.append('nuevaFecha', nuevaFecha);
+                formData.append('nuevaHora', nuevaHora);
+                
+                // Enviar solicitud al servidor para verificar conflictos
+                fetch('/asesor/asesoria/verificar-conflictos', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.conflicto) {
+                        errorDiv.textContent = data.mensaje;
+                        errorDiv.style.display = 'block';
+                    } else {
+                        // Si no hay conflictos, proceder a guardar
+                        guardarCambioFecha(asesoriaId, nuevaFecha, nuevaHora);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorDiv.textContent = 'Error al verificar conflictos. Inténtalo de nuevo.';
+                    errorDiv.style.display = 'block';
+                });
+            }
+            
+            function guardarCambioFecha(asesoriaId, nuevaFecha, nuevaHora) {
+                const errorDiv = document.getElementById('mensajeErrorCambioFecha');
+                
+                // Crear FormData para enviar
+                const formData = new FormData();
+                formData.append('nuevaFecha', nuevaFecha);
+                formData.append('nuevaHora', nuevaHora);
+                
+                // Enviar solicitud al servidor para actualizar
+                fetch(`/asesor/asesoria/${asesoriaId}/actualizar-fecha`, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        errorDiv.textContent = data.error;
+                        errorDiv.style.display = 'block';
+                    } else {
+                        // Cerrar modal y mostrar mensaje de éxito
+                        cerrarModalCambiarFecha();
+                        cerrarModalAsesorias();
+                        
+                        // Mostrar notificación
+                        alert(`Fecha/hora actualizada correctamente a ${data.nuevaFecha} a las ${data.nuevaHora}`);
+                        
+                        // Recargar la página para ver los cambios
+                        location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    errorDiv.textContent = 'Error al actualizar la fecha/hora. Inténtalo de nuevo.';
+                    errorDiv.style.display = 'block';
+                });
             }
 
             // Cerrar el modal al hacer clic fuera
@@ -375,6 +576,7 @@
                 const modalPerfil = document.getElementById('modalPerfil');
                 const modalConfirmacion = document.getElementById('modalConfirmacion');
                 const modalAsesorias = document.getElementById('modalAsesorias');
+                const modalCambiarFecha = document.getElementById('modalCambiarFecha');
                 
                 if (event.target === modalPerfil) {
                     cerrarModalPerfil();
@@ -386,6 +588,10 @@
                 
                 if (event.target === modalAsesorias) {
                     cerrarModalAsesorias();
+                }
+                
+                if (event.target === modalCambiarFecha) {
+                    cerrarModalCambiarFecha();
                 }
             }
         </script>

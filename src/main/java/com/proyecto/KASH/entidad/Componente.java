@@ -1,6 +1,7 @@
 package com.proyecto.KASH.entidad;
 
 import jakarta.persistence.*;
+import java.util.List;
 
 @Entity
 public class Componente {
@@ -14,6 +15,14 @@ public class Componente {
     @ManyToOne(optional = false)
     @JoinColumn(name = "id_usuario", nullable = false) 
     private Usuario usuario;
+    
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "componente_programa",
+        joinColumns = @JoinColumn(name = "componente_id"),
+        inverseJoinColumns = @JoinColumn(name = "programa_id")
+    )
+    private List<Programa> programas;
 
     public Long getId() {
         return id;
@@ -37,5 +46,13 @@ public class Componente {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+    
+    public List<Programa> getProgramas() {
+        return programas;
+    }
+
+    public void setProgramas(List<Programa> programas) {
+        this.programas = programas;
     }
 }

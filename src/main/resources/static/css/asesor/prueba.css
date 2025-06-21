@@ -603,100 +603,150 @@ select {
 }
 
 .card-grupo {
-    background-color: white;
+    background-color: #ffffff;
     border-radius: 10px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
-    transition: transform 0.3s, box-shadow 0.3s;
-    position: relative;
-    border: 1px solid #e0e0e0;
-    height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    justify-content: space-between;
+    margin-bottom: 20px;
 }
 
 .card-grupo:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .card-header {
-    background-color: #03314b;
-    color: white;
-    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.card-header h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.estado {
-    background-color: #4caf50;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 500;
-}
-
-.card-body {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    height: calc(100% - 60px);
-}
-
-.card-body p {
-    margin: 10px 0;
-    color: #555;
-}
-
-.botones-card {
-    display: flex;
-    gap: 10px;
+.card-footer {
     margin-top: auto;
     padding-top: 15px;
+    display: flex;
+    justify-content: center;
 }
 
-button.btn-asesorias {
+.btn-ver {
+    padding: 10px 15px;
     background-color: #03314b;
     color: white;
     border: none;
-    padding: 8px 15px;
     border-radius: 5px;
     cursor: pointer;
+    transition: all 0.3s ease;
     font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-    text-decoration: none;
-    font-size: 14px;
-    display: inline-block;
-    text-align: center;
+    min-width: 120px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    font-size: 0.85rem;
 }
 
-button.btn-asesorias:hover {
-    background-color: #025180;
-    transform: scale(1.05);
+.btn-ver:hover {
+    background-color: #025082;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
-/* Mantener el estilo para la clase btn-detalles */
-.btn-detalles {
-    background-color: #f0f0f0;
-    color: #333;
+.btn-resultados {
+    padding: 8px 12px;
+    background-color: #4CAF50;
+    color: white;
     border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
     font-weight: bold;
-    transition: background-color 0.3s;
-    text-decoration: none;
-    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
 }
 
-.btn-detalles:hover {
-    background-color: #e0e0e0;
+.btn-resultados:hover {
+    background-color: #388E3C;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tabla-resultados {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.tabla-resultados th,
+.tabla-resultados td {
+    padding: 12px 15px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: left;
+}
+
+.tabla-resultados th {
+    background-color: #03314b;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.tabla-resultados tr:last-child td {
+    border-bottom: none;
+}
+
+.tabla-resultados tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.tabla-resultados tr:hover {
+    background-color: #f1f1f1;
+}
+
+.modal-apr {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.7);
+    overflow: auto;
+}
+
+.modal-contenido-apr {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 25px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 800px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    animation: fadeIn 0.4s;
+}
+
+.cerrar {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.cerrar:hover {
+    color: #555;
 }
 
 .prueba-item {

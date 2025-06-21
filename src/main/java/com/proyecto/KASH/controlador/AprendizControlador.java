@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.time.format.DateTimeFormatter;
+import com.proyecto.KASH.servicio.EmailService;
 
 @Controller
 public class AprendizControlador {
@@ -128,6 +129,9 @@ public class AprendizControlador {
     @Autowired
     private GrupoRepositorio grupoRepositorio;
 
+    @Autowired
+    private EmailService correoServicio;
+
     @GetMapping("/aprendiz/grupo")
     public String mostrarGruposDelAprendiz(HttpSession session, Model model, HttpServletRequest request) {
         Usuario aprendiz = (Usuario) session.getAttribute("usuario");
@@ -136,6 +140,7 @@ public class AprendizControlador {
         }
 
         Long idAprendiz = aprendiz.getIdUsuario();
+        String programaAprendiz = aprendiz.getPrograma();
 
         // 1. Grupos actuales del aprendiz
         List<Grupo> gruposDelAprendiz = grupoAprendizServicio.obtenerGruposPorAprendiz(idAprendiz);
@@ -148,15 +153,41 @@ public class AprendizControlador {
                 .map(Grupo::getIdGrupo)
                 .collect(Collectors.toSet());
 
-        // 3. Grupos disponibles ya filtrados desde la BD
-        List<Grupo> gruposDisponibles = grupoRepositorio.findGruposDisponiblesParaAprendiz(idAprendiz);
+        // 3. Grupos disponibles - Mostrar un solo grupo por componente
+        // y filtrar los que tienen más de 5 estudiantes
+        List<Grupo> todosGruposDisponibles = grupoRepositorio.findGruposDisponiblesParaAprendiz(idAprendiz);
+        Map<String, Grupo> gruposPorComponente = new HashMap<>();
+        
+        // Filtrar por nombre de componente, número de estudiantes y programa del aprendiz
+        for (Grupo grupo : todosGruposDisponibles) {
+            String nombreComponente = grupo.getNombre(); // El nombre del grupo es el nombre del componente
+            
+            // Verificar si el componente pertenece al programa del aprendiz
+            boolean perteneceAlPrograma = aprendizComponenteServicio.componentePerteneceAPrograma(nombreComponente, programaAprendiz);
+            
+            // Solo considerar grupos con menos de 5 estudiantes y que pertenezcan al programa del aprendiz
+            if (perteneceAlPrograma && grupo.getAprendices() != null && grupo.getAprendices().size() < 5) {
+                // Solo añadir si no hay un grupo para este componente o si este no tiene asesorías activas
+                if (!gruposPorComponente.containsKey(nombreComponente) ||
+                    (!idsGruposConAsesoria.contains(grupo.getIdGrupo()) && 
+                     idsGruposConAsesoria.contains(gruposPorComponente.get(nombreComponente).getIdGrupo()))) {
+                    gruposPorComponente.put(nombreComponente, grupo);
+                }
+            }
+        }
+        
+        List<Grupo> gruposDisponiblesFiltrados = new ArrayList<>(gruposPorComponente.values());
 
         // Enviar al modelo
         model.addAttribute("aprendiz", aprendiz);
         model.addAttribute("grupos", gruposDelAprendiz);
         model.addAttribute("gruposConAsesoriaActiva", idsGruposConAsesoria);
-        model.addAttribute("gruposDisponibles", gruposDisponibles);
+        model.addAttribute("gruposDisponibles", gruposDisponiblesFiltrados);
         model.addAttribute("redirectUrl", request.getRequestURI());
+        model.addAttribute("nombre", aprendiz.getNombres());
+
+        // Configurar ayuda para esta vista
+        configurarAyuda(model, request);
 
         return "aprendiz/grupo";
     }
@@ -201,6 +232,9 @@ public class AprendizControlador {
         model.addAttribute("filtro", filtro);
         model.addAttribute("redirectUrl", request.getRequestURI());
 
+        // Configurar ayuda para esta vista
+        configurarAyuda(model, request);
+
         return "aprendiz/grupo";
     }
 
@@ -208,33 +242,50 @@ public class AprendizControlador {
 
     @PostMapping("/aprendiz/entrarGrupo")
     public String entrarGrupo(@RequestParam("idGrupo") Long idGrupo, HttpSession session, RedirectAttributes redirectAttributes) {
-        Usuario usuario = (Usuario) session.getAttribute("usuario");
-        Long idUsuario = usuario.getIdUsuario();
-        
-        // Obtener grupos activos del aprendiz
-        List<Grupo> gruposActivos = grupoAprendizServicio.obtenerGruposActivosPorAprendiz(idUsuario);
-        
-        // Verificar límite de grupos activos (máximo 3)
-        if (gruposActivos.size() >= 3) {
-            redirectAttributes.addFlashAttribute("error", "No puedes unirte a más grupos, ya tienes varios grupos activos.");
+        Usuario aprendiz = (Usuario) session.getAttribute("usuario");
+        if (aprendiz == null) {
+            return "redirect:/index";
+        }
+
+        Long idAprendiz = aprendiz.getIdUsuario();
+
+        // Verificar si el aprendiz ya está en el grupo
+        if (grupoAprendizServicio.existeAprendizEnGrupo(idAprendiz, idGrupo.intValue())) {
+            redirectAttributes.addFlashAttribute("error", "Ya estás inscrito en este grupo.");
             return "redirect:/aprendiz/grupo";
         }
 
-        try {
-            // Crear una nueva entrada directamente en la tabla grupo_aprendiz
-            GrupoAprendiz grupoAprendiz = new GrupoAprendiz();
-            Grupo grupo = new Grupo();
-            grupo.setId(idGrupo.intValue());
-            grupoAprendiz.setGrupo(grupo);
-            grupoAprendiz.setUsuario(usuario);
-            
-            grupoAprendizServicio.guardarGrupoAprendiz(grupoAprendiz);
-            
-            redirectAttributes.addFlashAttribute("mensaje", "Te has unido al grupo exitosamente.");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al unirse al grupo: " + e.getMessage());
+        // Verificar límite de grupos activos para aprendiz (máximo 5)
+        List<Grupo> gruposActivos = grupoAprendizServicio.obtenerGruposPorAprendiz(idAprendiz);
+        if (gruposActivos.size() >= 5) {
+            redirectAttributes.addFlashAttribute("error", "No puedes unirte a más de 5 grupos activos.");
+            return "redirect:/aprendiz/grupo";
         }
-        
+
+        // Obtener el grupo
+        Optional<Grupo> grupoOpt = grupoServicio.buscarPorId(idGrupo);
+        if (grupoOpt.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "El grupo no existe.");
+            return "redirect:/aprendiz/grupo";
+        }
+
+        Grupo grupo = grupoOpt.get();
+
+        // Verificar si el grupo está lleno (5 o más aprendices)
+        if (grupo.getAprendices() != null && grupo.getAprendices().size() >= 5) {
+            redirectAttributes.addFlashAttribute("error", "El grupo está lleno.");
+            return "redirect:/aprendiz/grupo";
+        }
+
+        // Registrar al aprendiz en el grupo
+        grupoAprendizServicio.registrarAprendizEnGrupo(idAprendiz, idGrupo.intValue());
+
+        // Si el grupo ahora está lleno, crear un nuevo grupo para este componente
+        if (grupo.getAprendices() != null && grupo.getAprendices().size() >= 5) {
+            grupoServicio.crearGrupoSiNecesario(grupo.getNombre());
+        }
+
+        redirectAttributes.addFlashAttribute("mensaje", "Te has unido al grupo exitosamente.");
         return "redirect:/aprendiz/grupo";
     }
 
@@ -273,6 +324,9 @@ public class AprendizControlador {
         model.addAttribute("fecha", fecha.format(formato));
         model.addAttribute("redirectUrl", request.getRequestURI());
         
+        // Configurar ayuda para esta vista
+        configurarAyuda(model, request);
+
         return "aprendiz/asistencia";
     }
 
@@ -373,98 +427,123 @@ public class AprendizControlador {
         model.addAttribute("aprendiz", aprendiz);
         model.addAttribute("redirectUrl", request.getRequestURI());
 
+        // Configurar ayuda para esta vista
+        configurarAyuda(model, request);
+
         return "aprendiz/asesorias";
     }
 
     //Componente
     @Autowired
-    private AprendizComponenteServicio ComponenteServicio;
+    private AprendizComponenteServicio aprendizComponenteServicio;
 
     @GetMapping("/aprendiz/componente")
-    public String RegistrarComponente(
-            @RequestParam(required = false) String buscar,
-            HttpSession session, Model model, HttpServletRequest request) {
-        Usuario aprendiz = (Usuario) session.getAttribute("usuario");
-
-        if (aprendiz == null) {
-            return "redirect:/index"; // Redirige si no hay sesión
+    public String componente(
+            Model model,
+            @RequestParam(name = "buscar", required = false) String buscar,
+            HttpSession session,
+            HttpServletRequest request) {
+        
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return "redirect:/";
         }
         
-        String nombre = aprendiz.getNombres();
+        // Obtener el programa del aprendiz
+        String programaAprendiz = usuario.getPrograma();
         
-        // Obtener solo los componentes que el aprendiz no ha registrado
-        List<String> componentesDisponibles = ComponenteServicio.obtenerComponentesNoRegistradosPorUsuario(aprendiz.getIdUsuario());
+        List<Componente> componentesDisponibles;
         
-        // Filtrar por búsqueda si se proporciona
+        // Filtrar componentes por programa del aprendiz
+        if (programaAprendiz != null && !programaAprendiz.isEmpty()) {
+            componentesDisponibles = aprendizComponenteServicio.findByPrograma(programaAprendiz);
+        } else {
+            componentesDisponibles = aprendizComponenteServicio.findAll();
+        }
+        
+        // Aplicar búsqueda si existe
         if (buscar != null && !buscar.isEmpty()) {
-            String buscarLower = buscar.toLowerCase();
-            componentesDisponibles = componentesDisponibles.stream()
-                    .filter(componente -> componente.toLowerCase().contains(buscarLower))
-                    .collect(Collectors.toList());
+            List<Componente> componentesFiltrados = new ArrayList<>();
+            for (Componente componente : componentesDisponibles) {
+                if (componente.getNombre().toLowerCase().contains(buscar.toLowerCase())) {
+                    componentesFiltrados.add(componente);
+                }
+            }
+            componentesDisponibles = componentesFiltrados;
         }
-
-        // Obtener los componentes elegidos por el usuario
-        List<Componente> componentesElegidos = ComponenteServicio.obtenerComponentePorUsuario(aprendiz.getIdUsuario());
-
-        model.addAttribute("componentesDisponibles", componentesDisponibles);
+        
+        // Obtener los nombres de los componentes disponibles
+        List<String> nombresComponentes = componentesDisponibles.stream()
+                .map(Componente::getNombre)
+                .collect(Collectors.toList());
+        
+        // Obtener los componentes ya elegidos por el aprendiz
+        List<Componente> componentesElegidos = aprendizComponenteServicio.findComponentesByAprendizId(usuario.getIdUsuario());
+        
+        model.addAttribute("componentesDisponibles", nombresComponentes);
         model.addAttribute("componentesElegidos", componentesElegidos);
+        model.addAttribute("aprendiz", usuario);
+        model.addAttribute("nombre", usuario.getNombres());
         model.addAttribute("buscar", buscar);
-        model.addAttribute("nombre", nombre);
-        model.addAttribute("aprendiz", aprendiz);
-        model.addAttribute("redirectUrl", request.getRequestURI());
+        model.addAttribute("redirectUrl", "/aprendiz/componente");
+        
+        // Configurar ayuda para esta vista
+        configurarAyuda(model, request);
 
         return "aprendiz/componente";
     }
 
     @PostMapping("/aprendiz/componente")
-    public String registrarComponente(@RequestParam("componente") String componenteNombre,
-            HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        Usuario aprendiz = (Usuario) session.getAttribute("usuario");
-
-        if (aprendiz == null) {
-            return "redirect:/index"; // Redirige si no hay sesión
-        }
-
-        if (ComponenteServicio.obtenerComponentePorUsuario(aprendiz.getIdUsuario()).size() >= 3) {
-            redirectAttributes.addFlashAttribute("error", "No puedes registrar más de 3 componentes.");
-            return "redirect:/aprendiz/componente";
-        }
-
-        // Verificar que el componente seleccionado existe en la lista de disponibles
-        List<String> componentesDisponibles = ComponenteServicio.obtenerNombresComponentesUnicos();
-        if (!componentesDisponibles.contains(componenteNombre)) {
-            redirectAttributes.addFlashAttribute("error", "El componente seleccionado no es válido.");
-            return "redirect:/aprendiz/componente";
-        }
-
-        Componente nuevoComponente = new Componente();
-        nuevoComponente.setNombre(componenteNombre);
-        nuevoComponente.setUsuario(aprendiz);
-        ComponenteServicio.guardarComponente(nuevoComponente);
-
-        // Registrar al aprendiz en el componente (esto ejecutará el procedimiento almacenado)
-        grupoServicio.registrarAprendizEnComponente(aprendiz.getIdUsuario(), componenteNombre);
+    public String registrarComponente(
+            @RequestParam String componente,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
         
-        redirectAttributes.addFlashAttribute("mensaje", "Componente registrado exitosamente.");
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return "redirect:/";
+        }
+        
+        try {
+            // Verificar si el componente pertenece al programa del aprendiz
+            String programaAprendiz = usuario.getPrograma();
+            if (programaAprendiz != null && !programaAprendiz.isEmpty()) {
+                boolean pertenece = aprendizComponenteServicio.componentePerteneceAPrograma(componente, programaAprendiz);
+                if (!pertenece) {
+                    redirectAttributes.addFlashAttribute("error", "El componente seleccionado no pertenece a tu programa de formación.");
+                    return "redirect:/aprendiz/componente";
+                }
+            }
+            
+            // Registrar el componente para el aprendiz
+            aprendizComponenteServicio.registrarComponenteParaAprendiz(usuario.getIdUsuario(), componente);
+            redirectAttributes.addFlashAttribute("mensaje", "Componente registrado exitosamente.");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al registrar el componente: " + e.getMessage());
+        }
+        
         return "redirect:/aprendiz/componente";
     }
 
     @PostMapping("/aprendiz/eliminarComponente")
-    @Transactional
-    public String eliminarComponente(@RequestParam("id") Long componenteId, HttpSession session, RedirectAttributes redirectAttributes) {
-        Usuario aprendiz = (Usuario) session.getAttribute("usuario");
-        if (aprendiz == null) {
-            return "redirect:/index";
+    public String eliminarComponente(
+            @RequestParam Integer id,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
+        Usuario usuario = (Usuario) session.getAttribute("usuario");
+        if (usuario == null) {
+            return "redirect:/";
         }
-
-        boolean eliminado = ComponenteServicio.eliminarComponenteSiNoTieneAsesoriasActivas(componenteId);
-
-        if (!eliminado) {
-            redirectAttributes.addFlashAttribute("error", "No se puede eliminar el componente porque tienes asesorías activas.");
-        } else {
+        
+        try {
+            aprendizComponenteServicio.eliminarComponentePorId(id);
             redirectAttributes.addFlashAttribute("mensaje", "Componente eliminado exitosamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al eliminar el componente: " + e.getMessage());
         }
-
+        
         return "redirect:/aprendiz/componente";
     }
 
@@ -506,6 +585,9 @@ public class AprendizControlador {
         model.addAttribute("aprendiz", aprendiz);
         model.addAttribute("grupos", todosGrupos);
         model.addAttribute("redirectUrl", request.getRequestURI());
+
+        // Configurar ayuda para esta vista
+        configurarAyuda(model, request);
 
         return "aprendiz/prueba";
     }
@@ -574,7 +656,7 @@ public class AprendizControlador {
         // Añadir el nombre del grupo a la respuesta
         respuesta.put("nombreGrupo", grupo.getNombre());
         
-        List<Asesoria> asesorias = asesoriaServicio.obtenerAsesoriasPorGrupo(grupo);
+        List<Asesoria> asesorias = asesoriaServicio.obtenerAsesoriasPorGrupo(idGrupo);
         
         // Convertir a formato JSON amigable
         List<Map<String, Object>> asesoriasMap = new ArrayList<>();
@@ -592,6 +674,105 @@ public class AprendizControlador {
         
         respuesta.put("asesorias", asesoriasMap);
         return respuesta;
+    }
+
+    @PostMapping("/aprendiz/salirGrupo")
+    public String salirGrupo(@RequestParam("idGrupo") Long idGrupo, HttpSession session, RedirectAttributes redirectAttributes) {
+        Usuario aprendiz = (Usuario) session.getAttribute("usuario");
+        if (aprendiz == null) {
+            return "redirect:/index";
+        }
+
+        try {
+            // Verificar si el grupo existe
+            Optional<Grupo> grupoOptional = grupoServicio.buscarPorId(idGrupo);
+            if (grupoOptional.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "El grupo no existe");
+                return "redirect:/aprendiz/grupo";
+            }
+
+            Grupo grupo = grupoOptional.get();
+            
+            // Eliminar al aprendiz del grupo
+            if (grupoAprendizServicio.eliminarAprendizDeGrupo(idGrupo, aprendiz.getIdUsuario())) {
+                
+                // Notificar al asesor si hay uno asignado
+                if (grupo.getAsesor() != null) {
+                    try {
+                        String asunto = "Un aprendiz ha abandonado tu grupo";
+                        String mensaje = "Hola " + grupo.getAsesor().getNombres() + ",\n\n" +
+                                "El aprendiz " + aprendiz.getNombres() + " " + aprendiz.getPrimerA() + " ha abandonado el grupo " + grupo.getNombre() + ".\n\n" +
+                                "Información del aprendiz:\n" +
+                                "- Nombre: " + aprendiz.getNombres() + " " + aprendiz.getPrimerA() + "\n" +
+                                "- Correo: " + aprendiz.getCorreo() + "\n" +
+                                "- Trimestre: " + aprendiz.getTrimestre() + "\n\n" +
+                                "Este mensaje es una notificación automática.";
+                        
+                        correoServicio.sendEmail(grupo.getAsesor().getCorreo(), asunto, mensaje);
+                    } catch (Exception e) {
+                        System.out.println("Error al enviar notificación al asesor: " + e.getMessage());
+                    }
+                }
+                
+                redirectAttributes.addFlashAttribute("mensaje", "Has abandonado el grupo exitosamente");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "No se pudo salir del grupo");
+            }
+            
+            return "redirect:/aprendiz/grupo";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al procesar la solicitud: " + e.getMessage());
+            return "redirect:/aprendiz/grupo";
+        }
+    }
+
+    private void configurarAyuda(Model model, HttpServletRequest request) {
+        // Obtener la ruta actual para determinar qué página es
+        String path = request.getRequestURI();
+        
+        if (path.contains("/aprendiz/asesorias")) {
+            model.addAttribute("helpTitle", "Ayuda - Asesorías");
+            model.addAttribute("helpItems", new String[][]{
+                {"Calendario", "Visualice todas las asesorías programadas."},
+                {"Enlaces", "Acceda directamente a las reuniones de asesoría desde esta vista."},
+                {"Asistencia", "Podrá ver sus registros de asistencia."}
+            });
+            model.addAttribute("helpFooter", "Recuerde unirse a tiempo a las asesorías programadas.");
+        } 
+        else if (path.contains("/aprendiz/asistencia")) {
+            model.addAttribute("helpTitle", "Ayuda - Asistencia");
+            model.addAttribute("helpItems", new String[][]{
+                {"Registro", "Revise su historial de asistencia a asesorías."},
+                {"Estado", "Verifique su estado (presente o ausente) para cada asesoría."}
+            });
+            model.addAttribute("helpFooter", "La asistencia a las asesorías es importante para su proceso formativo.");
+        }
+        else if (path.contains("/aprendiz/grupo")) {
+            model.addAttribute("helpTitle", "Ayuda - Grupos");
+            model.addAttribute("helpItems", new String[][]{
+                {"Inscripción", "Puede inscribirse a los grupos disponibles."},
+                {"Información", "Conozca detalles sobre el grupo y su asesor."}
+            });
+            model.addAttribute("helpFooter", "Seleccione el grupo que más se adapte a sus necesidades de formación.");
+        }
+        else if (path.contains("/aprendiz/prueba")) {
+            model.addAttribute("helpTitle", "Ayuda - Pruebas");
+            model.addAttribute("helpItems", new String[][]{
+                {"Evaluaciones", "Visualice las pruebas asignadas por el asesor."},
+                {"Respuestas", "Responda las pruebas dentro del tiempo establecido."},
+                {"Resultados", "Consulte sus calificaciones una vez evaluado."}
+            });
+            model.addAttribute("helpFooter", "Asegúrese de completar todas las pruebas antes de la fecha límite.");
+        }
+        else if (path.contains("/aprendiz/componente")) {
+            model.addAttribute("helpTitle", "Ayuda - Componentes");
+            model.addAttribute("helpItems", new String[][]{
+                {"Consulta", "Revise los componentes formativos disponibles."},
+                {"Contenidos", "Explore los contenidos de cada componente."}
+            });
+            model.addAttribute("helpFooter", "Los componentes formativos son fundamentales para su proceso de aprendizaje.");
+        }
     }
 
 }

@@ -442,7 +442,7 @@ public class UsuarioServicioImpl2 implements UsuarioServicio2 {
         return listarUsuarios().stream()
             .filter(u -> u.getNombres().toLowerCase().contains(filtroLower) ||
                    u.getPrimerA().toLowerCase().contains(filtroLower) ||
-                   u.getSegundoA().toLowerCase().contains(filtroLower) ||
+                   (u.getSegundoA() != null && u.getSegundoA().toLowerCase().contains(filtroLower)) ||
                    u.getCorreo().toLowerCase().contains(filtroLower) ||
                    u.getUsuario().toLowerCase().contains(filtroLower) ||
                    String.valueOf(u.getIdUsuario()).contains(filtroLower))
@@ -458,6 +458,16 @@ public class UsuarioServicioImpl2 implements UsuarioServicio2 {
         return listarUsuarios().stream()
             .filter(u -> u.getRolSeleccionado().equalsIgnoreCase(rol))
             .toList();
+    }
+
+    @Override
+    public Optional<Usuario> obtenerUsuarioPorId(Long idUsuario) {
+        return Repositorio.findById(idUsuario);
+    }
+    
+    @Override
+    public void guardarUsuario(Usuario usuario) {
+        Repositorio.save(usuario);
     }
 
 }

@@ -5,6 +5,7 @@ import com.proyecto.KASH.entidad.Grupo;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface AsesoriaServicio {
     
@@ -25,10 +26,14 @@ public interface AsesoriaServicio {
     public List<Asesoria> obtenerAsesoriasPorAsesor(Long idAsesor);
 
     public List<Asesoria> obtenerAsesoriasActivas();
-
-    public Asesoria obtenerPorId(Long idAsesoria);
     
     public List<Asesoria> obtenerAsesoriasPorGrupo(Grupo grupo);
+    
+    public List<Asesoria> obtenerAsesoriasPorGrupo(int idGrupo);
    
     public List<Asesoria> listarTodasLasAsesorias();
+    
+    public void eliminarAsesoria(int id);
+
+    Optional<Asesoria> obtenerPorId(int id);
 }

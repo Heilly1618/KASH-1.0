@@ -17,6 +17,9 @@ public class AprendizAsesoriaServicioImpl implements AprendizAsesoriaServicio{
     @Autowired
     private AsesoriaRepositorio asesoriaRepositorio;
 
+    @Autowired
+    private GrupoServicio grupoServicio;
+
     @Override
     public List<Asesoria> obtenerAsesoriasPorAprendiz(Long idAprendiz) {
         return repositorio.findAsesoriasPorAprendiz(idAprendiz);
@@ -31,5 +34,15 @@ public class AprendizAsesoriaServicioImpl implements AprendizAsesoriaServicio{
     @Override
     public List<Asesoria> obtenerAsesoriasPorGrupo(Grupo grupo) {
         return asesoriaRepositorio.findByGrupo(grupo);
+    }
+    
+    @Override
+    public List<Asesoria> obtenerAsesoriasPorGrupo(int idGrupo) {
+        // Buscar el grupo primero
+        Grupo grupo = grupoServicio.obtenerGrupoPorId(idGrupo);
+        if (grupo != null) {
+            return obtenerAsesoriasPorGrupo(grupo);
+        }
+        return java.util.Collections.emptyList();
     }
 }

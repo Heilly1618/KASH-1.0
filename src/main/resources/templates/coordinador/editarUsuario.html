@@ -154,21 +154,26 @@
                     { title: 'Cambio de trimestre', description: 'Actualice el trimestre actual del usuario.' }
                 ], 'Una vez realizados los cambios, haga clic en "Guardar Cambios" para aplicarlos.');
                 
-                // Función para abrir el modal de perfil
-                function abrirModalPerfil() {
+                // Asignar las funciones de los modales al ámbito global
+                window.abrirModalPerfil = function() {
                     document.getElementById('modalPerfil').style.display = 'block';
-                }
+                };
                 
-                // Función para cerrar el modal de perfil
-                function cerrarModalPerfil() {
+                window.cerrarModalPerfil = function() {
                     document.getElementById('modalPerfil').style.display = 'none';
+                };
+                
+                // Asignar evento al botón de perfil
+                const btnPerfil = document.querySelector('.icono-perfil');
+                if (btnPerfil) {
+                    btnPerfil.addEventListener('click', window.abrirModalPerfil);
                 }
                 
                 // Cerrar modal al hacer clic fuera
                 window.onclick = function(event) {
                     var modalPerfil = document.getElementById('modalPerfil');
                     if (modalPerfil && event.target === modalPerfil) {
-                        cerrarModalPerfil();
+                        window.cerrarModalPerfil();
                     }
                 };
             });

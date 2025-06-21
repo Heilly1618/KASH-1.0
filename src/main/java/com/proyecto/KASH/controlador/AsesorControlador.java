@@ -27,6 +27,7 @@ import com.proyecto.KASH.servicio.EmailService;
 import com.proyecto.KASH.servicio.FotoServicio;
 import com.proyecto.KASH.servicio.GrupoServicio;
 import com.proyecto.KASH.servicio.UsuarioServicio;
+import com.proyecto.KASH.servicio.AprendizComponenteServicio;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
@@ -66,6 +67,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import static org.springframework.web.server.ServerWebExchangeExtensionsKt.principal;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.http.HttpStatus;
+import java.time.format.DateTimeFormatter;
 
 @Controller
 public class AsesorControlador {
@@ -73,6 +76,9 @@ public class AsesorControlador {
     // foto
     @Autowired
     private FotoServicio fotoServicio;  // Inyectamos la interfaz FotoServicio
+
+    @Autowired
+    private AprendizComponenteServicio aprendizComponenteServicio;
 
     @GetMapping("/foto/{id}")
     @ResponseBody
@@ -516,8 +522,12 @@ public class AsesorControlador {
     @GetMapping("/asesor/aprendicesPorAsesoria/{id}")
     @ResponseBody
     public List<Map<String, Object>> obtenerAprendicesPorAsesoria(@PathVariable("id") Long idAsesoria) {
+        // Obtener el ID del grupo como Integer
+        int idGrupo = asesoriaRepositorio.findById(idAsesoria).get().getGrupo().getIdGrupo();
+        Integer idGrupoInteger = Integer.valueOf(idGrupo);
+        
         List<GrupoAprendiz> grupoAprendices = grupoAprendizRepositorio
-                .findByGrupo_Id(asesoriaRepositorio.findById(idAsesoria).get().getGrupo().getIdGrupo());
+                .findByGrupo_Id(idGrupoInteger);
 
         List<Map<String, Object>> resultado = new ArrayList<>();
 
@@ -541,11 +551,12 @@ public class AsesorControlador {
             @RequestParam("asistencias") List<Boolean> asistencias,
             RedirectAttributes redirectAttributes
     ) {
-        Asesoria asesoria = asesoriaServicio.obtenerPorId(idAsesoria);
-        if (asesoria == null) {
+        Optional<Asesoria> optAsesoria = asesoriaServicio.obtenerPorId(idAsesoria.intValue());
+        if (optAsesoria.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "La asesoría no fue encontrada.");
             return "redirect:/asesor/asistencia";
         }
+        Asesoria asesoria = optAsesoria.get();
 
         if (idUsuarios.size() != asistencias.size()) {
             redirectAttributes.addFlashAttribute("error", "El número de aprendices y asistencias no coincide.");
@@ -585,12 +596,15 @@ public class AsesorControlador {
             return "redirect:/index";
         }
 
-        Long idAsesor = asesor.getIdUsuario();
+        // Obtener grupos asignados al asesor actual
+        List<Grupo> gruposDelAsesor = grupoServicio.obtenerGruposPorAsesor(asesor.getIdUsuario());
 
-        // 1. Grupos asignados al asesor
-        List<Grupo> gruposAsignados = grupoServicio.obtenerGruposPorAsesor(idAsesor);
-
-        // 2. Obtener todas las asesorías activas
+        // Obtener grupos disponibles para el asesor
+        // Filtrar para mostrar un solo grupo por componente y con menos de 5 estudiantes
+        List<Grupo> todosGruposDisponibles = grupoRepositorio.findGruposSinAsesor();
+        Map<String, Grupo> gruposPorComponente = new HashMap<>();
+        
+        // Asesorías activas para marcar grupos
         List<Asesoria> asesoriasActivas = asesoriaServicio.obtenerAsesoriasActivas();
         Set<Integer> idsGruposConAsesoria = asesoriasActivas.stream()
                 .map(Asesoria::getGrupo)
@@ -598,19 +612,36 @@ public class AsesorControlador {
                 .map(Grupo::getIdGrupo)
                 .collect(Collectors.toSet());
 
-        // 3. Grupos disponibles (sin asesor y sin asesoría activa)
-        List<Grupo> gruposSinAsesorNiAsesoria = grupoRepositorio.findGruposSinAsesor(); // debe traer grupos sin asesor asignado
+        // Obtener el programa del asesor
+        String programaAsesor = asesor.getPrograma();
 
-        List<Grupo> gruposDisponibles = gruposSinAsesorNiAsesoria.stream()
-                .filter(grupo -> !idsGruposConAsesoria.contains(grupo.getIdGrupo()))
-                .collect(Collectors.toList());
+        // Filtrar por nombre de componente, número de estudiantes y programa del asesor
+        for (Grupo grupo : todosGruposDisponibles) {
+            String nombreComponente = grupo.getNombre(); // El nombre del grupo es el nombre del componente
+            
+            // Verificar si el componente pertenece al programa del asesor
+            boolean perteneceAlPrograma = aprendizComponenteServicio.componentePerteneceAPrograma(nombreComponente, programaAsesor);
+            
+            // Solo considerar grupos con menos de 5 estudiantes y que pertenezcan al programa del asesor
+            if (perteneceAlPrograma && grupo.getAprendices() != null && grupo.getAprendices().size() < 5) {
+                // Solo añadir si no hay un grupo para este componente o si este no tiene asesorías activas
+                if (!gruposPorComponente.containsKey(nombreComponente) ||
+                    (!idsGruposConAsesoria.contains(grupo.getIdGrupo()) && 
+                     idsGruposConAsesoria.contains(gruposPorComponente.get(nombreComponente).getIdGrupo()))) {
+                    gruposPorComponente.put(nombreComponente, grupo);
+                }
+            }
+        }
+        
+        List<Grupo> gruposDisponiblesFiltrados = new ArrayList<>(gruposPorComponente.values());
 
-        // 4. Agregar al modelo
+        // Agregar al modelo
         model.addAttribute("asesor", asesor);
-        model.addAttribute("gruposAsignados", gruposAsignados);
-        model.addAttribute("gruposDisponibles", gruposDisponibles);
+        model.addAttribute("gruposAsignados", gruposDelAsesor);
+        model.addAttribute("gruposDisponibles", gruposDisponiblesFiltrados);
         model.addAttribute("gruposConAsesoriaActiva", idsGruposConAsesoria);
         model.addAttribute("redirectUrl", request.getRequestURI());
+        model.addAttribute("nombre", asesor.getNombres());
 
         return "asesor/grupo";
     }
@@ -626,10 +657,20 @@ public class AsesorControlador {
             return "redirect:/index";
         }
 
-        Long idAprendiz = asesor.getIdUsuario();
+        Long idAsesor = asesor.getIdUsuario();
+        String programaAsesor = asesor.getPrograma();
 
         // Buscar solo los grupos que coincidan con el filtro
         List<Grupo> gruposFiltrados = grupoRepositorio.findGruposDisponiblesPorFiltro(filtro);
+        
+        // Filtrar por programa del asesor
+        List<Grupo> gruposFiltradosPorPrograma = new ArrayList<>();
+        for (Grupo grupo : gruposFiltrados) {
+            String nombreComponente = grupo.getNombre();
+            if (aprendizComponenteServicio.componentePerteneceAPrograma(nombreComponente, programaAsesor)) {
+                gruposFiltradosPorPrograma.add(grupo);
+            }
+        }
 
         // Asesorías activas (si la vista necesita marcar algo)
         List<Asesoria> asesoriasActivas = asesoriaServicio.obtenerAsesoriasActivas();
@@ -642,7 +683,7 @@ public class AsesorControlador {
         // Enviar al modelo SOLO lo necesario
         model.addAttribute("asesor", asesor);
         model.addAttribute("gruposConAsesoriaActiva", idsGruposConAsesoria);
-        model.addAttribute("gruposDisponibles", gruposFiltrados); // esto es lo único que te interesa
+        model.addAttribute("gruposDisponibles", gruposFiltradosPorPrograma); // Ahora filtrados por programa
         model.addAttribute("filtro", filtro);
         model.addAttribute("redirectUrl", request.getRequestURI());
 
@@ -655,54 +696,70 @@ public class AsesorControlador {
     @PostMapping("/asesor/entrarGrupo")
     public String entrarGrupo(@RequestParam("idGrupo") Long idGrupo, HttpSession session, RedirectAttributes redirectAttributes) {
         Usuario asesor = (Usuario) session.getAttribute("usuario");
+        if (asesor == null) {
+            return "redirect:/index";
+        }
+        
         Long idAsesor = asesor.getIdUsuario();
 
         // Verificar límite de grupos activos para asesor (máximo 5)
         List<Grupo> gruposActivos = grupoServicio.obtenerGruposActivosPorAsesor(idAsesor);
         if (gruposActivos.size() >= 5) {
             redirectAttributes.addFlashAttribute("error", "No puedes unirte a más de 5 grupos activos.");
-            return "redirect:/asesor/grupos/disponibles";
+            return "redirect:/asesor/grupo";
         }
         
-        // 1. Asignar asesor al grupo (procedimiento)
-        jdbcTemplate.update("CALL asignar_asesor_a_grupo(?, ?)", idAsesor, idGrupo);
+        // Obtener el grupo
+        int idGrupoInt = idGrupo.intValue();
+        Grupo grupo = grupoRepositorio.findById(idGrupoInt).orElse(null);
+        if (grupo == null) {
+            redirectAttributes.addFlashAttribute("error", "El grupo no existe.");
+            return "redirect:/asesor/grupo";
+        }
+        
+        // Verificar que el grupo no tenga ya un asesor
+        if (grupo.getAsesor() != null) {
+            redirectAttributes.addFlashAttribute("error", "Este grupo ya tiene un asesor asignado.");
+            return "redirect:/asesor/grupo";
+        }
+        
+        // 1. Asignar asesor al grupo directamente con SQL en lugar de usar procedimiento almacenado
+        jdbcTemplate.update("UPDATE grupo SET idAsesor = ? WHERE id = ?", idAsesor, idGrupoInt);
 
-        // 2. Obtener grupo
-        Grupo grupo = grupoRepositorio.findById(idGrupo.intValue()).orElse(null); // Ajusta tipo si usas Integer
+        // 2. Crear un nuevo grupo para este componente si es necesario
+        grupoServicio.crearGrupoSiNecesario(grupo.getNombre());
 
-        if (grupo != null) {
-            // 3. Obtener aprendices del grupo
-            List<GrupoAprendiz> grupoAprendices = grupoAprendizRepositorio.findByGrupo_Id(grupo.getIdGrupo());
+        // 3. Obtener aprendices del grupo
+        Integer idGrupoInteger = Integer.valueOf(grupo.getIdGrupo());
+        List<GrupoAprendiz> grupoAprendices = grupoAprendizRepositorio.findByGrupo_Id(idGrupoInteger);
 
-            List<String> correosAprendices = new ArrayList<>();
-            for (GrupoAprendiz ga : grupoAprendices) {
-                Usuario aprendiz = ga.getUsuario();
-                if (aprendiz != null && aprendiz.getCorreo() != null) {
-                    correosAprendices.add(aprendiz.getCorreo());
-                }
+        List<String> correosAprendices = new ArrayList<>();
+        for (GrupoAprendiz ga : grupoAprendices) {
+            Usuario aprendiz = ga.getUsuario();
+            if (aprendiz != null && aprendiz.getCorreo() != null) {
+                correosAprendices.add(aprendiz.getCorreo());
             }
-
-            // 4. Enviar correo masivo
-            if (!correosAprendices.isEmpty()) {
-                String asunto = "Un asesor se ha unido a tu grupo";
-                String cuerpo = "Hola, \n\n"
-                        + "Te informamos que el asesor " + asesor.getNombres() + " "
-                        + asesor.getPrimerA() + " " + asesor.getSegundoA()
-                        + " se ha unido al grupo '" + grupo.getNombre() + "'.\n\n"
-                        + "Gracias por usar KASH.";
-
-                correoServicio.sendMassEmail(correosAprendices, asunto, cuerpo);
-            }
-            
-            redirectAttributes.addFlashAttribute("mensaje", "Te has unido al grupo exitosamente.");
         }
 
+        // 4. Enviar correo masivo
+        if (!correosAprendices.isEmpty()) {
+            String asunto = "Un asesor se ha unido a tu grupo";
+            String cuerpo = "Hola, \n\n"
+                    + "Te informamos que el asesor " + asesor.getNombres() + " "
+                    + asesor.getPrimerA() + " " + asesor.getSegundoA()
+                    + " se ha unido al grupo '" + grupo.getNombre() + "'.\n\n"
+                    + "Gracias por usar KASH.";
+
+            correoServicio.sendMassEmail(correosAprendices, asunto, cuerpo);
+        }
+        
+        redirectAttributes.addFlashAttribute("mensaje", "Te has unido al grupo exitosamente.");
         return "redirect:/asesor/grupo";
     }
 
     //Vista Componente
     @Autowired
-    private AsesorComponenteServicio componenteServicio;
+    private AsesorComponenteServicio asesorComponenteServicio;
 
     @GetMapping("/asesor/componente")
     public String registrarComponentes(HttpSession session, Model model, HttpServletRequest request) {
@@ -712,10 +769,10 @@ public class AsesorControlador {
         }
 
         // Obtener la lista de componentes disponibles
-        List<String> componentesDisponibles = componenteServicio.obtenerNombresComponentesUnicos();
+        List<String> componentesDisponibles = asesorComponenteServicio.obtenerNombresComponentesUnicos();
 
         // Obtener los componentes elegidos por el asesor
-        List<Componente> componentesElegidos = componenteServicio.obtenerComponentePorUsuario(asesor.getIdUsuario());
+        List<Componente> componentesElegidos = asesorComponenteServicio.obtenerComponentePorUsuario(asesor.getIdUsuario());
 
         model.addAttribute("componentesDisponibles", componentesDisponibles);
         model.addAttribute("componentesElegidos", componentesElegidos);
@@ -734,7 +791,7 @@ public class AsesorControlador {
         }
 
         // Comprobar que el asesor no haya elegido ya 3 componentes
-        if (componenteServicio.obtenerComponentePorUsuario(asesor.getIdUsuario()).size() >= 3) {
+        if (asesorComponenteServicio.obtenerComponentePorUsuario(asesor.getIdUsuario()).size() >= 3) {
             model.addAttribute("mensaje", "No puedes registrar más de 3 componentes.");
             return "redirect:/asesor/componente";  // Redirige al formulario
         }
@@ -744,7 +801,7 @@ public class AsesorControlador {
         nuevoComponente.setNombre(componenteNombre);
         nuevoComponente.setUsuario(asesor);
 
-        componenteServicio.guardarComponente(nuevoComponente);
+        asesorComponenteServicio.guardarComponente(nuevoComponente);
 
         return "redirect:/asesor/componente";  // Redirige de nuevo para actualizar la lista
     }
@@ -761,7 +818,7 @@ public class AsesorControlador {
         }
 
         // Llamamos al servicio para eliminar la relación
-        componenteServicio.eliminarComponente(componenteId, asesor.getIdUsuario());
+        asesorComponenteServicio.eliminarComponente(componenteId, asesor.getIdUsuario());
 
         // Mostrar mensaje de éxito
         model.addAttribute("mensaje", "Componente eliminado exitosamente.");
@@ -821,10 +878,20 @@ public class AsesorControlador {
 // Agregar al modelo
         model.addAttribute("respuestasPorPrueba", respuestasPorPrueba);
 
+        // Agregar modelo para la vista
         model.addAttribute("asesor", asesor);
+        model.addAttribute("nombre", asesor.getNombres()); // Nombre para el encabezado
         model.addAttribute("grupos", gruposAsesor);
         model.addAttribute("pruebasPorGrupo", pruebasPorGrupo);
+        model.addAttribute("todasLasPruebas", todasLasPruebas);
         model.addAttribute("redirectUrl", request.getRequestURI());
+        
+        // Para depuración y ayuda
+        Map<Integer, String> grupoNombres = new HashMap<>();
+        for (Grupo grupo : gruposAsesor) {
+            grupoNombres.put(grupo.getId(), grupo.getNombre());
+        }
+        model.addAttribute("grupoNombres", grupoNombres);
 
         return "asesor/prueba";
     }
@@ -885,13 +952,31 @@ public class AsesorControlador {
 
         List<Pregunta> preguntas = new ArrayList<>();
 
-        int totalPreguntas = Integer.parseInt(request.getParameter("totalPreguntas"));
+        String totalPreguntasStr = request.getParameter("totalPreguntas");
+        int totalPreguntas = 0;
+        if (totalPreguntasStr != null && !totalPreguntasStr.isEmpty()) {
+            totalPreguntas = Integer.parseInt(totalPreguntasStr);
+        } else {
+            // Manejar el caso en que totalPreguntas no se proporciona
+            // Puedes establecer un valor predeterminado o mostrar un error
+            System.err.println("Error: totalPreguntas no se proporcionó en la solicitud.");
+            return "redirect:/asesor/prueba"; // Redirige a la página de prueba o muestra un mensaje de error
+        }
 
         for (int i = 0; i < totalPreguntas; i++) {
             Pregunta pregunta = new Pregunta();
             pregunta.setEnunciado(request.getParameter("Pregunta_" + i));
 
-            int respuestaCorrecta = Integer.parseInt(request.getParameter("Correcta_" + i));
+            String respuestaCorrectaStr = request.getParameter("Correcta_" + i);
+            int respuestaCorrecta = 0;
+            if (respuestaCorrectaStr != null && !respuestaCorrectaStr.isEmpty()) {
+                respuestaCorrecta = Integer.parseInt(respuestaCorrectaStr);
+            } else {
+                // Manejar el caso en que Correcta_<i> no se proporciona
+                // Puedes establecer un valor predeterminado o mostrar un error
+                System.err.println("Error: Correcta_" + i + " no se proporcionó en la solicitud.");
+                return "redirect:/asesor/prueba"; // Redirige a la página de prueba o muestra un mensaje de error
+            }
             List<Respuesta> respuestas = new ArrayList<>();
 
             for (int j = 0; j < 4; j++) {
@@ -949,7 +1034,7 @@ public class AsesorControlador {
             return resultado;
         }
         
-        List<Asesoria> asesorias = asesoriaServicio.obtenerAsesoriasPorGrupo(grupo);
+        List<Asesoria> asesorias = asesoriaServicio.obtenerAsesoriasPorGrupo(idGrupo);
         
         // Convertir a formato JSON amigable
         List<Map<String, Object>> asesoriasJSON = new ArrayList<>();
@@ -1008,6 +1093,321 @@ public class AsesorControlador {
             redirect.addFlashAttribute("error", "No se encontró la asesoría.");
         }
         return "redirect:/asesor/asesorias";
+    }
+
+    @PostMapping("/asesor/salirGrupo")
+    @Transactional
+    public String salirGrupo(@RequestParam("idGrupo") Long idGrupo, HttpSession session, RedirectAttributes redirectAttributes) {
+        Usuario asesor = (Usuario) session.getAttribute("usuario");
+        if (asesor == null) {
+            return "redirect:/index";
+        }
+
+        try {
+            // Verificar si el grupo existe
+            Optional<Grupo> grupoOptional = grupoRepositorio.findById(idGrupo.intValue());
+            if (grupoOptional.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "El grupo no existe");
+                return "redirect:/asesor/grupo";
+            }
+
+            Grupo grupo = grupoOptional.get();
+            
+            // Verificar que el asesor es el asignado al grupo
+            if (grupo.getAsesor() == null || !grupo.getAsesor().getIdUsuario().equals(asesor.getIdUsuario())) {
+                redirectAttributes.addFlashAttribute("error", "No eres el asesor de este grupo");
+                return "redirect:/asesor/grupo";
+            }
+            
+            // Recopilar información de los aprendices para notificaciones
+            List<String> correosAprendices = new ArrayList<>();
+            List<Usuario> aprendicesGrupo = new ArrayList<>();
+            
+            if (grupo.getAprendices() != null) {
+                for (GrupoAprendiz ga : grupo.getAprendices()) {
+                    if (ga != null && ga.getUsuario() != null) {
+                        Usuario aprendiz = ga.getUsuario();
+                        aprendicesGrupo.add(aprendiz);
+                        if (aprendiz.getCorreo() != null && !aprendiz.getCorreo().isEmpty()) {
+                            correosAprendices.add(aprendiz.getCorreo());
+                        }
+                    }
+                }
+            }
+            
+            // 1. Eliminar todas las asesorías asociadas al grupo
+            List<Asesoria> asesoriasGrupo = asesoriaServicio.obtenerAsesoriasPorGrupo(grupo.getIdGrupo());
+            for (Asesoria asesoria : asesoriasGrupo) {
+                try {
+                    asesoriaServicio.eliminarAsesoria(asesoria.getId());
+                } catch (Exception e) {
+                    System.out.println("Error al eliminar asesoría: " + e.getMessage());
+                }
+            }
+            
+            // 2. Eliminar todas las pruebas asociadas al grupo
+            // Implementar si es necesario
+            
+            // 3. Desasignar el asesor del grupo
+            grupo.setAsesor(null);
+            grupoRepositorio.save(grupo);
+            
+            // 4. Enviar notificación a todos los aprendices del grupo
+            if (!correosAprendices.isEmpty()) {
+                try {
+                    String asunto = "El asesor ha abandonado el grupo " + grupo.getNombre();
+                    String mensaje = "Estimado(a) aprendiz,\n\n" +
+                            "Te informamos que el asesor " + asesor.getNombres() + " " + asesor.getPrimerA() + 
+                            " ha abandonado el grupo " + grupo.getNombre() + ".\n\n" +
+                            "Las asesorías programadas han sido canceladas. " +
+                            "El grupo estará disponible para que un nuevo asesor pueda tomar el relevo.\n\n" +
+                            "Te mantendremos informado cuando un nuevo asesor sea asignado al grupo.\n\n" +
+                            "Este mensaje es una notificación automática.";
+                    
+                    correoServicio.sendMassEmail(correosAprendices, asunto, mensaje);
+                } catch (Exception e) {
+                    System.out.println("Error al enviar notificaciones a los aprendices: " + e.getMessage());
+                }
+            }
+            
+            redirectAttributes.addFlashAttribute("mensaje", "Has abandonado el grupo exitosamente y se han eliminado las asesorías asociadas");
+            return "redirect:/asesor/grupo";
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al procesar la solicitud: " + e.getMessage());
+            return "redirect:/asesor/grupo";
+        }
+    }
+
+    @PostMapping("/asesor/asesoria/{id}/actualizar-fecha")
+    public ResponseEntity<?> actualizarFechaAsesoria(
+            @PathVariable("id") int id,
+            @RequestParam("nuevaFecha") String nuevaFechaStr,
+            @RequestParam("nuevaHora") String nuevaHoraStr,
+            HttpSession session) {
+        
+        try {
+            Usuario asesor = (Usuario) session.getAttribute("usuario");
+            if (asesor == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "No autorizado"));
+            }
+            
+            // Obtener la asesoría
+            Optional<Asesoria> optAsesoria = asesoriaRepositorio.findById(id);
+            if (!optAsesoria.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Asesoría no encontrada"));
+            }
+            
+            Asesoria asesoria = optAsesoria.get();
+            
+            // Verificar que el asesor es el correcto
+            if (asesoria.getGrupo().getAsesor() == null || 
+                !asesoria.getGrupo().getAsesor().getIdUsuario().equals(asesor.getIdUsuario())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "No tienes permiso para modificar esta asesoría"));
+            }
+            
+            // Guardar fecha y hora anteriores para el correo
+            LocalDate fechaAnterior = asesoria.getFecha();
+            LocalTime horaAnterior = asesoria.getHora();
+            String fechaAnteriorStr = asesoria.getFechaFormateada();
+            String horaAnteriorStr = asesoria.getHoraFormateada();
+            
+            // Convertir fecha y hora
+            LocalDate nuevaFecha = nuevaFechaStr.isEmpty() ? asesoria.getFecha() : LocalDate.parse(nuevaFechaStr);
+            LocalTime nuevaHora = nuevaHoraStr.isEmpty() ? asesoria.getHora() : LocalTime.parse(nuevaHoraStr);
+            
+            // Verificar si realmente hay cambios
+            boolean cambioFecha = !nuevaFecha.equals(fechaAnterior);
+            boolean cambioHora = !nuevaHora.equals(horaAnterior);
+            
+            if (!cambioFecha && !cambioHora) {
+                return ResponseEntity.ok(Map.of(
+                    "mensaje", "No se realizaron cambios",
+                    "nuevaFecha", nuevaFecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                    "nuevaHora", nuevaHora.format(DateTimeFormatter.ofPattern("HH:mm"))
+                ));
+            }
+            
+            // Actualizar la asesoría
+            asesoria.setFecha(nuevaFecha);
+            asesoria.setHora(nuevaHora);
+            asesoriaRepositorio.save(asesoria);
+            
+            // Obtener los aprendices del grupo para enviar correos
+            List<GrupoAprendiz> grupoAprendices = asesoria.getGrupo().getAprendices();
+            List<String> correosAprendices = new ArrayList<>();
+            
+            for (GrupoAprendiz ga : grupoAprendices) {
+                Usuario aprendiz = ga.getUsuario();
+                if (aprendiz != null && aprendiz.getCorreo() != null) {
+                    correosAprendices.add(aprendiz.getCorreo());
+                }
+            }
+            
+            // Enviar correo a los aprendices si hay cambios
+            if (!correosAprendices.isEmpty()) {
+                String asunto = "Cambio en asesoría - " + asesoria.getGrupo().getNombre();
+                StringBuilder cuerpo = new StringBuilder();
+                cuerpo.append("Hola, \n\n");
+                cuerpo.append("Te informamos que el asesor ").append(asesor.getNombres()).append(" ").append(asesor.getPrimerA());
+                cuerpo.append(" ha modificado una asesoría del grupo '").append(asesoria.getGrupo().getNombre()).append("'.\n\n");
+                
+                if (cambioFecha) {
+                    cuerpo.append("Fecha anterior: ").append(fechaAnteriorStr).append("\n");
+                    cuerpo.append("Nueva fecha: ").append(nuevaFecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))).append("\n");
+                }
+                
+                if (cambioHora) {
+                    cuerpo.append("Hora anterior: ").append(horaAnteriorStr).append("\n");
+                    cuerpo.append("Nueva hora: ").append(nuevaHora.format(DateTimeFormatter.ofPattern("HH:mm"))).append("\n");
+                }
+                
+                cuerpo.append("\nGracias por usar KASH.");
+                
+                correoServicio.sendMassEmail(correosAprendices, asunto, cuerpo.toString());
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "mensaje", "Fecha/hora actualizada correctamente",
+                "nuevaFecha", nuevaFecha.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")),
+                "nuevaHora", nuevaHora.format(DateTimeFormatter.ofPattern("HH:mm"))
+            ));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error al actualizar la fecha: " + e.getMessage()));
+        }
+    }
+
+    @GetMapping("/asesor/asesoria/{id}/datos")
+    public ResponseEntity<?> obtenerDatosAsesoria(@PathVariable("id") int id, HttpSession session) {
+        Usuario asesor = (Usuario) session.getAttribute("usuario");
+        if (asesor == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "No autorizado"));
+        }
+        
+        Optional<Asesoria> optAsesoria = asesoriaRepositorio.findById(id);
+        if (!optAsesoria.isPresent()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Asesoría no encontrada"));
+        }
+        
+        Asesoria asesoria = optAsesoria.get();
+        
+        // Verificar que el asesor es el correcto
+        if (asesoria.getGrupo().getAsesor() == null || 
+            !asesoria.getGrupo().getAsesor().getIdUsuario().equals(asesor.getIdUsuario())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", "No tienes permiso para ver esta asesoría"));
+        }
+        
+        // Devolver los datos de la asesoría
+        return ResponseEntity.ok(Map.of(
+            "id", asesoria.getId(),
+            "fecha", asesoria.getFecha().toString(),
+            "hora", asesoria.getHora().toString(),
+            "fechaFormateada", asesoria.getFechaFormateada(),
+            "horaFormateada", asesoria.getHoraFormateada()
+        ));
+    }
+    
+    @PostMapping("/asesor/asesoria/verificar-conflictos")
+    public ResponseEntity<?> verificarConflictos(
+            @RequestParam("asesoriaId") int asesoriaId,
+            @RequestParam("nuevaFecha") String nuevaFechaStr,
+            @RequestParam("nuevaHora") String nuevaHoraStr,
+            HttpSession session) {
+        
+        try {
+            Usuario asesor = (Usuario) session.getAttribute("usuario");
+            if (asesor == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "No autorizado", "conflicto", true));
+            }
+            
+            // Obtener la asesoría
+            Optional<Asesoria> optAsesoria = asesoriaRepositorio.findById(asesoriaId);
+            if (!optAsesoria.isPresent()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("error", "Asesoría no encontrada", "conflicto", true));
+            }
+            
+            Asesoria asesoria = optAsesoria.get();
+            
+            // Verificar que el asesor es el correcto
+            if (asesoria.getGrupo().getAsesor() == null || 
+                !asesoria.getGrupo().getAsesor().getIdUsuario().equals(asesor.getIdUsuario())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                        .body(Map.of("error", "No tienes permiso para modificar esta asesoría", "conflicto", true));
+            }
+            
+            // Convertir fecha y hora
+            LocalDate nuevaFecha = LocalDate.parse(nuevaFechaStr);
+            LocalTime nuevaHora = LocalTime.parse(nuevaHoraStr);
+            
+            // Verificar que la fecha no sea anterior a hoy
+            LocalDate hoy = LocalDate.now();
+            if (nuevaFecha.isBefore(hoy)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("mensaje", "La fecha no puede ser anterior a hoy.", "conflicto", true));
+            }
+            
+            // Verificar que la hora no esté en el rango de 10 PM a 6 AM
+            LocalTime horaInicio = LocalTime.of(22, 0); // 10 PM
+            LocalTime horaFin = LocalTime.of(6, 0); // 6 AM
+            
+            if ((nuevaHora.isAfter(horaInicio) || nuevaHora.equals(horaInicio)) || 
+                (nuevaHora.isBefore(horaFin) || nuevaHora.equals(horaFin))) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("mensaje", "No se pueden programar asesorías entre las 10:00 PM y las 6:00 AM.", "conflicto", true));
+            }
+            
+            // Verificar conflictos con otras asesorías (excluyendo la actual)
+            boolean hayConflicto = false;
+            String mensajeConflicto = "";
+            
+            // Verificar si hay conflicto con otra asesoría del mismo grupo
+            List<Asesoria> asesoriasGrupo = asesoriaRepositorio.findByGrupo(asesoria.getGrupo());
+            for (Asesoria a : asesoriasGrupo) {
+                if (a.getId() != asesoria.getId() && // No es la misma asesoría
+                    a.getFecha().equals(nuevaFecha) && a.getHora().equals(nuevaHora)) {
+                    hayConflicto = true;
+                    mensajeConflicto = "Ya existe otra asesoría para este grupo en la misma fecha y hora.";
+                    break;
+                }
+            }
+            
+            // Verificar si hay conflicto con otra asesoría del mismo asesor en otro grupo
+            if (!hayConflicto) {
+                List<Asesoria> asesoriasAsesor = asesoriaRepositorio.findByGrupo_Asesor_IdUsuario(asesor.getIdUsuario());
+                for (Asesoria a : asesoriasAsesor) {
+                    if (a.getId() != asesoria.getId() && // No es la misma asesoría
+                        a.getFecha().equals(nuevaFecha) && a.getHora().equals(nuevaHora)) {
+                        hayConflicto = true;
+                        mensajeConflicto = "Ya tienes otra asesoría programada en la misma fecha y hora.";
+                        break;
+                    }
+                }
+            }
+            
+            if (hayConflicto) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("mensaje", mensajeConflicto, "conflicto", true));
+            }
+            
+            // Si no hay conflictos
+            return ResponseEntity.ok(Map.of("mensaje", "No hay conflictos", "conflicto", false));
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("mensaje", "Error al verificar conflictos: " + e.getMessage(), "conflicto", true));
+        }
     }
 
 }

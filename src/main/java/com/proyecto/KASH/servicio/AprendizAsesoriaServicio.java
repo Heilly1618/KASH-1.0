@@ -10,4 +10,6 @@ public interface AprendizAsesoriaServicio {
     public List<Asesoria> obtenerAsesoriasActivas();
     
     public List<Asesoria> obtenerAsesoriasPorGrupo(Grupo grupo);
+    
+    public List<Asesoria> obtenerAsesoriasPorGrupo(int idGrupo);
 }

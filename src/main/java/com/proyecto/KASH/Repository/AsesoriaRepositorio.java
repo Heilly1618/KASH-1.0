@@ -64,4 +64,8 @@ public interface AsesoriaRepositorio extends JpaRepository<Asesoria, Integer> {
     @Query("SELECT DISTINCT a.grupo FROM Asesoria a WHERE a.grupo.asesor.idUsuario = :idAsesor")
     List<Grupo> findDistinctGrupoByAsesorId(@Param("idAsesor") Long idAsesor);
 
+    List<Asesoria> findByFechaBefore(LocalDate fecha);
+    
+    List<Asesoria> findByFechaBeforeAndEstadoNotAndCompletadaFalse(LocalDate fecha, String estado);
+
 }

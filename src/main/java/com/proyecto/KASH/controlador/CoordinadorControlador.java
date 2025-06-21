@@ -3,6 +3,7 @@ package com.proyecto.KASH.controlador;
 import com.proyecto.KASH.Repository.foroRepositorio;
 import com.proyecto.KASH.entidad.Comentario;
 import com.proyecto.KASH.entidad.PQRS;
+import com.proyecto.KASH.entidad.Programa;
 import com.proyecto.KASH.entidad.Usuario;
 import com.proyecto.KASH.entidad.foro;
 import com.proyecto.KASH.entidad.fotos;
@@ -58,6 +59,18 @@ import com.proyecto.KASH.servicio.GrupoServicio;
 import com.proyecto.KASH.servicio.AprendizComponenteServicio;
 import java.util.Objects;
 import com.proyecto.KASH.entidad.Componente;
+import com.proyecto.KASH.servicio.ProgramaServicio;
+import java.util.ArrayList;
+import java.util.Optional;
+import com.proyecto.KASH.servicio.CorreoServicio;
+import com.proyecto.KASH.entidad.Asistencia;
+import com.proyecto.KASH.Repository.AprendizAsistenciaRepositorio;
+import com.proyecto.KASH.Repository.PQRSRepository;
+import com.proyecto.KASH.Repository.RolRepository;
+import com.proyecto.KASH.Repository.Usuario2Repositorio;
+import com.proyecto.KASH.entidad.EmailUtil;
+import com.proyecto.KASH.entidad.EstadoPQRS;
+import com.proyecto.KASH.entidad.GrupoAprendiz;
 
 @Controller
 public class CoordinadorControlador {
@@ -88,6 +101,15 @@ public class CoordinadorControlador {
 
     @Autowired
     private AprendizComponenteServicio componenteServicio;
+
+    @Autowired
+    private ProgramaServicio programaServicio;
+
+    @Autowired
+    private CorreoServicio correoServicio;
+
+    @Autowired
+    private AprendizAsistenciaRepositorio asistenciaRepositorio;
 
     //vista coordinador perfil
     @RequestMapping("/coordinador")
@@ -372,8 +394,8 @@ public class CoordinadorControlador {
     public String filtrarAsesorias(
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) String completada,
-            @RequestParam(required = false) Long asesorId,
-            @RequestParam(required = false) String aprendiz,
+            @RequestParam(required = false) Long grupoId,
+            @RequestParam(required = false) String idUsuario,
             @RequestParam(required = false) String fechaDesde,
             @RequestParam(required = false) String fechaHasta,
             Model modelo, 
@@ -400,31 +422,43 @@ public class CoordinadorControlador {
                     .collect(Collectors.toList());
         }
         
-        if (asesorId != null && asesorId > 0) {
+        if (grupoId != null && grupoId > 0) {
             asesorias = asesorias.stream()
-                    .filter(a -> a.getGrupo().getAsesor() != null && a.getGrupo().getAsesor().getIdUsuario().equals(asesorId))
+                    .filter(a -> a.getGrupo() != null && a.getGrupo().getId() == grupoId)
                     .collect(Collectors.toList());
         }
         
-        if (aprendiz != null && !aprendiz.trim().isEmpty()) {
-            asesorias = asesorias.stream()
-                    .filter(a -> {
-                        // Verificar si hay aprendices en el grupo que coincidan con el nombre buscado
-                        Grupo grupo = a.getGrupo();
-                        if (grupo != null && grupo.getAprendices() != null) {
-                            return grupo.getAprendices().stream()
-                                    .anyMatch(ga -> {
-                                        Usuario u = ga.getAprendiz();
-                                        if (u != null) {
-                                            String nombreCompleto = (u.getNombres() + " " + u.getPrimerA() + " " + u.getSegundoA()).toLowerCase();
-                                            return nombreCompleto.contains(aprendiz.toLowerCase());
-                                        }
-                                        return false;
-                                    });
-                        }
-                        return false;
-                    })
-                    .collect(Collectors.toList());
+        if (idUsuario != null && !idUsuario.trim().isEmpty()) {
+            Long idUsuarioLong;
+            try {
+                idUsuarioLong = Long.parseLong(idUsuario.trim());
+                asesorias = asesorias.stream()
+                        .filter(a -> {
+                            Grupo grupo = a.getGrupo();
+                            if (grupo == null) return false;
+                            
+                            // Buscar en el asesor del grupo
+                            if (grupo.getAsesor() != null && grupo.getAsesor().getIdUsuario().equals(idUsuarioLong)) {
+                                return true;
+                            }
+                            
+                            // Buscar en los aprendices del grupo
+                            if (grupo.getAprendices() != null) {
+                                return grupo.getAprendices().stream()
+                                        .anyMatch(ga -> {
+                                            Usuario u = ga.getAprendiz();
+                                            return u != null && u.getIdUsuario().equals(idUsuarioLong);
+                                        });
+                            }
+                            
+                            return false;
+                        })
+                        .collect(Collectors.toList());
+            } catch (NumberFormatException e) {
+                // Si el ID no es un número válido, no aplicar filtro
+                // pero mostrar un log
+                System.out.println("ID de usuario no válido: " + idUsuario);
+            }
         }
         
         if (fechaDesde != null && !fechaDesde.isEmpty()) {
@@ -441,8 +475,8 @@ public class CoordinadorControlador {
                     .collect(Collectors.toList());
         }
         
-        // Obtener todos los asesores para el selector
-        List<Usuario> asesores = usuarioServicio.obtenerUsuariosPorRol("Asesor");
+        // Obtener todos los grupos para el selector
+        List<Grupo> grupos = grupoServicio.listarGrupos();
         
         // Estadísticas
         int totalAsesorias = asesorias.size();
@@ -451,7 +485,7 @@ public class CoordinadorControlador {
         
         modelo.addAttribute("coordinador", coordinador);
         modelo.addAttribute("asesorias", asesorias);
-        modelo.addAttribute("asesores", asesores);
+        modelo.addAttribute("grupos", grupos);
         modelo.addAttribute("totalAsesorias", totalAsesorias);
         modelo.addAttribute("asesoriasActivas", asesoriasActivas);
         modelo.addAttribute("asesoriasCompletadas", asesoriasCompletadas);
@@ -459,8 +493,8 @@ public class CoordinadorControlador {
         // Guardar filtros para mantenerlos en la vista
         modelo.addAttribute("estadoFiltro", estado);
         modelo.addAttribute("completadaFiltro", completada);
-        modelo.addAttribute("asesorIdFiltro", asesorId);
-        modelo.addAttribute("aprendizFiltro", aprendiz);
+        modelo.addAttribute("grupoIdFiltro", grupoId);
+        modelo.addAttribute("idUsuarioFiltro", idUsuario);
         modelo.addAttribute("fechaDesdeFiltro", fechaDesde);
         modelo.addAttribute("fechaHastaFiltro", fechaHasta);
         
@@ -471,8 +505,8 @@ public class CoordinadorControlador {
     public ResponseEntity<byte[]> generarPdfAsesorias(
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) String completada,
-            @RequestParam(required = false) Long asesorId,
-            @RequestParam(required = false) String aprendiz,
+            @RequestParam(required = false) Long grupoId,
+            @RequestParam(required = false) String idUsuario,
             @RequestParam(required = false) String fechaDesde,
             @RequestParam(required = false) String fechaHasta,
             HttpSession session) {
@@ -499,31 +533,42 @@ public class CoordinadorControlador {
                         .collect(Collectors.toList());
             }
             
-            if (asesorId != null && asesorId > 0) {
+            if (grupoId != null && grupoId > 0) {
                 asesoriasFiltradas = asesoriasFiltradas.stream()
-                        .filter(a -> a.getGrupo().getAsesor() != null && a.getGrupo().getAsesor().getIdUsuario().equals(asesorId))
+                        .filter(a -> a.getGrupo() != null && a.getGrupo().getId() == grupoId)
                         .collect(Collectors.toList());
             }
             
-            if (aprendiz != null && !aprendiz.trim().isEmpty()) {
-                asesoriasFiltradas = asesoriasFiltradas.stream()
-                        .filter(a -> {
-                            // Verificar si hay aprendices en el grupo que coincidan con el nombre buscado
-                            Grupo grupo = a.getGrupo();
-                            if (grupo != null && grupo.getAprendices() != null) {
-                                return grupo.getAprendices().stream()
-                                        .anyMatch(ga -> {
-                                            Usuario u = ga.getAprendiz();
-                                            if (u != null) {
-                                                String nombreCompleto = (u.getNombres() + " " + u.getPrimerA() + " " + u.getSegundoA()).toLowerCase();
-                                                return nombreCompleto.contains(aprendiz.toLowerCase());
-                                            }
-                                            return false;
-                                        });
-                            }
-                            return false;
-                        })
-                        .collect(Collectors.toList());
+            if (idUsuario != null && !idUsuario.trim().isEmpty()) {
+                Long idUsuarioLong;
+                try {
+                    idUsuarioLong = Long.parseLong(idUsuario.trim());
+                    asesoriasFiltradas = asesoriasFiltradas.stream()
+                            .filter(a -> {
+                                Grupo grupo = a.getGrupo();
+                                if (grupo == null) return false;
+                                
+                                // Buscar en el asesor del grupo
+                                if (grupo.getAsesor() != null && grupo.getAsesor().getIdUsuario().equals(idUsuarioLong)) {
+                                    return true;
+                                }
+                                
+                                // Buscar en los aprendices del grupo
+                                if (grupo.getAprendices() != null) {
+                                    return grupo.getAprendices().stream()
+                                            .anyMatch(ga -> {
+                                                Usuario u = ga.getAprendiz();
+                                                return u != null && u.getIdUsuario().equals(idUsuarioLong);
+                                            });
+                                }
+                                
+                                return false;
+                            })
+                            .collect(Collectors.toList());
+                } catch (NumberFormatException e) {
+                    // Si el ID no es un número válido, no aplicar filtro
+                    System.out.println("ID de usuario no válido para PDF: " + idUsuario);
+                }
             }
             
             if (fechaDesde != null && !fechaDesde.isEmpty()) {
@@ -565,16 +610,16 @@ public class CoordinadorControlador {
             if (completada != null && !completada.isEmpty() && !completada.equals("todos")) {
                 document.add(new Paragraph("Completada: " + (completada.equals("si") ? "Sí" : "No"), normalFont));
             }
-            if (asesorId != null && asesorId > 0) {
-                // Buscar el nombre del asesor
-                Usuario asesor = asesoriasFiltradas.stream()
-                        .filter(a -> a.getGrupo().getAsesor().getIdUsuario().equals(asesorId))
-                        .map(a -> a.getGrupo().getAsesor())
+            if (grupoId != null && grupoId > 0) {
+                // Buscar el nombre del grupo
+                Grupo grupo = asesoriasFiltradas.stream()
+                        .filter(a -> a.getGrupo() != null && a.getGrupo().getId() == grupoId)
+                        .map(a -> a.getGrupo())
                         .findFirst()
                         .orElse(null);
                 
-                String nombreAsesor = asesor != null ? (asesor.getNombres() + " " + asesor.getPrimerA()) : "No encontrado";
-                document.add(new Paragraph("Asesor: " + nombreAsesor, normalFont));
+                String nombreGrupo = grupo != null ? grupo.getNombre() : "No encontrado";
+                document.add(new Paragraph("Grupo: " + nombreGrupo, normalFont));
             }
             if (fechaDesde != null && !fechaDesde.isEmpty()) {
                 document.add(new Paragraph("Fecha desde: " + fechaDesde, normalFont));
@@ -684,17 +729,28 @@ public class CoordinadorControlador {
             gruposPorComponente.put(nombreComponente, grupos.size());
         }
         
+        // Obtener lista de programas
+        List<String> programas = programaServicio.listarNombresProgramas();
+        
         model.addAttribute("coordinador", coordinador);
         model.addAttribute("componentesDisponibles", componentesDisponibles);
         model.addAttribute("gruposPorComponente", gruposPorComponente);
+        model.addAttribute("programas", programas);
         
         return "coordinador/componentes";
     }
     
     @PostMapping("/coordinador/componentes/crear")
-    public String crearComponente(@RequestParam("nombreComponente") String nombreComponente, 
-                                 HttpSession session,
-                                 RedirectAttributes redirectAttributes) {
+    public String crearComponente(
+            @RequestParam("nombreComponente") String nombreComponente,
+            @RequestParam(value = "tipoProgramas", required = false, defaultValue = "unico") String tipoProgramas,
+            @RequestParam(value = "programa", required = false) String programaSeleccionado,
+            @RequestParam(value = "programas", required = false) List<String> programasSeleccionados,
+            @RequestParam(value = "nuevoPrograma", required = false) String nuevoPrograma,
+            @RequestParam(value = "implementarProgramas", required = false) Boolean implementarProgramas,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+        
         if (nombreComponente == null || nombreComponente.trim().isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "El nombre del componente no puede estar vacío");
             return "redirect:/coordinador/componentes";
@@ -723,10 +779,278 @@ public class CoordinadorControlador {
         Componente componente = new Componente();
         componente.setNombre(nombreComponente.trim());
         componente.setUsuario(coordinador);
+        
+        // Procesar la lista de programas según el tipo de selección
+        List<String> nombresProgramas = new ArrayList<>();
+        
+        // Si se seleccionó un único programa
+        if ("unico".equals(tipoProgramas) && programaSeleccionado != null && !programaSeleccionado.isEmpty()) {
+            nombresProgramas.add(programaSeleccionado);
+        }
+        
+        // Si se seleccionaron múltiples programas
+        if ("multiple".equals(tipoProgramas) && programasSeleccionados != null && !programasSeleccionados.isEmpty()) {
+            nombresProgramas.addAll(programasSeleccionados);
+        }
+        
+        // Procesar el nuevo programa si se ha especificado
+        if (nuevoPrograma != null && !nuevoPrograma.trim().isEmpty()) {
+            // Verificar si ya existe el programa
+            if (programaServicio.existePorNombre(nuevoPrograma.trim())) {
+                redirectAttributes.addFlashAttribute("error", "El programa '" + nuevoPrograma.trim() + "' ya existe. Por favor, selecciónelo de la lista en lugar de crearlo nuevamente.");
+                return "redirect:/coordinador/componentes";
+            } else {
+                // Crear nuevo programa
+                Programa programa = new Programa();
+                programa.setId(generarIdPrograma()); // Generar un ID único
+                programa.setNombre(nuevoPrograma.trim());
+                programaServicio.guardar(programa);
+                
+                // Añadir el nuevo programa a la lista
+                nombresProgramas.add(nuevoPrograma.trim());
+            }
+        }
+        
+        // Asociar programas al componente
+        if (!nombresProgramas.isEmpty()) {
+            List<Programa> programas = new ArrayList<>();
+            for (String nombrePrograma : nombresProgramas) {
+                List<Programa> programasEncontrados = programaServicio.buscarPorNombre(nombrePrograma);
+                if (!programasEncontrados.isEmpty()) {
+                    programas.add(programasEncontrados.get(0));
+                }
+            }
+            componente.setProgramas(programas);
+        }
+        
         componenteServicio.guardarComponente(componente);
         
-        redirectAttributes.addFlashAttribute("mensaje", "Componente creado exitosamente");
+        // Mensaje personalizado según la implementación
+        String mensaje = "Componente creado exitosamente";
+        if (Boolean.TRUE.equals(implementarProgramas) && !nombresProgramas.isEmpty()) {
+            mensaje += " e implementado a los programas: " + String.join(", ", nombresProgramas);
+        }
+        
+        redirectAttributes.addFlashAttribute("mensaje", mensaje);
         return "redirect:/coordinador/componentes";
+    }
+    
+    // Método para generar un ID único para un nuevo programa
+    private Long generarIdPrograma() {
+        // Obtener el máximo ID existente y sumar 1
+        return programaServicio.listarProgramas().stream()
+                .mapToLong(Programa::getId)
+                .max()
+                .orElse(0) + 1;
+    }
+
+    @PostMapping("/coordinador/inactivar-usuario")
+    public String inactivarUsuario(
+            @RequestParam("idUsuario") Long idUsuario,
+            @RequestParam("accion") String accion,
+            @RequestParam("motivo") String motivo,
+            RedirectAttributes redirectAttributes) {
+        
+        try {
+            // Obtener el usuario
+            Optional<Usuario> optUsuario = usuarioServicio.obtenerUsuarioPorId(idUsuario);
+            if (!optUsuario.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Usuario no encontrado");
+                return "redirect:/coordinador/usuarios";
+            }
+            
+            Usuario usuario = optUsuario.get();
+            
+            // Actualizar el estado del usuario
+            if ("inactivar".equals(accion)) {
+                usuario.setEstado("Inactivo");
+                redirectAttributes.addFlashAttribute("mensaje", "Usuario inactivado correctamente");
+            } else {
+                usuario.setEstado("Activo");
+                redirectAttributes.addFlashAttribute("mensaje", "Usuario activado correctamente");
+            }
+            
+            // Guardar el usuario
+            usuarioServicio.guardarUsuario(usuario);
+            
+            // Enviar correo al usuario
+            if (usuario.getCorreo() != null && !usuario.getCorreo().isEmpty()) {
+                String nombreCompleto = usuario.getNombres() + " " + usuario.getPrimerA();
+                
+                try {
+                    if ("inactivar".equals(accion)) {
+                        correoServicio.sendUserInactivationEmail(usuario.getCorreo(), nombreCompleto, motivo);
+                    } else {
+                        correoServicio.sendUserActivationEmail(usuario.getCorreo(), nombreCompleto, motivo);
+                    }
+                } catch (Exception e) {
+                    // Registrar error pero no interrumpir el flujo
+                    System.err.println("Error al enviar correo: " + e.getMessage());
+                }
+            }
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error al procesar la solicitud: " + e.getMessage());
+        }
+        
+        return "redirect:/coordinador/usuarios";
+    }
+
+    @GetMapping("/coordinador/asesorias/{asesoriaId}/aprendices")
+    @ResponseBody
+    public List<Map<String, Object>> obtenerAprendicesPorAsesoria(@PathVariable int asesoriaId) {
+        // Obtener la asesoría
+        Optional<Asesoria> optAsesoria = asesoriaServicio.obtenerPorId(asesoriaId);
+        if (!optAsesoria.isPresent()) {
+            return Collections.emptyList();
+        }
+        
+        Asesoria asesoria = optAsesoria.get();
+        Grupo grupo = asesoria.getGrupo();
+        
+        if (grupo == null || grupo.getAprendices() == null || grupo.getAprendices().isEmpty()) {
+            return Collections.emptyList();
+        }
+        
+        List<Map<String, Object>> resultado = new ArrayList<>();
+        
+        for (GrupoAprendiz grupoAprendiz : grupo.getAprendices()) {
+            Usuario aprendiz = grupoAprendiz.getAprendiz();
+            if (aprendiz != null) {
+                Map<String, Object> aprendizData = new HashMap<>();
+                aprendizData.put("idUsuario", aprendiz.getIdUsuario());
+                aprendizData.put("nombreCompleto", aprendiz.getNombres() + " " + aprendiz.getPrimerA() + " " + aprendiz.getSegundoA());
+                
+                // Buscar si el aprendiz asistió a la asesoría
+                List<Asistencia> asistencias = asistenciaRepositorio.findByUsuarioIdUsuarioAndFecha(
+                        aprendiz.getIdUsuario(), asesoria.getFecha());
+                
+                boolean asistio = !asistencias.isEmpty() && asistencias.stream()
+                        .anyMatch(a -> a.getAsesoria().getId() == asesoriaId && Boolean.TRUE.equals(a.getAsistio()));
+                
+                aprendizData.put("asistio", asistio);
+                resultado.add(aprendizData);
+            }
+        }
+        
+        return resultado;
+    }
+    
+    @GetMapping("/coordinador/asesorias/{asesoriaId}/asistencia/pdf")
+    public ResponseEntity<byte[]> generarPdfAsistencia(@PathVariable int asesoriaId) {
+        try {
+            // Obtener la asesoría
+            Optional<Asesoria> optAsesoria = asesoriaServicio.obtenerPorId(asesoriaId);
+            if (!optAsesoria.isPresent()) {
+                return ResponseEntity.notFound().build();
+            }
+            
+            Asesoria asesoria = optAsesoria.get();
+            Grupo grupo = asesoria.getGrupo();
+            
+            if (grupo == null) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            // Crear el documento PDF
+            Document document = new Document(PageSize.A4);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PdfWriter.getInstance(document, baos);
+            
+            document.open();
+            
+            // Título del reporte
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 16);
+            Font subtitleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 10);
+            
+            Paragraph title = new Paragraph("Reporte de Asistencia", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            document.add(title);
+            
+            // Información de la asesoría
+            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("Información de la Asesoría:", subtitleFont));
+            document.add(new Paragraph("ID: " + asesoria.getId(), normalFont));
+            document.add(new Paragraph("Grupo: " + grupo.getNombre(), normalFont));
+            
+            Usuario asesor = grupo.getAsesor();
+            String nombreAsesor = asesor != null ? (asesor.getNombres() + " " + asesor.getPrimerA()) : "No asignado";
+            document.add(new Paragraph("Asesor: " + nombreAsesor, normalFont));
+            
+            String fechaFormateada = asesoria.getFecha() != null ? asesoria.getFechaFormateada() : "N/A";
+            document.add(new Paragraph("Fecha: " + fechaFormateada, normalFont));
+            
+            String horaFormateada = asesoria.getHora() != null ? asesoria.getHoraFormateada() : "N/A";
+            document.add(new Paragraph("Hora: " + horaFormateada, normalFont));
+            
+            // Tabla de asistencia
+            document.add(new Paragraph("\n"));
+            document.add(new Paragraph("Asistencia de Aprendices:", subtitleFont));
+            
+            PdfPTable table = new PdfPTable(3); // 3 columnas
+            table.setWidthPercentage(100);
+            
+            // Encabezados de la tabla
+            PdfPCell cell = new PdfPCell(new Phrase("ID", subtitleFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            
+            cell = new PdfPCell(new Phrase("Nombre", subtitleFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            
+            cell = new PdfPCell(new Phrase("Asistencia", subtitleFont));
+            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(cell);
+            
+            // Obtener los aprendices y su asistencia
+            if (grupo.getAprendices() != null && !grupo.getAprendices().isEmpty()) {
+                for (GrupoAprendiz grupoAprendiz : grupo.getAprendices()) {
+                    Usuario aprendiz = grupoAprendiz.getAprendiz();
+                    if (aprendiz != null) {
+                        table.addCell(String.valueOf(aprendiz.getIdUsuario()));
+                        table.addCell(aprendiz.getNombres() + " " + aprendiz.getPrimerA() + " " + aprendiz.getSegundoA());
+                        
+                        // Buscar si el aprendiz asistió a la asesoría
+                        List<Asistencia> asistencias = asistenciaRepositorio.findByUsuarioIdUsuarioAndFecha(
+                                aprendiz.getIdUsuario(), asesoria.getFecha());
+                        
+                        boolean asistio = !asistencias.isEmpty() && asistencias.stream()
+                                .anyMatch(a -> a.getAsesoria().getId() == asesoriaId && Boolean.TRUE.equals(a.getAsistio()));
+                        
+                        table.addCell(asistio ? "Asistió" : "No asistió");
+                    }
+                }
+            } else {
+                PdfPCell noDataCell = new PdfPCell(new Phrase("No hay aprendices asignados a este grupo", normalFont));
+                noDataCell.setColspan(3);
+                noDataCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                table.addCell(noDataCell);
+            }
+            
+            document.add(table);
+            
+            // Agregar pie de página con la fecha de generación
+            document.add(new Paragraph("\n"));
+            Paragraph footer = new Paragraph("Reporte generado: " + new Date().toString(), normalFont);
+            footer.setAlignment(Element.ALIGN_RIGHT);
+            document.add(footer);
+            
+            document.close();
+            
+            // Configurar la respuesta HTTP con el PDF
+            byte[] pdfBytes = baos.toByteArray();
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=asistencia_asesoria_" + asesoriaId + ".pdf");
+            
+            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
+            
+        } catch (DocumentException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

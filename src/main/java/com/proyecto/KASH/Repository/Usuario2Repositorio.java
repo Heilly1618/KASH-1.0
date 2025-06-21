@@ -43,4 +43,10 @@ public interface Usuario2Repositorio extends JpaRepository<Usuario, Long> {
 
     Optional<Usuario> findByUsuario(String usuario);
 
+    @Query("SELECT DISTINCT g.nombre FROM Grupo g")
+    List<String> findDistinctComponentes();
+
+    @Query("SELECT g.nombre, COUNT(g) FROM Grupo g GROUP BY g.nombre")
+    List<Object[]> countGruposPorComponente();
+
 }

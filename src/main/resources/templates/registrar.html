@@ -101,6 +101,14 @@
                 </select>
             </label>
 
+            <label>
+                <p>Programa:</p>
+                <select th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" th:field="*{programa}" required>
+                    <option value="">Seleccionar programa</option>
+                    <option th:each="prog : ${programas}" th:value="${prog}" th:text="${prog}"></option>
+                </select>
+            </label>
+
             <h4>DATOS DE CONTACTO</h4>
 
             <label>
@@ -188,18 +196,49 @@
         </script>
         <script>
             document.addEventListener("DOMContentLoaded", function () {
-                const etapaSelect = document.getElementById("etapa");
-                const trimestreSelect = document.getElementById("trimestre");
+                const etapaSelect = document.querySelector('[name="etapa"]');
+                const trimestreSelect = document.querySelector('[name="trimestre"]');
+                const opcionNA = Array.from(trimestreSelect.options).find(option => option.value === "N/A");
 
-                etapaSelect.addEventListener("change", function () {
-                    if (this.value === "etapa productiva") {
+                // Función para actualizar el estado del trimestre
+                function actualizarTrimestre() {
+                    if (etapaSelect.value === "etapa productiva") {
+                        // Para etapa productiva, seleccionar N/A y deshabilitar
                         trimestreSelect.value = "N/A";
                         trimestreSelect.disabled = true;
-                    } else {
+                        // Asegurar que la opción N/A esté visible
+                        opcionNA.hidden = false;
+                    } else if (etapaSelect.value === "etapa lectiva") {
+                        // Para etapa lectiva, habilitar y ocultar la opción N/A
                         trimestreSelect.disabled = false;
+                        opcionNA.hidden = true;
+                        // Si tenía N/A seleccionado, cambiarlo
                         if (trimestreSelect.value === "N/A") {
-                            trimestreSelect.value = "";
+                            trimestreSelect.value = "1";
                         }
+                    } else {
+                        // Para otros casos o sin selección
+                        trimestreSelect.disabled = false;
+                        opcionNA.hidden = false;
+                    }
+                }
+
+                // Inicializar el estado
+                actualizarTrimestre();
+
+                // Actualizar cuando cambie la etapa
+                etapaSelect.addEventListener("change", actualizarTrimestre);
+                
+                // Validar antes de enviar el formulario
+                document.getElementById("myForm").addEventListener("submit", function(event) {
+                    if (etapaSelect.value === "etapa lectiva" && trimestreSelect.value === "N/A") {
+                        alert("Si estás en etapa lectiva, debes seleccionar un trimestre válido.");
+                        event.preventDefault();
+                    }
+                    
+                    // Asegurar que el campo trimestre esté habilitado para enviar su valor
+                    if (trimestreSelect.disabled) {
+                        trimestreSelect.disabled = false;
                     }
                 });
             });

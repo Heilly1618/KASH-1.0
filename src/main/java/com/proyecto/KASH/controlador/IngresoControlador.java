@@ -27,6 +27,12 @@ public class IngresoControlador {
         Usuario usuarioEncontrado = servicio.findByUsuario(usuario).orElse(null);
 
         if (usuarioEncontrado != null && BCrypt.checkpw(pass, usuarioEncontrado.getPass())) {
+            // Verificar si el usuario está activo
+            if (!"activo".equalsIgnoreCase(usuarioEncontrado.getEstado())) {
+                redirectAttributes.addFlashAttribute("mensajeError", "Su cuenta se encuentra inactiva. Contacte al administrador.");
+                return "redirect:/";
+            }
+            
             String rol = usuarioEncontrado.getRolSeleccionado();
             session.setAttribute("usuario", usuarioEncontrado);
 
@@ -35,7 +41,7 @@ public class IngresoControlador {
 
             switch (rol.trim().toLowerCase()) {
                 case "coordinador":
-                    return "redirect:/coordinador";
+                    return "redirect:/coordinador/usuarios";
                 case "aprendiz":
                     return "redirect:/aprendiz/asesorias";
                 case "asesor":

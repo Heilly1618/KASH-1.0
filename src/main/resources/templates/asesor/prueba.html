@@ -7,127 +7,182 @@
         <link rel="stylesheet" href="../../css/asesor/prueba.css">
         <link rel="stylesheet" href="../../css/help-modal.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    </head>
-    <body>
-        <!-- Scripts -->
-
+        <script src="../../js/help-modal.js"></script>
+        <script src="../../js/add-help-modal.js"></script>
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
+            // Función definida explícitamente en el ámbito global
+            window.mostrarPruebasPorGrupo = function (grupoId) {
+                try {
+                    console.log("Mostrando pruebas para grupo:", grupoId);
+
+                    // Mostrar info de depuración temporalmente
+                    const debugInfo = document.getElementById('debug-info');
+                    if (debugInfo) {
+                        debugInfo.style.display = 'block';
+                        setTimeout(() => {
+                            debugInfo.style.display = 'none';
+                        }, 5000); // Ocultar después de 5 segundos
+                    }
+
+                    // Ocultar todos los bloques de pruebas
+                    document.querySelectorAll('[id^="pruebas-grupo-"]')
+                            .forEach(d => d.style.display = 'none');
+
+                    // Mostrar el bloque correspondiente al grupo seleccionado
+                    const blockId = 'pruebas-grupo-' + grupoId;
+                    console.log("Buscando el elemento con ID:", blockId);
+                    const block = document.getElementById(blockId);
+
+                    if (block) {
+                        console.log("Elemento encontrado, mostrando...");
+                        block.style.display = 'block';
+
+                        // Desplazarse suavemente hasta la sección de pruebas
+                        block.scrollIntoView({behavior: 'smooth', block: 'start'});
+                    } else {
+                        console.error('No se encontró el bloque de pruebas para el grupo:', grupoId);
+                        alert("No hay pruebas disponibles para este grupo o ha ocurrido un error al mostrarlas.");
+                    }
+                } catch (error) {
+                    console.error("Error al mostrar pruebas:", error);
+                    alert("Ocurrió un error al mostrar las pruebas. Por favor, intente nuevamente.");
+                }
+            };
+
+            document.addEventListener('DOMContentLoaded', function () {
                 // Configuración del modal de ayuda
                 addHelpModal('Ayuda - Gestión de Pruebas', [
-                    { title: 'Creación', description: 'Cree nuevas pruebas para evaluar a los aprendices de sus grupos.' },
-                    { title: 'Asignación', description: 'Asigne pruebas a grupos específicos con fecha límite para su realización.' },
-                    { title: 'Resultados', description: 'Visualice el rendimiento de los aprendices y sus resultados.' }
+                    {title: 'Creación', description: 'Cree nuevas pruebas para evaluar a los aprendices de sus grupos.'},
+                    {title: 'Asignación', description: 'Asigne pruebas a grupos específicos con fecha límite para su realización.'},
+                    {title: 'Resultados', description: 'Visualice el rendimiento de los aprendices y sus resultados.'}
                 ], 'Las pruebas son una herramienta importante para evaluar el avance de los aprendices en los temas tratados durante las asesorías.');
-                
+
                 // Manejo global de eventos de ventana para todos los modales
-                window.addEventListener('click', function(event) {
+                window.onclick = function (event) {
                     // Modal de perfil
                     var modalPerfil = document.getElementById('modalPerfil');
                     if (modalPerfil && event.target === modalPerfil) {
                         cerrarModalPerfil();
                     }
-                    
+
                     // Modal de prueba
                     var modalPrueba = document.getElementById('modalPrueba');
                     if (modalPrueba && event.target === modalPrueba) {
                         cerrarModalPrueba();
                     }
-                    
+
                     // Modales de aprendices (si hay alguno abierto)
                     document.querySelectorAll('[id^="modalApr-"]').forEach(modal => {
                         if (event.target === modal) {
                             modal.style.display = 'none';
                         }
                     });
-                });
+                };
             });
-            
-            function mostrarPruebasPorGrupo(grupoId) {
-                document.querySelectorAll('[id^="pruebas-grupo-"]')
-                        .forEach(d => d.style.display = 'none');
-                const block = document.getElementById('pruebas-grupo-' + grupoId);
-                if (block)
-                    block.style.display = 'block';
-            }
 
             function mostrarAprendicesEnModal(pruebaId) {
                 console.log("Abriendo modal para prueba:", pruebaId);
-                const modal = document.getElementById('modalApr-' + pruebaId);
-                if (modal) {
-                    modal.style.display = 'flex';
-                } else {
-                    console.warn("No se encontró el modal con ID:", 'modalApr-' + pruebaId);
-                }
+                document.getElementById('modalApr-' + pruebaId).style.display = 'block';
             }
 
             function cerrarAprModal(pruebaId) {
                 document.getElementById('modalApr-' + pruebaId).style.display = 'none';
             }
-            
-            function seleccionarGrupo(selectElement) {
-                const grupoId = selectElement.value;
-                if (grupoId) {
-                    document.getElementById('grupoInput').value = grupoId;
-                    abrirModalPrueba();
+
+            window.seleccionarGrupo = function (selectElement) {
+                if (selectElement.value) {
+                    abrirModalPrueba(selectElement.value);
                 }
             }
-            
-            function abrirModalPrueba() {
+
+            function abrirModalPrueba(grupoId) {
+                document.getElementById('grupoInput').value = grupoId;
                 document.getElementById('modalPrueba').style.display = 'block';
+                document.getElementById('contenedorPreguntas').innerHTML = '';
+                document.getElementById('totalPreguntas').value = 0;
+                agregarPregunta(); // Agregamos al menos una pregunta al inicio
             }
-            
+
             function cerrarModalPrueba() {
                 document.getElementById('modalPrueba').style.display = 'none';
             }
-            
-            function cerrarModalVerPruebas() {
-                const modal = document.getElementById("modalVerPruebas");
-                modal.classList.remove("mostrar");
+
+            function agregarPregunta() {
+                const contenedor = document.getElementById('contenedorPreguntas');
+                const total = parseInt(document.getElementById('totalPreguntas').value) + 1;
+                document.getElementById('totalPreguntas').value = total;
+
+                const divPregunta = document.createElement('div');
+                divPregunta.className = 'pregunta';
+                divPregunta.innerHTML = `
+                    <h3>Pregunta ${total}</h3>
+                    <input type="hidden" name="preguntas[${total - 1}].id" value="0">
+                    <label>Enunciado:</label>
+                    <input type="text" name="preguntas[${total - 1}].texto" class="input-estilizado" required>
+                    <button type="button" class="btn-eliminar-pregunta" onclick="eliminarPregunta(this)">
+                        <i class="fas fa-trash"></i> Eliminar
+                    </button>
+                    <div class="opciones">
+                        <label>Opción A:</label>
+                        <input type="text" name="preguntas[${total - 1}].opcionA" class="input-estilizado" required>
+                        <label>Opción B:</label>
+                        <input type="text" name="preguntas[${total - 1}].opcionB" class="input-estilizado" required>
+                        <label>Opción C:</label>
+                        <input type="text" name="preguntas[${total - 1}].opcionC" class="input-estilizado" required>
+                        <label>Respuesta correcta:</label>
+                        <select name="Correcta_${total - 1}" class="input-estilizado" required>
+                            <option value="0">A</option>
+                            <option value="1">B</option>
+                            <option value="2">C</option>
+                        </select>
+                    </div>
+                `;
+                contenedor.appendChild(divPregunta);
+            }
+
+            function eliminarPregunta(boton) {
+                // Solo permitir eliminar si hay más de una pregunta
+                const totalPreguntas = document.querySelectorAll('.pregunta').length;
+                if (totalPreguntas > 1) {
+                    const pregunta = boton.parentNode;
+                    pregunta.parentNode.removeChild(pregunta);
+                    // Recalcular los índices
+                    recalcularIndices();
+                } else {
+                    alert("Debe haber al menos una pregunta en la prueba");
+                }
+            }
+
+            function recalcularIndices() {
+                const preguntas = document.querySelectorAll('.pregunta');
+                document.getElementById('totalPreguntas').value = preguntas.length;
+
+                for (let i = 0; i < preguntas.length; i++) {
+                    const pregunta = preguntas[i];
+                    const h3 = pregunta.querySelector('h3');
+                    h3.textContent = `Pregunta ${i + 1}`;
+
+                    const inputs = pregunta.querySelectorAll('input, select');
+                    inputs.forEach(input => {
+                        if (input.name.includes('preguntas[')) {
+                            input.name = input.name.replace(/preguntas\[\d+\]/, `preguntas[${i}]`);
+                        } else if (input.name.includes('Correcta_')) {
+                            input.name = input.name.replace(/Correcta_\d+/, `Correcta_${i}`);
+                        }
+                    });
+                }
             }
 
             function abrirModalPerfil() {
                 document.getElementById('modalPerfil').style.display = 'block';
             }
-            
+
             function cerrarModalPerfil() {
                 document.getElementById('modalPerfil').style.display = 'none';
             }
-            
-            let contadorPreguntas = 0;
-            function agregarPregunta() {
-                const cont = document.getElementById('contenedorPreguntas');
-                const div = document.createElement('div');
-                div.className = 'pregunta';
-                div.setAttribute('data-index', contadorPreguntas);
-                div.innerHTML = `
-                    <button type="button" class="btn-eliminar-pregunta" onclick="eliminarPregunta(this)">X</button>
-                    <label>Enunciado de la pregunta:</label>
-                    <input type="text" name="Pregunta_${contadorPreguntas}" class="input-estilizado" required><br><br>
-                    <label>Respuestas:</label><br>
-                    ${[0, 1, 2, 3].map(j => `
-                        <div class="respuesta">
-                            <input type="radio" name="Correcta_${contadorPreguntas}" value="${j}" required>
-                            <input type="text" name="respuesta_${contadorPreguntas}_${j}" placeholder="Respuesta ${j + 1}" required>
-                            <button type="button" class="btn-eliminar-respuesta" onclick="eliminarRespuesta(this)">X</button>
-                        </div>
-                    `).join('')}
-                `;
-                cont.appendChild(div);
-                contadorPreguntas++;
-                document.getElementById('totalPreguntas').value = contadorPreguntas;
-            }
-            
-            function eliminarPregunta(btn) {
-                btn.closest('.pregunta').remove();
-            }
-            
-            function eliminarRespuesta(btn) {
-                btn.closest('.respuesta').remove();
-            }
         </script>
-
-        <!-- Barra de navegación -->
+    </head>
+    <body>
         <div class="barra">
             <div class="selection">
                 <img class="icono" src="../../img/asesoria.png" alt="">
@@ -195,6 +250,7 @@
                             <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
                             <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
                             <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${asesor.programa}"></span></p>
                             <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
                             <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
                             <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
@@ -211,7 +267,6 @@
                         <option value="" disabled selected>Seleccione un grupo</option>
                         <option th:each="grupo : ${grupos}" th:value="${grupo.id}" th:text="${grupo.nombre}">Grupo</option>
                     </select>
-
                 </div>
             </div>
 
@@ -238,7 +293,7 @@
             <!-- Sección de grupos y resultados -->
             <div class="Grupos">
                 <h2 class="titulo-grupos">Resultados por grupo</h2>
-                <div class="grid-grupos">
+                <div class="grid-grupos" th:if="${!#maps.isEmpty(pruebasPorGrupo)}">
                     <div class="card-grupo" th:each="grupo : ${grupos}">
                         <div class="card-header">
                             <h3 th:text="${grupo.nombre}">Nombre del Grupo</h3>
@@ -248,62 +303,90 @@
                             <p th:if="${!#lists.isEmpty(pruebasPorGrupo[grupo.id])}">
                                 Cantidad de pruebas: <span th:text="${#lists.size(pruebasPorGrupo[grupo.id])}">0</span>
                             </p>
-                            <p th:if="${#lists.isEmpty(pruebasPorGrupo[grupo.id])}">
-                                Este grupo aún no tiene pruebas.
+                            <p th:unless="${!#lists.isEmpty(pruebasPorGrupo[grupo.id])}">
+                                No hay pruebas asignadas a este grupo.
                             </p>
-                            <div class="botones-card">
-                                <button th:onclick="|mostrarPruebasPorGrupo(${grupo.id})|" class="btn-asesorias">
-                                    Ver Resultados
-                                </button>
-                            </div>
-                            <!-- Contenedor oculto con pruebas -->
-                            <div th:id="${'pruebas-grupo-' + grupo.id}" style="display:none; margin-top:1em;">
-                                <div th:each="prueba : ${pruebasPorGrupo[grupo.id]}" class="prueba-item">
-                                    <p><strong>Prueba:</strong> <span th:text="${prueba.tema}">Nombre de Prueba</span></p>
-                                    <button type="button" class="btn-asesorias" th:onclick="'mostrarAprendicesEnModal(' + ${prueba.id} + ')'">
-                                        Ver respuestas de aprendices
-                                    </button>
-
-
-                                    <!-- Modal para esta prueba -->
-                                    <div th:id="'modalApr-' + ${prueba.id}" class="modal" style="display:none;">
-                                        <div class="modal-contenido-prueba">
-                                            <span class="cerrar-modal" th:onclick="'cerrarAprModal(' + ${prueba.id} + ')'">&times;</span>
-                                            <h3>Respuestas de Aprendices</h3>
-                                            <div th:if="${respuestasPorPrueba[prueba.id]} != null">
-                                                <div th:each="entry : ${respuestasPorPrueba[prueba.id].entrySet()}">
-                                                    <p><strong>Aprendiz:</strong>
-                                                        <span th:text="${entry.key.nombres + ' ' + entry.key.primerA + ' ' + entry.key.segundoA}"></span>
-                                                    </p>
-
-                                                    <ul>
-                                                        <li th:each="resp : ${entry.value}">
-                                                            <div>
-                                                                <strong>Pregunta:</strong> <span th:text="${resp.pregunta.enunciado}">[Pregunta]</span><br>
-                                                                <strong>Respuesta:</strong> <span th:text="${resp.respuestaSeleccionada.texto}">[Respuesta]</span>
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-
-                                                    <hr>
-                                                </div>
-                                            </div>
-                                            <div th:if="${respuestasPorPrueba[prueba.id]} == null || respuestasPorPrueba[prueba.id].isEmpty()">
-                                                <p>No hay respuestas para esta prueba.</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
                         </div>
+                        <div class="card-footer">
+                            <button class="btn-ver" th:onclick="'mostrarPruebasPorGrupo(' + ${grupo.id} + ')'">
+                                Ver Pruebas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de resultados de pruebas -->
+            <!-- Debug info -->
+            <div id="debug-info" style="display: none; background-color: #f8f8f8; padding: 10px; margin: 10px 0; border: 1px solid #ddd;">
+                <h3>Información de depuración</h3>
+                <div>Grupos disponibles: <span th:text="${pruebasPorGrupo != null ? #maps.size(pruebasPorGrupo) : 0}">0</span></div>
+                <div>IDs de grupos: 
+                    <span th:if="${pruebasPorGrupo != null}" th:each="entry : ${pruebasPorGrupo}" th:text="${entry.key} + ' '">id</span>
+                </div>
+            </div>
+
+            <div th:if="${pruebasPorGrupo != null}" th:each="grupoEntry : ${pruebasPorGrupo}" th:id="'pruebas-grupo-' + ${grupoEntry.key}" 
+                 class="pruebas-grupo" style="display: none;">
+                <h3>Pruebas del grupo: <span th:text="${grupoNombres != null and grupoNombres[grupoEntry.key] != null ? grupoNombres[grupoEntry.key] : 'Grupo ' + grupoEntry.key}"></span></h3>
+                <div class="tabla-container">
+                    <table class="tabla-pruebas">
+                        <thead>
+                            <tr>
+                                <th>Tema</th>
+                                <th>Fecha Inicio</th>
+                                <th>Fecha Fin</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="prueba : ${grupoEntry.value}">
+                                <td th:text="${prueba.tema}"></td>
+                                <td th:text="${prueba.fechaInicio}"></td>
+                                <td th:text="${prueba.fechaFin}"></td>
+                                <td>
+                                    <button class="btn-resultados" th:onclick="'mostrarAprendicesEnModal(' + ${prueba.id} + ')'">
+                                        Ver Resultados
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Modales de resultados por aprendiz -->
+            <div th:if="${todasLasPruebas != null}" th:each="prueba : ${todasLasPruebas}" th:id="'modalApr-' + ${prueba.id}" class="modal-apr">
+                <div class="modal-contenido-apr">
+                    <span class="cerrar" th:onclick="'cerrarAprModal(' + ${prueba.id} + ')'">×</span>
+                    <h3>Resultados: <span th:text="${prueba.tema != null ? prueba.tema : 'Sin título'}"></span></h3>
+                    <div class="tabla-container">
+                        <table class="tabla-resultados">
+                            <thead>
+                                <tr>
+                                    <th>Aprendiz</th>
+                                    <th>Estado</th>
+                                    <th>Calificación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${resultadosPorPrueba != null and resultadosPorPrueba[prueba.id] != null}" 
+                                    th:each="entrada : ${resultadosPorPrueba[prueba.id].entrySet()}">
+                                    <td th:text="${entrada.key.nombres + ' ' + entrada.key.primerA}">Nombre Aprendiz</td>
+                                    <td>Presentado</td>
+                                    <td>-</td>
+                                </tr>
+                                <tr th:unless="${resultadosPorPrueba != null and resultadosPorPrueba[prueba.id] != null}">
+                                    <td colspan="3">No hay resultados disponibles</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-        <script src="../../js/help-modal.js"></script>
-        <script src="../../js/add-help-modal.js"></script>
+        <!-- Scripts -->
+
     </body>
 </html>

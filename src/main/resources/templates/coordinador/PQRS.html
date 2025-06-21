@@ -9,6 +9,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/coordinador/PQRS.css"></link>
+        <link rel="stylesheet" href="../../css/help-modal.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
     <body>
@@ -126,10 +127,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             
             <!-- Botones de reportes -->
             <div class="reportes-container">
+                <button class="btn-generar-reporte" onclick="abrirModalReporte()">
+                    <i class="fas fa-file-pdf"></i> Generar reporte personalizado
+                </button>
                 <a th:href="@{/reporte/coordinador/generar-reporte-pqrs}" class="btn-generar-reporte" target="_blank">
                     <i class="fas fa-file-pdf"></i> Generar reporte PDF
                 </a>
-
             </div>
             
             <table>
@@ -233,34 +236,24 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 document.getElementById("filtro").value = "";
                 document.getElementById("tipo").value = "todos";
                 document.getElementById("estado").value = "todos";
-                document.forms[0].submit();
+                window.location.href = "/coordinador/PQRS";
             }
             
-            // Funciones para la ventana de ayuda
-            function showHelpModal() {
-                document.getElementById("helpModal").style.display = "block";
+            // Funciones para el modal de reporte
+            function abrirModalReporte() {
+                document.getElementById('modalReporte').style.display = 'flex';
             }
-            
-            function closeHelpModal() {
-                document.getElementById("helpModal").style.display = "none";
+
+            function cerrarModalReporte() {
+                document.getElementById('modalReporte').style.display = 'none';
             }
-            
-            // Mostrar la ayuda automáticamente al cargar la página
-            window.onload = function() {
-                setTimeout(function() {
-                    showHelpModal();
-                    // Cerrar automáticamente después de 60 segundos
-                    setTimeout(function() {
-                        closeHelpModal();
-                    }, 60000);
-                }, 1000);
-            };
 
             // Cerrar modales al hacer clic fuera de ellos
             window.onclick = function(event) {
                 var modalResponder = document.getElementById("modalResponder");
                 var modalPerfil = document.getElementById("modalPerfil");
                 var helpModal = document.getElementById("helpModal");
+                var modalReporte = document.getElementById("modalReporte");
                 
                 if (event.target == modalResponder) {
                     modalResponder.style.display = "none";
@@ -273,8 +266,58 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 if (event.target == helpModal) {
                     helpModal.style.display = "none";
                 }
+                
+                if (event.target == modalReporte) {
+                    modalReporte.style.display = "none";
+                }
             }
         </script>
+        
+        <script src="../../js/help-modal.js"></script>
+
+        <!-- Modal para reporte personalizado -->
+        <div id="modalReporte" class="modal" style="display:none;">
+            <div class="modal-content">
+                <span class="cerrar-modal" onclick="cerrarModalReporte()">&times;</span>
+                <h3 class="modal-title"><i class="fas fa-file-pdf"></i> Generar reporte personalizado</h3>
+                
+                <form id="formReportePersonalizado" method="post" th:action="@{/reporte/coordinador/generar-reporte-pqrs-personalizado}" target="_blank">
+                    <div class="reporte-section">
+                        <h4>Selecciona los campos a incluir:</h4>
+                        <div class="checkbox-group">
+                            <div class="checkbox-column">
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="id" checked> ID</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="nombre" checked> Nombre</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="email" checked> Email</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="tipo" checked> Tipo</label>
+                            </div>
+                            <div class="checkbox-column">
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="estado" checked> Estado</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="detalles" checked> Detalles</label>
+                                <label class="checkbox-item"><input type="checkbox" name="campos" value="fecha" checked> Fecha</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="reporte-section">
+                        <h4>Formato del reporte:</h4>
+                        <div class="tipo-reporte">
+                            <label class="radio-item"><input type="radio" name="tipo" value="pdf" checked> <i class="fas fa-file-pdf"></i> PDF</label>
+                            <label class="radio-item"><input type="radio" name="tipo" value="excel"> <i class="fas fa-file-excel"></i> Excel</label>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-generar-reporte">
+                            <i class="fas fa-download"></i> Generar reporte
+                        </button>
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalReporte()">
+                            <i class="fas fa-times"></i> Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
 
 </body>
 </html>

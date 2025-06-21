@@ -78,6 +78,7 @@
                             <p><strong>Tipo de documento:</strong> <span th:text="${aprendiz.tDocumento}"></span></p>
                             <p><strong>Número de documento:</strong> <span th:text="${aprendiz.idUsuario}"></span></p>
                             <p><strong>Rol:</strong> <span th:text="${aprendiz.rolSeleccionado}"></span></p>
+                            <p><strong>Programa:</strong> <span th:text="${aprendiz.programa}"></span></p>
                             <p><strong>Trimestre:</strong> <span th:text="${aprendiz.trimestre}"></span></p>
                             <p><strong>Correo:</strong> <span th:text="${aprendiz.correo}"></span></p>
                             <p><strong>Número de contacto:</strong> <span th:text="${aprendiz.numero}"></span></p>
@@ -143,6 +144,11 @@
                                     Ver detalles
                                 </a>
                                 <a class="btn-asesorias" href="/aprendiz/asesorias">Asesorías</a>
+                                
+                                <form th:action="@{/aprendiz/salirGrupo}" method="post" class="form-salir-grupo" onsubmit="return confirmarSalir(this)">
+                                    <input type="hidden" name="idGrupo" th:value="${grupo.idGrupo}" />
+                                    <button type="submit" class="btn-salir">Salir del grupo</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -235,6 +241,10 @@
 
             function confirmarIngreso(form) {
                 return confirm("¿Estás seguro de que deseas ingresar a este grupo?");
+            }
+
+            function confirmarSalir(form) {
+                return confirm("¿Estás seguro de que deseas salir de este grupo? Esta acción no se puede deshacer.");
             }
 
             function toggleFiltro(idFormulario) {

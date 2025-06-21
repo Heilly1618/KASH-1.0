@@ -430,58 +430,73 @@ button[type="submit"]:hover {
 /* Botones */
 .botones-card {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 10px;
     margin-top: 15px;
+    width: 100%;
 }
 
 .btn-detalles,
 .btn-asesorias {
-    background-color: #007BFF;
-    color: white;
-    border: none;
-    padding: 8px 12px;
+    display: inline-block;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
     text-decoration: none;
-    border-radius: 6px;
+    font-weight: 600;
     font-size: 14px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
+    width: 100%;
+}
+
+.btn-detalles {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ddd;
 }
 
 .btn-detalles:hover,
 .btn-asesorias:hover {
-    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Detalles de integrantes */
-.detalles-integrantes {
-    margin-top: 10px;
-    background-color: #f1f1f1;
-    padding: 10px;
-    border-radius: 6px;
-}
-
-.btn-asesorias,
-.btn-detalles {
-    display: inline-block;
-    text-align: center;
-    cursor: pointer;
-}
-
-.btn-asesorias:focus,
-.btn-detalles:focus {
-    outline: none;
-}
-
-button.btn-asesorias {
-    all: unset; /* Elimina estilos por defecto del <button> */
-    background-color: #007BFF;
+.btn-asesorias {
+    background-color: #03314b;
     color: white;
-    padding: 8px 12px;
-    border-radius: 6px;
+    border: none;
+}
+
+.btn-asesorias:hover,
+.btn-asesorias:focus {
+    background-color: #024663;
+}
+
+.btn-salir {
+    padding: 10px 15px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 5px;
     font-size: 14px;
-    transition: background-color 0.3s ease;
+    font-weight: 600;
     cursor: pointer;
-    text-align: center;
-    display: inline-block;
+    width: 100%;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.btn-salir:hover {
+    background-color: #c9302c;
+    transform: translateY(-2px);
+}
+
+.form-salir-grupo {
+    width: 100%;
+}
+
+/* Estilo para el botón de entrar al grupo */
+.form-entrar-grupo {
+    width: 100%;
 }
 
 /* Modal general */
@@ -624,7 +639,7 @@ button.btn-asesorias {
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    margin-top: 60px;
+    margin-top: 120px; /* Aumentado para dar más espacio */
     padding: 0 20px;
     flex-wrap: wrap; /* Para que se acomode bien en pantallas pequeñas */
 }
@@ -644,7 +659,7 @@ button.btn-asesorias {
     align-items: center;
     gap: 10px;
     padding: 0 20px;
-    margin-top: 60px; /* MÁS CORTO el espacio arriba */
+    margin-top: 120px; /* Aumentado para dar más espacio */
     background-color: #f0f4f8;
     border-radius: 12px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);

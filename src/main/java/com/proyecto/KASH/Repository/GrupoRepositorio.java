@@ -49,7 +49,8 @@ public interface GrupoRepositorio extends JpaRepository<Grupo, Integer> {
             + "LOWER(g.asesor.nombres) LIKE LOWER(CONCAT('%', :filtro, '%')))")
     List<Grupo> findGruposDisponiblesPorFiltro(String filtro);
 
-    @Query("SELECT g FROM Grupo g WHERE g.asesor IS NULL")
+    @Query("SELECT g FROM Grupo g WHERE g.asesor IS NULL AND g.nombre NOT IN " +
+           "(SELECT DISTINCT g2.nombre FROM Grupo g2 JOIN Asesoria a ON g2.id = a.grupo.id WHERE a.estado = 'Activa')")
     List<Grupo> findGruposSinAsesor();
 
     public List<Grupo> findGruposByAsesor(Usuario idUsuario);
