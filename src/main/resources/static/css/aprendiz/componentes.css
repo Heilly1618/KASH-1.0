@@ -13,8 +13,8 @@ body {
 }
 
 .barra {
-    width: 60px; 
-    background-color:rgb(4, 55, 77);
+    width: 60px;
+    background-color: rgb(4, 55, 77);
     color: white;
     height: 100vh;
     display: flex;
@@ -25,12 +25,9 @@ body {
     transition: width 0.3s ease;
     z-index: 2;
 }
-.barra:hover {
-    width: 200px; 
-}
 
-.barra:hover .link {
-    display: inline; 
+.barra:hover {
+    width: 200px;
 }
 
 .barra a {
@@ -48,8 +45,8 @@ body {
 
 .selection {
     display: flex;
-    flex-direction: row; 
-    align-items: center; 
+    flex-direction: row;
+    align-items: center;
     width: 100%;
     margin-bottom: 20px;
     transition: background-color 0.3s ease, transform 0.3s ease;
@@ -59,13 +56,13 @@ body {
 
 .selection:hover {
     background-color: rgb(5, 35, 48);
-    transform: translateX(10px); /* Desplazar el elemento hacia la derecha */
+    transform: translateX(10px);
 }
 
 .selection .link {
     display: none;
-    margin-left: 5px; 
-    white-space: nowrap; 
+    margin-left: 5px;
+    white-space: nowrap;
 }
 
 .icono {
@@ -76,19 +73,60 @@ body {
 }
 
 .icono:hover {
-    transform: rotate(20deg); 
+    transform: rotate(20deg);
 }
 
-.barra.expanded .link {
-    display: inline; 
+.barra {
+    width: 60px;
+    transition: width 0.3s ease;
 }
 
-.barra.expanded {
-    width: 200px; 
+.barra:hover {
+    width: 200px;
+}
+
+.barra:hover .cerrar_sesion {
+    display: block;
+}
+
+.barra .cerrar_sesion {
+    display: none;
+}
+
+.btn-cerrar-sesion {
+    background-color: rgb(4, 55, 77);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.btn-cerrar-sesion:hover {
+    background-color: rgb(5, 35, 48);
+}
+
+.barra {
+    width: 60px;
+    transition: width 0.3s ease;
+}
+
+.barra:hover {
+    width: 200px;
+}
+
+.barra:hover .link {
+    display: inline;
 }
 
 .cuerpo {
-    margin-left: 60px; 
+    margin-left: 60px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -100,15 +138,17 @@ header {
     padding: 15px;
     position: fixed;
     top: 0;
-    left: 60px; 
-    z-index: 1; 
-    background-color: rgb(57,169,0);
+    left: 60px;
+    z-index: 1;
+    background-color: #03314b;
     height: 70px;
     justify-content: space-between;
     display: flex;
     align-items: center;
 }
-
+header h1, h2{
+    Color: white;
+}
 .logo {
     display: flex;
 }
@@ -146,31 +186,103 @@ section {
 .div-container {
     margin-top: 10px;
 }
-.cerrar_sesion {
-    display: none; /* Ocultar el botón por defecto */
-    margin-left: 5px;
-    white-space: nowrap;
+
+.componente {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    margin: 0 auto;
+    margin-top: 70px;
 }
 
-.barra:hover .cerrar_sesion {
-    display: block; /* Mostrar el botón cuando la barra esté en hover */
+.componente h2 {
+    font-size: 24px;
+    margin-bottom: 10px;
 }
 
-.btn-cerrar-sesion {
-    background-color: rgb(4, 55, 77);
+.componente p {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.componente input {
+    padding: 10px;
+    font-size: 16px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.componente button {
+    background-color: #2a3d66;
     color: white;
-    padding: 10px 20px; /* Ajustar el padding */
+    padding: 12px 20px;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
-    text-decoration: none;
-    display: block;
-    width: 100%; /* Hacer que el botón ocupe el ancho completo */
-    text-align: center;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    font-size: 18px;
+    width: 100%;
 }
 
-.btn-cerrar-sesion:hover {
-    background-color: rgb(5, 35, 48);
+.componente button:hover {
+    background-color: #1e2b44;
+}
+
+/* Tabla de Componentes */
+.componente2 {
+    margin-top: 40px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    margin: 0 auto;
+}
+
+.componente2 h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    font-size: 16px;
+    border-bottom: 1px solid #ccc;
+}
+
+th {
+    background-color: #f1f1f1;
+}
+
+button {
+    background-color: #e63946;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #d13d3d;
+}
+
+.acciones {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.columna-accion {
+    display: inline-block;
+    padding: 0 10px;
 }

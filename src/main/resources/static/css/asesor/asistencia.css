@@ -102,11 +102,15 @@ header {
     top: 0;
     left: 60px; 
     z-index: 1; 
-    background-color: rgb(57,169,0);
+    background-color: #03314b;
     height: 70px;
     justify-content: space-between;
     display: flex;
     align-items: center;
+}
+
+header h1, h2{
+    Color: white;
 }
 
 .logo {

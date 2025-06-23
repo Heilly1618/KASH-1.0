@@ -12,41 +12,75 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
     </head>
     <body>
         <header>
-            <img class="logo" src="../img/Logo-removebg-preview (1).png" alt="Logo de KASH">
+            <div class="logo-container">
+                <img class="logo" src="../img/logoKash.png" alt="Logo de KASH">
+                <h2>KASH</h2>
+            </div>
             <h1>Foro</h1>
-            <h3><a th:href="@{/index}">Inicio</a></h3>
-            <h2>KASH</h2>
+            <a th:href="@{/index}" class="btn-login">Iniciar sesión</a>
         </header>
 
         <!-- Aquí agregamos el contenedor para los foros -->
         <section id="foros">
             <div class="foro-lista" th:each="f : ${foro}">
                 <div class="foro-item">
-                    <h3 th:text="${f.tema}">Título del Foro</h3>
-                    <p th:text="${f.contenido}">Descripción del foro</p>
-                    <p><strong>Creado por:</strong> <span th:text="${f.nombre}">Nombre del Creador</span></p>
-                    <p><strong>Fecha de creación:</strong> <span th:text="${f.fecha}">Fecha del Foro</span></p>
-
-
-                    <!-- Calificación por estrellas -->
-                    <div class="calificacion">
-                        <label for="stars">Calificación:</label>
-                        <div class="estrellas">
-                            <input type="radio" id="star5" name="rating" value="5"><label for="star5">&#9733;</label>
-                            <input type="radio" id="star4" name="rating" value="4"><label for="star4">&#9733;</label>
-                            <input type="radio" id="star3" name="rating" value="3"><label for="star3">&#9733;</label>
-                            <input type="radio" id="star2" name="rating" value="2"><label for="star2">&#9733;</label>
-                            <input type="radio" id="star1" name="rating" value="1"><label for="star1">&#9733;</label>
+                    <div class="card">
+                        <div class="card-header">
+                            <img class="card-img" th:src="@{'/foro/imagen/' + ${f.id}}" alt="Imagen del Foro">
+                            <h3 th:text="${f.tema}">Título del Foro</h3>
                         </div>
-                    </div>
+                        <div class="card-body">
+                            <p class="author"><strong>Creado por:</strong> <span th:text="${f.nombre}">Nombre del Creador</span></p>
+                            <p class="date"><strong>Fecha de creación:</strong> <span th:text="${f.fecha}">Fecha del Foro</span></p>
+                            <div class="foro-contenido" style="display: none;" th:text="${f.contenido}"></div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn-comentar"
+                                    th:data-id-foro="${f.id}"
+                                    th:data-tema="${f.tema}"
+                                    th:data-nombre="${f.nombre}"
+                                    th:data-fecha="${f.fecha}"
+                                    th:data-contenido="${f.contenido}"
+                                    th:data-imagen="@{'/foro/imagen/' + ${f.id}}"
+                                    onclick="abrirForo(this)">Abrir Foro</button>
 
-                    <div class="botones">
-                        <button class="btn-comentar" th:data-tema="${f.tema}" th:data-id-foro="${f.id}">Comentar</button>
-                        <button class="btn-ver-comentarios" th:data-id-foro="${f.id}">Ver Comentarios</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
+
+
+
+        <!-- Modal para mostrar detalles del foro -->
+        <div id="modalForo" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="cerrarModal()">&times;</span>
+                <img id="modalImagen" class="modal-img" src="" alt="Imagen del Foro">
+                <h3 id="modalTema">Título del Foro</h3>
+                <p id="modalAutor"><strong>Creado por:</strong> <span id="modalNombre"></span></p>
+                <p id="modalFecha"><strong>Fecha de creación:</strong> <span id="modalFechaCreacion"></span></p>
+                <p id="modalContenido">Contenido del foro...</p>
+
+                <div id="comentariosZona">
+                    <h4>Comentarios</h4>
+                    <div th:each="comentario : ${comentarios}">
+                        <p><strong th:text="${comentario.nombre}">Usuario</strong>: <span th:text="${comentario.contenido}">Comentario</span></p>
+                    </div>
+                </div>
+                <form th:action="@{/foro/comentarios/agregar}" method="POST" class="form-comentar">
+                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" class="input-comentar">
+                    <input type="text" id="contenido" name="contenido" placeholder="Escribe tu comentario..." class="input-comentar">
+                    <input type="hidden" id="foroId" name="foroId" value="ID_DEL_FORO_AQUÍ">
+                    <button class="BotonComentar">Comentar</button>
+                </form>
+            </div>
+        </div>
+
+
+
+
+
 
         <button class="btn-flotante" id="btnPQR" aria-label="Registrar PQRS">
             <img src="../img/icono pqrs.png" alt="Icono PQR">
@@ -60,43 +94,57 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             <div class="formulario-pqr-header">
                 <img src="../img/icono pqrs.png" alt="Icono PQR">
                 <h4 id="pqrHeader">Registrar PQRS</h4>
+
             </div>
-            <form th:action="@{/enviarComentario}" >
-                <label for="nombres">Nombre de usuario:</label>
+
+            <form th:action="@{/enviarPQRS}" method="post">
+
+                <label for="nombre">Nombre de usuario:</label>
                 <input type="text" id="nombre" name="nombres" required>
-                <label for="num_documento">Número de documento:</label>
+
+                <label for="idUsuario">Número de documento:</label>
                 <input type="text" id="idUsuario" name="idUsuario" required>
+
                 <label for="correo">Email:</label>
                 <input type="email" id="correo" name="correo" required>
+
                 <label for="fecha">Fecha:</label>
-                <input type="date" id="fecha" name="fecha" required>
+                <input type="date" id="fecha" name="fecha" readonly>
+
+
+
                 <label for="tipo">Tipo:</label>
                 <input type="text" id="tDocumento" name="tipo" list="list" required>
                 <datalist id="list">
-                    <option value="Pregunta"></option>
+                    <option value="Petición"></option>
                     <option value="Queja"></option>
                     <option value="Reclamo"></option>
                     <option value="Otra"></option>
                 </datalist>
+
                 <label for="detalles">Detalles:</label>
                 <textarea id="detalles" name="detalles" rows="4" required></textarea>
+
                 <div class="button-container">
                     <button type="submit">Enviar</button>
+
                     <button type="button" id="cerrarPQR">Cerrar</button>
                 </div>
             </form>
         </div>
 
+
         <!-- Modal de Login -->
-        <div id="loginModal" class="modal" role="dialog" aria-labelledby="loginHeader" aria-hidden="true">
+        <div id="loginModalUnique" class="modal" role="dialog" aria-labelledby="loginHeader" aria-hidden="true">
             <div class="modal-content">
-                <span class="close" aria-label="Cerrar modal">&times;</span>
+                <span class="close" id="closeLoginModal" aria-label="Cerrar modal">&times;</span>
                 <h2 id="loginHeader">Inicia sesión para crear un foro</h2>
-                <form th:action="@{/ingresar/foro} " method="Get " class="formulario">
+                <form th:action="@{/ingresar/foro}" method="GET" class="formulario">
+                    <p id="error-message" style="display: none;">${error}</p>
                     <h4>Usuario: </h4>
-                    <input type="text" id="usuario" name="usuario"  placeholder="Ingrese el usuario"><br>
+                    <input type="text" id="usuario" name="usuario" placeholder="Ingrese el usuario"><br>
                     <h4>Contraseña: </h4>
-                    <input type="password" id="pass" name="pass"  placeholder="Ingrese la contraseña"><br>
+                    <input type="password" id="pass" name="pass" placeholder="Ingrese la contraseña"><br>
                     <div class="enlaces">
                         <button class="boton" type="submit">Ingresar</button>
                         <a href="#">Olvidé mi contraseña</a>
@@ -105,68 +153,127 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             </div>
         </div>
 
-        <!-- Modal de Comentario -->
-        <div id="comentarioModal" class="modal" role="dialog" aria-labelledby="comentarioHeader" aria-hidden="true">
-            <div class="modal-content">
-                <span class="close" aria-label="Cerrar modal">&times;</span>
-                <h2 id="comentarioHeader">Comentar</h2>
-                <form id="comentarioForm">
-                    <input type="hidden" name="idForo" id="idForo">
-                    <input type="hidden" name="tema" id="temaComentario">
-                    <label for="anonimo">¿Quieres hacer el comentario anónimo?</label>
-                    <select id="anonimo" name="anonimo">
-                        <option value="si">Sí</option>
-                        <option value="no">No</option>
-                    </select>
-                    <div id="usuarioInput" style="display:none;">
-                        <label for="nombre">Nombre de usuario:</label>
-                        <input type="text" name="nombre" id="nombreComentario">
-
-                        <label for="password">Contraseña:</label>
-                        <input type="password" name="password" id="passwordComentario">
-                    </div>
-
-                    <label for="comentario">Comentario:</label>
-                    <textarea name="comentario" rows="4" id="comentarioContenido" placeholder="Escribe tu comentario..." required></textarea>
-                    <button type="submit">Enviar Comentario</button>
-                </form>
-
-            </div>
-        </div>
-
-
-        <!-- Modal de Ver Comentarios -->
-        <div id="comentariosModal" class="modal" role="dialog" aria-labelledby="verComentariosHeader" aria-hidden="true">
-            <div class="modal-content">
-                <span class="close" aria-label="Cerrar modal">&times;</span>
-                <h2 id="verComentariosHeader">Comentarios</h2>
-                <div id="comentariosContainer"></div>
-            </div>
-        </div>
-
         <main>
 
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    // PQR Formulario
+                    // PQRS formulario
                     const btnPQR = document.getElementById("btnPQR");
                     const formPQR = document.getElementById("formPQR");
                     const cerrarPQR = document.getElementById("cerrarPQR");
 
-                    formPQR.style.display = "none"; // Asegúrate de que el formulario PQR esté oculto inicialmente
+                    // Verificar que los elementos necesarios estén presentes
+                    if (!btnPQR || !formPQR || !cerrarPQR) {
+                        console.error("Error: No se encontraron elementos necesarios.");
+                        return;
+                    }
 
-                    btnPQR.onclick = function () {
-                        formPQR.style.display = formPQR.style.display === "none" ? "flex" : "none";
-                    };
+                    // Asegurar que el formulario esté oculto al inicio
+                    formPQR.style.display = "none";
 
-                    cerrarPQR.onclick = function () {
-                        formPQR.style.display = "none";
-                    };
+                    // Mostrar formulario solo al hacer clic en el botón
+                    btnPQR.addEventListener("click", function () {
+                        console.log("Abriendo formulario");
+                        formPQR.style.display = "flex";  // Mostrar el formulario
+                    });
 
+                    // Cerrar formulario al hacer clic en el botón "cerrarPQR"
+                    cerrarPQR.addEventListener("click", function () {
+                        console.log("Cerrando formulario");
+                        formPQR.style.display = "none";  // Ocultar el formulario
+                    });
+
+                    // También cerrar si se hace clic fuera del formulario
+                    formPQR.addEventListener("click", function (event) {
+                        if (event.target === formPQR) {
+                            console.log("Cerrando formulario desde fuera");
+                            formPQR.style.display = "none";  // Ocultar el formulario
+                        }
+                    });
+
+                    // Establecer la fecha de hoy en el campo de fecha
+                    const fechaInput = document.getElementById("fecha");
+                    if (fechaInput) {
+                        const hoy = new Date();
+                        const fechaFormateada = hoy.toISOString().split('T')[0];  // Formatear la fecha como YYYY-MM-DD
+                        console.log("Fecha asignada:", fechaFormateada);
+                        fechaInput.value = fechaFormateada;
+                    }
+
+                });
+
+            </script>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const mensajeExito = "[[${mensajeExito}]]";
+                    const mensajeError = "[[${mensajeError}]]";
+
+
+                    if (mensajeExito && mensajeExito !== "null" && mensajeExito !== "") {
+                        alert(mensajeExito);
+                    } else if (mensajeError && mensajeError !== "null" && mensajeError !== "") {
+                        alert(mensajeError);
+                    }
+                });
+            </script>
+
+            <script>
+                function abrirForo(button) {
+                    // Obtener datos del botón clickeado
+                    var foroId = button.getAttribute('data-id-foro');
+                    var tema = button.getAttribute('data-tema');
+                    var nombre = button.getAttribute('data-nombre');
+                    var fecha = button.getAttribute('data-fecha');
+                    var contenido = button.getAttribute('data-contenido');
+                    var imagen = button.getAttribute('data-imagen');
+
+                    // Actualizar el modal con la información del foro seleccionado
+                    document.getElementById('modalImagen').src = imagen;
+                    document.getElementById('modalTema').textContent = tema;
+                    document.getElementById('modalNombre').textContent = nombre;
+                    document.getElementById('modalFechaCreacion').textContent = fecha;
+                    document.getElementById('modalContenido').textContent = contenido;
+
+                    // Establecer el foroId en el campo oculto del formulario
+                    document.getElementById('foroId').value = foroId;
+
+                    // Mostrar el modal
+                    document.getElementById('modalForo').style.display = 'block';
+
+                    // Limpiar la zona de comentarios antes de cargar los nuevos
+                    const comentariosZona = document.getElementById('comentariosZona');
+                    comentariosZona.innerHTML = '<h4>Comentarios</h4>';  // Restablecer el título de los comentarios
+
+                    // Obtener los comentarios del servidor para ese foro específico
+                    fetch(`/foro/comentarios/${foroId}`)
+                            .then(response => response.json())
+                            .then(comentarios => {
+                                // Agregar los comentarios al modal
+                                comentarios.forEach(comentario => {
+                                    comentariosZona.innerHTML += `
+                    <p><strong>${comentario.nombre}</strong>: ${comentario.contenido}</p>
+                `;
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error al cargar los comentarios:', error);
+                                comentariosZona.innerHTML += '<p>Error al cargar los comentarios.</p>';
+                            });
+                }
+
+                function cerrarModal() {
+                    // Ocultar el modal
+                    document.getElementById('modalForo').style.display = 'none';
+                }
+
+            </script>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
                     // Modal de Login
-                    const modalLogin = document.getElementById("loginModal");
+                    const modalLogin = document.getElementById("loginModalUnique"); // Ahora tiene un ID único
                     const btnCrearForo = document.getElementById("Forobtn");
-                    const closeLogin = document.querySelector("#loginModal .close");
+                    const closeLogin = document.getElementById("closeLoginModal");
 
                     modalLogin.style.display = "none"; // Ocultar modal al cargar la página
 
@@ -183,84 +290,12 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                             modalLogin.style.display = "none";
                         }
                     };
-
-
-                    //modal comentar
-                    var modalComentario = document.getElementById("comentarioModal");
-                    var spanComentario = document.querySelectorAll(".modal-content .close")[1];
-                    var btnsComentar = document.querySelectorAll(".btn-comentar");
-
-                    modalComentario.style.display = "none";
-
-                    btnsComentar.forEach(function (btn) {
-                        btn.onclick = function () {
-                            document.getElementById("temaComentario").value = this.getAttribute("data-tema");
-                            modalComentario.style.display = "flex";
-                        };
-                    });
-
-                    spanComentario.onclick = function () {
-                        modalComentario.style.display = "none";
-                    };
-                    
-                    const anonimoSelect = document.getElementById("anonimo");
-                    const usuarioInput = document.getElementById("usuarioInput");
-
-                    anonimoSelect.addEventListener('change', function () {
-                        if (this.value === "no") {
-                            usuarioInput.style.display = "block";
-                        } else {
-                            usuarioInput.style.display = "none";
-                        }
-                    });
-                    // Modal de Ver Comentarios
-                    const modalComentarios = document.getElementById("comentariosModal");
-                    const comentariosContainer = document.getElementById("comentariosContainer");
-                    const closeComentarios = modalComentarios.querySelector(".close");
-                    const btnsVerComentarios = document.querySelectorAll(".btn-ver-comentarios");
-
-                    modalComentarios.style.display = "none"; // Ocultar modal al cargar la página
-
-                    btnsVerComentarios.forEach(function (btn) {
-                        btn.onclick = function () {
-                            const idForo = this.getAttribute("data-id-foro");
-
-                            fetch(`/api/comentarios/${idForo}`)
-                                    .then(response => {
-                                        if (!response.ok)
-                                            throw new Error("Error al obtener los comentarios");
-                                        return response.json();
-                                    })
-                                    .then(comentarios => {
-                                        comentariosContainer.innerHTML = comentarios.length
-                                                ? comentarios.map(comentario => `
-                                <div class="comentario-item">
-                                    <strong>${comentario.nombre || "Anónimo"}</strong>
-                                    <p>${comentario.contenido}</p>
-                                </div>`).join("")
-                                                : "<p>No hay comentarios para este foro.</p>";
-                                        modalComentarios.style.display = "flex"; // Mostrar modal
-                                    })
-                                    .catch(error => {
-                                        console.error("Error al obtener comentarios:", error);
-                                        comentariosContainer.innerHTML = "<p>Error al cargar comentarios.</p>";
-                                    });
-                        };
-                    });
-
-                    closeComentarios.onclick = function () {
-                        modalComentarios.style.display = "none";
-                    };
-
-                    window.onclick = function (event) {
-                        if (event.target === modalComentarios) {
-                            modalComentarios.style.display = "none";
-                        }
-                    };
                 });
+
             </script>
-
-
+            <script th:if="${error}">
+                alert("[[${error}]]");
+            </script>
         </main>
     </body>
 </html>

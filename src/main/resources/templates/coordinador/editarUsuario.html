@@ -17,7 +17,7 @@
                 <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
             </div>
             <div class="selection">
-                <img class="icono" src="../../img/asesoria.png" alt=""/>
+                <img class="icono" src="../../img/usuarios.png" alt=""/>
                 <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
             </div>
             <div class="selection">
@@ -30,8 +30,8 @@
         </div>
         <div class="cuerpo">
             <header>
-                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt=""/>
-                <p>WELCOME</p>
+                <img class="logo" src="../../img/logoKash.png" alt=""/>
+                <h2>WELCOME</h2>
                 <h1>KASH</h1>
             </header>
         </div>
@@ -51,10 +51,9 @@
 
                 <label for="tDocumento">Tipo de Documento:</label>
                 <select id="tDocumento" name="tDocumento" required>
-                    <option value="CC" th:selected="${usuarios.tDocumento == 'CC'}" >Cédula de Ciudadanía</option>
-                    <option value="TI" th:selected="${usuarios.tDocumento == 'TI'}" >Tarjeta de Identidad</option>
-                    <option value="CE" th:selected="${usuarios.tDocumento == 'CE'}" >Cédula de Extranjería</option>
-                    <option value="PAS" th:selected="${usuarios.tDocumento == 'PAS'}">Pasaporte</option>
+                    <option value="Cédula de Ciudadanía" th:selected="${usuarios.tDocumento == 'CC'}" >Cédula de Ciudadanía</option>
+                    <option value="Tarjeta de Identidad" th:selected="${usuarios.tDocumento == 'TI'}" >Tarjeta de Identidad</option>
+                    <option value="Cédula de Extranjería" th:selected="${usuarios.tDocumento == 'CE'}" >Cédula de Extranjería</option>
                 </select>
 
                 <label for="nombres">Nombre:</label>
@@ -75,7 +74,7 @@
                 <label for="rolSeleccionado">Rol:</label>
                 <select id="rolSeleccionado" name="rolSeleccionado" required>
                     <option value="asesor" th:selected="${usuarios.rolSeleccionado == 'asesor'}" >Asesor</option>
-                    <option value="estudiante" th:selected="${usuarios.rolSeleccionado == 'aprendiz'}">Aprendiz</option>
+                    <option value="aprendiz" th:selected="${usuarios.rolSeleccionado == 'aprendiz'}">Aprendiz</option>
                 </select>
 
                 <label for="trimestre">Trimestre:</label>

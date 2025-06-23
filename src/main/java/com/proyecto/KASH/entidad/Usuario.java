@@ -2,6 +2,7 @@ package com.proyecto.KASH.entidad;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "usuarios")
@@ -11,7 +12,18 @@ public class Usuario {
     @Column(name = "IDusuario", nullable = false, length = 100)
     private Long idUsuario;
 
-    @Column(name = "rol", nullable = false)
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private List<Componente> componentes;
+
+    public List<Componente> getComponentes() {
+        return componentes;
+    }
+
+    public void setComponentes(List<Componente> componentes) {
+        this.componentes = componentes;
+    }
+    
+    @Column(name="rol", nullable=false)
     private String rolSeleccionado;
 
     @Column(name = "nombres", nullable = false)
@@ -186,10 +198,6 @@ public class Usuario {
     public void LongPass(Long idUsuario) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
-    
-    
 
    
-    
-    
 }

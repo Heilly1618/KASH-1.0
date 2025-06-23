@@ -13,8 +13,8 @@ body {
 }
 
 .barra {
-    width: 60px; 
-    background-color:rgb(4, 55, 77);
+    width: 60px;
+    background-color: rgb(4, 55, 77);
     color: white;
     height: 100vh;
     display: flex;
@@ -25,12 +25,9 @@ body {
     transition: width 0.3s ease;
     z-index: 2;
 }
-.barra:hover {
-    width: 200px; 
-}
 
-.barra:hover .link {
-    display: inline; 
+.barra:hover {
+    width: 200px;
 }
 
 .barra a {
@@ -46,106 +43,87 @@ body {
     color: #f0f0f0;
 }
 
-    .selection {
-        display: flex;
-        flex-direction: row; 
-        align-items: center; 
-        width: 100%;
-        margin-bottom: 20px;
-        transition: background-color 0.3s ease, transform 0.3s ease;
-        border-radius: 5px;
-        padding: 10px 15px;
-    }
+.selection {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    border-radius: 5px;
+    padding: 10px 15px;
+}
 
-    .selection:hover {
-        background-color: rgb(5, 35, 48);
-        transform: translateX(10px); /* Desplazar el elemento hacia la derecha */
-    }
+.selection:hover {
+    background-color: rgb(5, 35, 48);
+    transform: translateX(10px);
+}
 
-    .selection .link {
-        display: none;
-        margin-left: 5px; 
-        white-space: nowrap; 
-    }
+.selection .link {
+    display: none;
+    margin-left: 5px;
+    white-space: nowrap;
+}
 
-    .icono {
-        width: 30px;
-        height: 30px;
-        cursor: pointer;
-        transition: transform 0.3s ease;
-    }
+.icono {
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
 
-    .icono:hover {
-        transform: rotate(20deg); 
-    }
+.icono:hover {
+    transform: rotate(20deg);
+}
 
-    .barra.expanded .link {
-        display: inline; 
-    }
+.barra {
+    width: 60px;
+    transition: width 0.3s ease;
+}
 
-    .barra.expanded {
-        width: 200px; 
-    }
+.barra:hover {
+    width: 200px;
+}
 
-    .cuerpo {
-        margin-left: 60px; 
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        padding: 20px;
-    }
+.barra:hover .cerrar_sesion {
+    display: block;
+}
 
-    header {
-        width: calc(100% - 60px);
-        padding: 15px;
-        position: fixed;
-        top: 0;
-        left: 60px; 
-        z-index: 1; 
-        background-color: rgb(57,169,0);
-        height: 70px;
-        justify-content: space-between;
-        display: flex;
-        align-items: center;
-    }
+.barra .cerrar_sesion {
+    display: none;
+}
 
-    .logo {
-        display: flex;
-    }
+.btn-cerrar-sesion {
+    background-color: rgb(4, 55, 77);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
 
-    header img {
-        width: 50px;
-    }
+.btn-cerrar-sesion:hover {
+    background-color: rgb(5, 35, 48);
+}
 
-    section {
-        margin-bottom: 20px;
-    }
+.barra {
+    width: 60px;
+    transition: width 0.3s ease;
+}
 
-    @media screen and (max-width: 600px) {
-        .barra {
-            width: 100%;
-            height: auto;
-            position: relative;
-            flex-direction: row;
-            justify-content: space-around;
-            padding: 10px 0;
-        }
+.barra:hover {
+    width: 200px;
+}
 
-        .barra a {
-            float: none;
-            padding: 10px;
-            text-align: center;
-            width: auto;
-        }
-
-        .cuerpo {
-            margin-left: 0;
-        }
-    }
-
-    .div-container {
-        margin-top: 10px;
-    }
+.barra:hover .link {
+    display: inline;
+}
 
 .cuerpo {
     margin-left: 60px;
@@ -161,185 +139,151 @@ header {
     position: fixed;
     top: 0;
     left: 60px;
-    background-color: rgb(57, 169, 0);
+    z-index: 1;
+    background-color: #03314b;
     height: 70px;
     justify-content: space-between;
     display: flex;
     align-items: center;
-    z-index: 1;
+}
+header h1, h2{
+    Color: white;
+}
+
+.logo {
+    display: flex;
+}
+
+header img {
+    width: 50px;
+}
+
+section {
+    margin-bottom: 20px;
+}
+
+@media screen and (max-width: 600px) {
+    .barra {
+        width: 100%;
+        height: auto;
+        position: relative;
+        flex-direction: row;
+        justify-content: space-around;
+        padding: 10px 0;
+    }
+
+    .barra a {
+        float: none;
+        padding: 10px;
+        text-align: center;
+        width: auto;
+    }
+
+    .cuerpo {
+        margin-left: 0;
+    }
+}
+
+.div-container {
+    margin-top: 10px;
 }
 
 .componente {
-    margin-top: 100px;
-    padding: 20px;
-    text-align: center;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-}
-
-.select {
-    width: 50%;
-    margin: 20px auto;
-    padding: 20px;
     background-color: #fff;
-    border-radius: 10px;
+    padding: 20px;
+    border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 60%;
+    margin: 0 auto;
+    margin-top: 70px;
 }
 
-label {
-    display: block;
-    text-align: left;
+.componente h2 {
+    font-size: 24px;
     margin-bottom: 10px;
-    font-size: 16px;
-    color: #555;
 }
 
-select, input[type="text"] {
-    width: 100%;
-    padding: 12px;
+.componente p {
+    font-size: 18px;
+    color: #333;
     margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+}
+
+.componente input {
+    padding: 10px;
     font-size: 16px;
-    transition: border-color 0.3s ease;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
-select:focus, input[type="text"]:focus {
-    border-color: #0072ff;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 114, 255, 0.5);
-}
-
-button {
-    display: block;
-    margin: 20px auto;
+.componente button {
+    background-color: #2a3d66;
+    color: white;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;
-    background-color: #0072ff;
-    color: #fff;
-    font-size: 16px;
     cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 18px;
+    width: 100%;
 }
 
-button:hover {
-    background-color: #005bb5;
-    transform: translateY(-3px);
+.componente button:hover {
+    background-color: #1e2b44;
 }
 
-button:active {
-    transform: translateY(0);
-}
-
-.ingresar-componente {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
-
-.ingresar-componente p {
-    margin-right: 10px;
-    font-size: 16px;
-    color: #333;
-}
-
-.btn-ingresalo {
-    padding: 10px 15px;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.btn-ingresalo:hover {
-    background-color: #45a049;
-}
-
-/* Estilos del modal */
-.modal {
-    display: none; 
-    position: fixed;
-    z-index: 3;
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.4);
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-content {
-    background-color: white;
+/* Tabla de Componentes */
+.componente2 {
+    margin-top: 40px;
+    background-color: #fff;
     padding: 20px;
-    border-radius: 10px;
-    width: 300px;
-    text-align: center;
+    border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 80%;
+    margin: 0 auto;
 }
 
-.close {
-    color: #aaa;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close:hover {
-    color: black;
-}
-
-input[type="text"] {
-    padding: 10px;
-    margin-top: 10px;
+.componente2 h2 {
+    font-size: 24px;
     margin-bottom: 20px;
 }
 
-button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+table {
+    width: 100%;
+    border-collapse: collapse;
 }
 
-button[type="submit"]:hover {
-    background-color: #45a049;
-}
-.cerrar_sesion {
-    display: none; /* Ocultar el botón por defecto */
-    margin-left: 5px;
-    white-space: nowrap;
-}
-
-.barra:hover .cerrar_sesion {
-    display: block; /* Mostrar el botón cuando la barra esté en hover */
-}
-
-.btn-cerrar-sesion {
-    background-color: rgb(4, 55, 77);
-    color: white;
-    padding: 10px 20px; /* Ajustar el padding */
-    border: none;
-    border-radius: 5px;
+th, td {
+    padding: 15px;
+    text-align: left;
     font-size: 16px;
-    text-decoration: none;
-    display: block;
-    width: 100%; /* Hacer que el botón ocupe el ancho completo */
-    text-align: center;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
+    border-bottom: 1px solid #ccc;
 }
 
-.btn-cerrar-sesion:hover {
-    background-color: rgb(5, 35, 48);
+th {
+    background-color: #f1f1f1;
+}
+
+button {
+    background-color: #e63946;
+    color: white;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #d13d3d;
+}
+
+.acciones {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.columna-accion {
+    display: inline-block;
+    padding: 0 10px;
 }

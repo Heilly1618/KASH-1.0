@@ -46,7 +46,32 @@ public class UsuarioServicioImpl implements UsuarioServicio {
 
     @Override
     public void actualizarUsuario(Usuario usuario) {
-       Repositorio.save(usuario);
+        Repositorio.save(usuario);
+    }
+
+    @Autowired
+    private Usuario2Repositorio usuarioRepositorio;
+
+    public List<Usuario> buscarCoordinador() {
+        return usuarioRepositorio.findByRolSeleccionado("coordinador");
+    }
+
+    @Override
+    public List<Usuario> obtenerTodosLosUsuarios() {
+        return usuarioRepositorio.findAll();// Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void cambiarContrasena(String correo, String nuevaContrasena) {
+        usuarioRepositorio.findByCorreo(correo).ifPresent(usuario -> {
+            usuario.setPass(nuevaContrasena); // Guarda la contraseña sin encriptar
+            usuarioRepositorio.save(usuario);
+        });
+    }
+
+    @Override
+    public Optional<Usuario> buscarPorRol(String rol) {
+        return usuarioRepositorio.findByRolSeleccionado(rol).stream().findFirst();
     }
 
 }

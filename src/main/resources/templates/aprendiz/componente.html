@@ -5,32 +5,32 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
 -->
 <html xmlns:th="http://www.thymeLeaf.org">
     <head>
-        <title>APRENDIZ CONFIRMAR</title>
+        <title>Asesor Componente</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="../../css/aprendiz/prueba.css">
+        <link rel="stylesheet" href="../../css/aprendiz/componentes.css">
     </head>
-    <div class="barra">
-            <div class="barra">
+    <body>
+        <div class="barra">
             <div class="selection">
                 <img class="icono" src="../../img/perfil.png" alt="">
-                <a th:href="@{/aprendiz}" class="link">mi perfil</a>
+                <a th:href="@{/aprendiz}" class="link">Mi perfil</a>
             </div>
             <div class="selection">
                 <img class="icono" src="../../img/componente.png" alt="">
-                <a th:href="@{/aprendiz/componente}" class="link">solicitar componentes</a>
+                <a th:href="@{/aprendiz/componente}" class="link">Solicitar componentes</a>
             </div>
             <div class="selection">
                 <img class="icono" src="../../img/asesoria.png" alt="">
-                <a th:href="@{/aprendiz/asesorias}" class="link">solicitar asesorias</a>
+                <a th:href="@{/aprendiz/asesorias}" class="link">Grupos</a>
             </div>
             <div class="selection">
                 <img class="icono" src="../../img/confirmar.png" alt="">
-                <a th:href="@{/aprendiz/confirmar}" class="link">confirmacion asesorias</a>
+                <a th:href="@{/aprendiz/confirmar}" class="link">Asesorias</a>
             </div>
             <div class="selection">
                 <img class="icono" src="../../img/asistencia.png" alt="">
-                <a th:href="@{/aprendiz/asistencia}" class="link">asistencia</a>
+                <a th:href="@{/aprendiz/asistencia}" class="link">Asistencia</a>
             </div>
             <div class="selection">
                 <img class="icono" src="../../img/prueba.png" alt="">
@@ -40,16 +40,57 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
             </div>
         </div>
-    <div class="cuerpo">
-        <header>
-            <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-            <p>WELCOME</p>
-            <h1>KASH</h1>
-        </header>
-        <div class="Perfil">
-            
-        </div>
-    </div>
+        <div class="cuerpo">
+            <header>
+                <img class="logo" src="../../img/logoKash" alt="">
+                <h2>WELCOME</h2>
+                <h1>KASH</h1>
+            </header>
 
-</body>
+            <div class="componente">
+                <form method="post" th:action="@{/aprendiz/componente}">
+                    <h2>Elije el componente:</h2>
+                    <p>En este espacio puedes elegir los componentes a los cuales deseas hacer asesorías</p>
+                    <input list="componentes" name="componente" required />
+                    <datalist id="componentes">
+                        <option value="Algoritmos"></option>
+                        <option value="Ingles"></option>
+                        <option value="Desarrollo web"></option>
+                        <option value="Java"></option>
+                    </datalist>
+                    <button type="submit">Registrar componente</button>
+                </form>
+            </div>
+
+            <div class="componente2">
+                <h2>Componentes elegidos:</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Componente</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <th:block th:each="componente : ${componentesElegidos}">
+                        <tr>
+                            <td th:text="${componente.nombre}"></td>
+                            <td>
+                                <form action="/aprendiz/eliminarComponente" method="post">
+                                    <input type="hidden" name="id" th:value="${componente.id}" />
+                                    <button type="submit" onclick="return confirm('¿Estás seguro de que quieres eliminar este componente?')">Eliminar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </div>
+
+
+
+
+        </div>
+
+    </body>
 </html>

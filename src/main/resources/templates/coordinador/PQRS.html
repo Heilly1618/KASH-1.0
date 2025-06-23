@@ -10,8 +10,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/coordinador/PQRS.css"></link>
     </head>
-     <body>
-    <div class="barra">
+    <body>
+        <div class="barra">
             <div class="selection">
                 <img class="icono" src="../../img/perfil.png" alt="">
                 <a th:href="@{/coordinador}" class="link">mi perfil</a>
@@ -21,7 +21,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
             </div>
             <div class="selection">
-                <img class="icono" src="../../img/asesoria.png" alt="">
+                <img class="icono" src="../../img/usuarios.png" alt="">
                 <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
             </div>
             <div class="selection">
@@ -32,12 +32,89 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
             </div>
         </div>
+    </div>
+    <div class="cuerpo">
+        <header>
+            <img class="logo" src="../../img/logoKash.png" alt="">
+            <h2>WELCOME</h2>
+            <h1>KASH</h1>
+        </header>
+        <div class="PQRS">
+            <h2 class="titulo">Lista de PQRS</h2>
+            <form th:action="@{/coordinador/buscarPQRS}" method="get" class="buscador-form">
+                <input type="text" name="filtro" placeholder="Buscar por cualquier campo..." th:value="${filtro}" class="buscador-input">
+                <button type="submit" class="buscador-btn">Buscar</button>
+            </form>
+            <a th:href="@{/reporte/coordinador/generar-reporte-pqrs}" class="btn-generar-reporte" target="_blank">
+                Crear reporte PQRS
+            </a>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numero</th>
+                        <th>Usuario</th>
+                        <th>Correo</th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Asunto</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="pqrs : ${pqrsList}">
+                        <td th:text="${pqrs.id}"></td>
+                        <td th:text="${pqrs.nombre}"></td>
+                        <td th:text="${pqrs.email}"></td>
+                        <td th:text="${pqrs.fecha}"></td>
+                        <td th:text="${pqrs.tipo}"></td>
+                        <td th:text="${pqrs.detalles}"></td>
+                        <td th:text="${pqrs.estado}"></td>
+                        <td>
+                            <div class="btn-action">
+                                <button type="button" class="btn-responder"
+                                        th:data-id="${pqrs.id}"
+                                        th:data-nombre="${pqrs.nombre}"
+                                        th:data-email="${pqrs.email}"
+                                        th:data-detalles="${pqrs.detalles}"
+                                        onclick="abrirModal(this)">
+                                    Responder
+                                </button>
+
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-        <div class="cuerpo">
-            <header>
-                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-                <p>WELCOME</p>
-                <h1>KASH</h1>
-            </header>
-    </body>
+        <div id="modalResponder" class="modal" style="display: none;">
+            <div class="modal-contenido">
+                <span class="cerrar" onclick="cerrarModal()">&times;</span>
+                <h2>Responder PQRS</h2>
+                <form th:action="@{/coordinador/responderPQRS}" method="post">
+                    <input type="hidden" name="id" id="pqrsId">
+                    <p><strong>Nombre:</strong> <span id="modalNombre"></span></p>
+                    <p><strong>Correo:</strong> <span id="modalCorreo"></span></p>
+                    <p><strong>Detalles:</strong> <span id="modalDetalles"></span></p>
+                    <textarea name="respuesta" placeholder="Escribe tu respuesta..." required></textarea>
+                    <button type="submit">Enviar Respuesta</button>
+                </form>
+            </div>
+        </div>
+        <script>
+            function abrirModal(btn) {
+                document.getElementById('modalResponder').style.display = 'block';
+                document.getElementById('pqrsId').value = btn.getAttribute('data-id');
+                document.getElementById('modalNombre').innerText = btn.getAttribute('data-nombre');
+                document.getElementById('modalCorreo').innerText = btn.getAttribute('data-email');
+                document.getElementById('modalDetalles').innerText = btn.getAttribute('data-detalles');
+            }
+
+            function cerrarModal() {
+                document.getElementById('modalResponder').style.display = 'none';
+            }
+        </script>
+
+</body>
 </html>

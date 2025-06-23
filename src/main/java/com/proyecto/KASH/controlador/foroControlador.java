@@ -11,13 +11,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.proyecto.KASH.entidad.Usuario;
+import com.proyecto.KASH.entidad.foro;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import java.io.IOException;
+import java.sql.SQLException;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class foroControlador {
 
     @Autowired
     private foroServicio servicio;
+
+    @Autowired
+    private UsuarioServicio usuarioServicio;
 
     @GetMapping("/foro")
     public String foro(Model modelo) {
@@ -29,31 +38,47 @@ public class foroControlador {
     private UsuarioServicio2 Servicio;
 
     @GetMapping("/ingresar/foro")
-    public String ingresar(@RequestParam String usuario, @RequestParam String pass, Model model, HttpSession session) {
+    public String ingresar(@RequestParam String usuario, @RequestParam String pass, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         Usuario usuarioValidado = Servicio.findByUsuarioAndPass(usuario, pass).orElse(null);
-        if (usuarioValidado != null) {
-            // Guarda los datos del usuario en la sesión
-            session.setAttribute("usuarioSesion", usuarioValidado);
 
-            // Redirige según el rol del usuario
+        if (usuarioValidado != null) {
+
+            System.out.println("Usuario encontrado: " + usuarioValidado);
+            System.out.println("Nombres: " + usuarioValidado.getNombres());
+            System.out.println("Rol: " + usuarioValidado.getRolSeleccionado());
+
+            session.setAttribute("usuarioSesion", usuarioValidado);
             String rol = usuarioValidado.getRolSeleccionado();
 
             switch (rol) {
                 case "coordinador":
-                    return "foro"; // Redirige al coordinador
                 case "aprendiz":
-                    return "foro"; // Redirige al aprendiz
+                    return "redirect:/foro";
                 case "asesor":
-                    model.addAttribute("usuarios", usuarioValidado);
-                    return "ForoFormulario"; // Redirige al asesor
+                    session.setAttribute("usuario", usuarioValidado);
+                    return "redirect:/ForoFormulario";
                 default:
-                    model.addAttribute("error", "Rol no válido");
-                    return "foro"; // Si no es un rol válido, regresa a la vista de login
+                    redirectAttributes.addFlashAttribute("error", "Rol no válido");
+                    return "redirect:/foro";
             }
         } else {
-            // Si las credenciales no son válidas
-            model.addAttribute("error", "Usuario o contraseña incorrectos");
-            return "index"; // Regresa a la vista de login con mensaje de error
+            redirectAttributes.addFlashAttribute("error", "Usuario o contraseña incorrectos");
+            return "redirect:/foro";
+        }
+    }
+
+    @GetMapping("/foro/imagen/{id}")
+    public void obtenerFoto(@PathVariable Long id, HttpServletResponse response) throws IOException, SQLException {
+        // Recuperamos el foro por ID
+        foro foro = servicio.obtenerFotoId(id);
+
+        if (foro != null && foro.getFoto() != null) {
+            // Establecemos el tipo de contenido como imagen para mostrarla en la respuesta
+            response.setContentType("image/jpeg");
+            response.getOutputStream().write(foro.getFoto().getBytes(1, (int) foro.getFoto().length()));
+            response.getOutputStream().close();
+        } else {
+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
         }
     }
 

@@ -102,11 +102,14 @@ header {
     top: 0;
     left: 60px; 
     z-index: 1; 
-    background-color: rgb(57,169,0);
+    background-color: #03314b;
     height: 70px;
     justify-content: space-between;
     display: flex;
     align-items: center;
+}
+header h1, h2{
+    Color: white;
 }
 
 .logo {
@@ -146,20 +149,106 @@ section {
 .div-container {
     margin-top: 10px;
 }
+
+.Perfil {
+    width: 100%;
+    padding: 20px;
+    display: flex; 
+    flex-direction: column;
+    margin-top: 60px; 
+}
+
+
+
+.Foto {
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+#foto-preview {
+    object-fit: cover; 
+    width: 100%;
+    height: 100%;
+    display: none;
+}
+
+
+#foto-input {
+    display: none;
+}
+
+
+.custom-file-upload {
+    display: inline-block;
+    padding: 10px 15px;
+    background-color: #008CBA;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.custom-file-upload:hover {
+    background-color: #005f73;
+}
+.Datos2 {
+    width: 300px;
+    height: 250px;
+    margin-top: 10px;
+    flex: 1;
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.Datos2 p {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #333;
+}
+
+.Datos2 strong {
+    color: #000;
+    font-weight: bold;
+}
+
+.Datos2 p:last-child {
+    margin-bottom: 0;
+}
+
+
+
+.Datos {
+    display: flex;
+    justify-content: space-between; 
+    align-items: center; 
+}
+
+
+.Historial {
+    flex: 1;
+}
 .cerrar_sesion {
     display: none; /* Ocultar el botón por defecto */
     margin-left: 5px;
     white-space: nowrap;
 }
 
+/* Cuando la barra esté en estado hover, mostramos el botón */
 .barra:hover .cerrar_sesion {
-    display: block; /* Mostrar el botón cuando la barra esté en hover */
+    display: block;
 }
 
 .btn-cerrar-sesion {
     background-color: rgb(4, 55, 77);
     color: white;
-    padding: 10px 20px; /* Ajustar el padding */
+    padding: 10px 20px;
     border: none;
     border-radius: 5px;
     font-size: 16px;

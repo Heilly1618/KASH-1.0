@@ -21,7 +21,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
             </div>
             <div class="selection">
-                <img class="icono" src="../../img/asesoria.png" alt="">
+                <img class="icono" src="../../img/usuarios.png" alt="">
                 <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
             </div>
             <div class="selection">
@@ -29,15 +29,37 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <a th:href="@{/coordinador/foro}" class="link">Control de foros</a>
             </div>
             <div class="cerrar_sesion">
-                <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
+                <button class="btn-cerrar-sesion"><a th:href="@{/cerrar-sesion}">Cerrar sesión</a></button>
             </div>
         </div>
         </div>
         <div class="cuerpo">
             <header>
-                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-                <p>WELCOME</p>
+                <img class="logo" src="../../img/logoKash.png" alt="">
+                <h2>WELCOME</h2>
                 <h1>KASH</h1>
             </header>
+            <div class="Perfil">
+                <div class="Datos">
+                    <form th:action="@{/coordinador/subirFoto}" method="POST" enctype="multipart/form-data">
+                        <div class="Foto" id="foto-container">
+                           <img th:src="@{|/fotoCoordinador/${coordinador.idUsuario}|}" alt="Foto de perfil" />
+                       </div>
+                        <input type="file" name="foto" accept="image/*" required>
+                        <button type="submit">Subir Foto</button>
+                    </form>
+                    <div class="Datos2">
+                        <p><strong>Usuario:</strong> <span th:text="${coordinador.usuario}"></span></p>
+                         <p><strong>Nombre:</strong> <span th:text="(${coordinador.nombres} + ' ' + ${coordinador.primerA} + ' ' + ${coordinador.segundoA})"></span></p>
+                        <p><strong>Tipo de documento:</strong> <span th:text="${coordinador.tDocumento}"></span></p>
+                        <p><strong>Número de documento:</strong> <span th:text="${coordinador.idUsuario}"></span></p>
+                        <p><strong>Rol:</strong> <span th:text="${coordinador.rolSeleccionado}"></span></p>
+                        <p><strong>Trimestre:</strong> <span th:text="${coordinador.trimestre}"></span></p>
+                        <p><strong>Correo:</strong> <span th:text="${coordinador.correo}"></span></p>
+                        <p><strong>Número de contacto:</strong> <span th:text="${coordinador.numero}"></span></p>
+                    </div>
+                </div>
+                
+            </div>
     </body>
 </html>

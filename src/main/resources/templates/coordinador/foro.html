@@ -10,8 +10,8 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../../css/coordinador/foros.css"></link>
     </head>
-     <body>
-    <div class="barra">
+    <body>
+        <div class="barra">
             <div class="selection">
                 <img class="icono" src="../../img/perfil.png" alt="">
                 <a th:href="@{/coordinador}" class="link">mi perfil</a>
@@ -21,7 +21,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
             </div>
             <div class="selection">
-                <img class="icono" src="../../img/asesoria.png" alt="">
+                <img class="icono" src="../../img/usuarios.png" alt="">
                 <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
             </div>
             <div class="selection">
@@ -32,12 +32,123 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
                 <button class="btn-cerrar-sesion"><a th:href="@{/index}">Cerrar sesión</a></button>
             </div>
         </div>
+    </div>
+    <div class="cuerpo">
+        <header>
+            <img class="logo" src="../../img/logoKash.png" alt="">
+            <h2>WELCOME</h2>
+            <h1>KASH</h1>
+        </header>
+        <div class="foros">
+            <h2 class="titulo">Lista de foros</h2>
+            <form method="get" th:action="@{/coordinador/foro}">
+                <input type="text" name="filtro" placeholder="Buscar foros..." th:value="${filtro}">
+                <button type="submit">Buscar</button>
+            </form>
+
+            <div class="contenedor-boton-reporte">
+                <a class="btn-generar-reporte" th:href="@{/report-foros}" target="_blank">
+                    Descargar Reporte PDF
+                </a>
+            </div>
+
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Número documento</th>
+                        <th>Nombre</th>
+                        <th>Tema</th>
+                        <th>Contenido</th>
+                        <th>Fecha</th>
+                        <th>Trimestre</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="foro : ${foros}">
+                        <td th:text="${foro.idUsuario}">ID Usuario</td>
+                        <td th:text="${foro.nombre}">Nombre</td>
+                        <td th:text="${foro.tema}">Tema</td>
+                        <td th:text="${foro.contenido}">Contenido</td>
+                        <td th:text="${foro.fecha}">Fecha</td>
+                        <td th:text="${foro.trimestre}">Trimestre</td>
+                        <td>
+                            <button type="button" class="btn-ver-comentarios"
+                                    th:onclick="'abrirModal(' + ${foro.id} + ')'">
+                                Ver Comentarios
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
         </div>
-        <div class="cuerpo">
-            <header>
-                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-                <p>WELCOME</p>
-                <h1>KASH</h1>
-            </header>
-    </body>
+        <div id="modalComentarios" class="modal">
+            <div class="modal-contenido">
+                <span class="cerrar" onclick="cerrarModal()">&times;</span>
+                <h3>Comentarios del foro</h3>
+                <div id="listaComentarios">
+                    <!-- Aquí se cargan los comentarios -->
+                </div>
+            </div>
+        </div>
+        <script>
+    function abrirModal(idForo) {
+        const modal = document.getElementById('modalComentarios');
+        const lista = document.getElementById('listaComentarios');
+        lista.innerHTML = ''; // Limpiar comentarios anteriores
+
+        fetch('/coordinador/comentarios/' + idForo)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    lista.innerHTML = '<p>No hay comentarios para este foro.</p>';
+                } else {
+                    data.forEach(comentario => {
+                        const div = document.createElement('div');
+                        div.classList.add('comentario-item');
+                        div.innerHTML = `
+                            <p><strong>${comentario.nombre}:</strong> ${comentario.contenido}</p>
+                            <button onclick="eliminarComentario(${comentario.id}, ${idForo})">Eliminar</button>
+                            <hr>
+                        `;
+                        lista.appendChild(div);
+                    });
+                }
+                modal.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error al cargar comentarios:', error);
+                lista.innerHTML = '<p>Error al cargar los comentarios.</p>';
+                modal.style.display = 'block';
+            });
+    }
+
+    function cerrarModal() {
+        document.getElementById('modalComentarios').style.display = 'none';
+    }
+
+    function eliminarComentario(idComentario, idForo) {
+        if (confirm('¿Estás seguro de eliminar este comentario?')) {
+            fetch('/coordinador/comentarios/eliminar/' + idComentario, {
+                method: 'DELETE'
+            })
+            .then(() => {
+                abrirModal(idForo); // Recargar comentarios
+            })
+            .catch(error => console.error('Error al eliminar comentario:', error));
+        }
+    }
+
+    // Cierra el modal si se hace clic fuera del contenido
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalComentarios');
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
 </html>

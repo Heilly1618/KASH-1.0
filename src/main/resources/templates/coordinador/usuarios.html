@@ -17,7 +17,7 @@
                 <a th:href="@{/coordinador/PQRS}" class="link">Revisar PQRS</a>
             </div>
             <div class="selection">
-                <img class="icono" src="../../img/asesoria.png" alt="">
+                <img class="icono" src="../../img/usuarios.png" alt="">
                 <a th:href="@{/coordinador/usuarios}" class="link">Control de usuarios</a>
             </div>
             <div class="selection">
@@ -31,70 +31,76 @@
 
         <div class="cuerpo">
             <header>
-                <img class="logo" src="../../img/Logo-removebg-preview (1).png" alt="">
-                <p>WELCOME</p>
+                <img class="logo" src="../../img/logoKash.png" alt="">
+                <h2>WELCOME</h2>
                 <h1>KASH</h1>
             </header>
+            <div class="usuarios">
+                    <h2 class="titulo">Lista de usuarios</h2>
+                <div class="search-bar">
+                    <form th:action="@{/coordinador/buscar}" method="get">
+                        <label for="filtro">Buscar Usuario:</label>
+                        <input type="text" id="filtro" name="filtro" placeholder="Buscar usuario">
+                        <button type="submit" class="btn-primario">Buscar</button>
+                    </form>
+                </div>
 
-            <div class="search-bar">
-                <form th:action="@{/coordinador/buscar}" method="get">
-                    <label for="idUsuario">Buscar Usuario por Número de documento:</label>
-                    <input type="text"  id="idUsuario" name="idUsuario" placeholder="Ingrese el número de documento del usuario">
-                    <button type="submit">Buscar</button>
-                </form>
+
+
+                <div class="table-container">
+                    <div class="reporte-botones">
+                        <a th:href="@{/coordinador/reporte-usuarios}" target="_blank" class="btn-generar-reporte">Reporte usuarios</a>
+                        <th:block th:if="${usuarios.size() == 1}">
+                            <a th:href="@{/coordinador/reporte-usuario-individual(id=${usuarios[0].idUsuario})}" target="_blank" class="btn-generar-reporte">Descargar Reporte Individual</a>
+                        </th:block>
+                    </div>
+                    <table border="1">
+                        <thead>
+                            <tr>
+                                <th>Número de documento:</th>
+                                <th>Rol</th>
+                                <th>Nombre</th>
+                                <th>Primer Apellido</th>
+                                <th>Segundo Apellido</th>
+                                <th>Fecha de Nacimiento</th>
+                                <th>Tipo de Documento</th>
+                                <th>Trimestre</th>
+                                <th>Correo</th>
+                                <th>Número</th>
+                                <th>Usuario</th>
+                                <th>Contraseña</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${usuarios}">
+                                <td th:text="${u.idUsuario}"></td>
+                                <td th:text="${u.rolSeleccionado}"></td>
+                                <td th:text="${u.nombres}"></td>
+                                <td th:text="${u.primerA}"></td>
+                                <td th:text="${u.segundoA}"></td>
+                                <td th:text="${u.fNacimiento}"></td>
+                                <td th:text="${u.tDocumento}"></td>
+                                <td th:text="${u.trimestre}"></td>
+                                <td th:text="${u.correo}"></td>
+                                <td th:text="${u.numero}"></td>
+                                <td th:text="${u.usuario}"></td>
+                                <td th:text="${u.pass}"></td>
+                                <td>
+                                    <div class="action-buttons">
+                                        <a th:href="@{/coordinador/editar/{id}(id=${u.idUsuario})}" class="btn-editar">Editar</a>
+                                        <form th:action="@{/coordinador/eliminar}" method="post" class="delete-form">
+                                            <input type="hidden" name="idUsuario" th:value="${u.idUsuario}">
+                                            <button type="submit" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?')">Eliminar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
-
-
-            <div class="table-container">
-                <h2>Lista de Usuarios</h2>
-                <table border="1">
-                    <thead>
-                        <tr>
-                            <th>Número de documento:</th>
-                            <th>Rol</th>
-                            <th>Nombre</th>
-                            <th>Primer Apellido</th>
-                            <th>Segundo Apellido</th>
-                            <th>Fecha de Nacimiento</th>
-                            <th>Tipo de Documento</th>
-                            <th>Trimestre</th>
-                            <th>Correo</th>
-                            <th>Número</th>
-                            <th>Usuario</th>
-                            <th>Contraseña</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="u : ${usuarios}">
-                            <td th:text="${u.idUsuario}"></td>
-                            <td th:text="${u.rolSeleccionado}"></td>
-                            <td th:text="${u.nombres}"></td>
-                            <td th:text="${u.primerA}"></td>
-                            <td th:text="${u.segundoA}"></td>
-                            <td th:text="${u.fNacimiento}"></td>
-                            <td th:text="${u.tDocumento}"></td>
-                            <td th:text="${u.trimestre}"></td>
-                            <td th:text="${u.correo}"></td>
-                            <td th:text="${u.numero}"></td>
-                            <td th:text="${u.usuario}"></td>
-                            <td th:text="${u.pass}"></td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button class="btn-editar">
-                                        <a th:href="@{/coordinador/editar/{id}(id=${u.idUsuario})}">Editar</a>
-                                    </button>
-                                    <form th:action="@{/coordinador/eliminar}" method="post" class="delete-form">
-                                        <input type="hidden" name="idUsuario" th:value="${u.idUsuario}">
-                                        <button type="submit" class="btn-eliminar" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?')">Eliminar</button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
         </div>
 
     </body>

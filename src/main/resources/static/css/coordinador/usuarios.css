@@ -93,7 +93,7 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 20px;
+    padding: 10px;
     overflow: auto; /* Asegura que el contenido se ajuste */
     width: calc(100% - 60px); /* Ajustar para el espacio de la barra */
 }
@@ -105,11 +105,19 @@ header {
     top: 0;
     left: 60px;
     z-index: 1;
-    background-color: rgb(57,169,0);
+    background-color: #03314b;
     height: 70px;
     justify-content: space-between;
     display: flex;
     align-items: center;
+}
+
+.titulo{
+    color: black;
+}
+
+header h1, h2{
+    color: white;
 }
 
 .logo {
@@ -157,168 +165,148 @@ section {
     background-color: rgb(5, 35, 48);
 }
 
-
-.table-container {
-    margin-top: 100px; /* Espacio para que quede debajo del header */
-    margin-left: 10px; /* Ajusta según el ancho de la barra lateral */
-    padding: 15px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    width: calc(100% - 100px); /* Ajusta el ancho para que respete la barra */
+.usuarios{
+    margin-top: 100px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-table {
-    width: 80%; /* La tabla ocupa todo el contenedor */
-    border-collapse: collapse;
-    margin-top: 10px; /* Espacio entre la tabla y el contenedor */
+.titulo{
+    color: black;
+    text-align: center;
 }
-
-th, td {
-    padding: 12px;
+.usuarios h2 {
     text-align: left;
-    border-bottom: 1px solid #ddd;
+    color: black;
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-th {
-    background-color: #4CAF50;
-    color: white;
+.usuarios form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
 }
 
-td {
-    background-color: #fff;
-}
-
-tr:hover td {
-    background-color: #f2f2f2;
-}
-
-.search-bar {
-    margin-top: 100px; /* Espacio para que quede debajo del header */
-    margin-left: 10px; /* Ajusta según el ancho de la barra lateral */
-    padding: 15px;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    width: calc(100% - 100px); /* Ajusta el ancho para que respete la barra */
-}
-
-.search-bar input {
-    padding: 8px;
+.usuarios input[type="text"] {
+    flex: 1;
+    padding: 10px;
+    border-radius: 5px;
     border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 200px;
+    transition: border-color 0.3s ease;
+    min-width: 250px;
 }
 
-.search-bar button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    background-color: #4CAF50;
+.usuarios input[type="text"]:focus {
+    border-color: #0056b3;
+    outline: none;
+}
+
+.usuarios button {
+    padding: 10px 20px;
+    background-color: #0056b3;
     color: white;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.2s ease;
+    font-weight: bold;
+}
+
+.usuarios button:hover {
+    background-color: #003f80;
+}
+.usuarios table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.usuarios th, .usuarios td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.usuarios th {
+    background-color: #0056b3;
+    color: white;
+}
+
+.usuarios .btn-accion {
+    padding: 5px 10px;
+    background-color: #007bff;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.usuarios .btn-accion:hover {
+    background-color: #0056b3;
+}
+.btn-generar-reporte {
+    background-color: #004a99;
+    color: white;
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-generar-reporte:hover {
+    background-color: #003366;
+}
+.contenedor-boton-reporte {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 10px; /* Espacio entre los botones */
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap; /* Por si se usa en pantallas pequeñas */
+}
+
+.action-buttons .btn-editar,
+.action-buttons .btn-eliminar {
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    color: white;
     transition: background-color 0.3s ease;
 }
 
-.search-bar button:hover {
-    background-color: #45a049;
-}
-/* Estilo general para los botones */
-button {
-    background-color: #4CAF50; /* Verde estándar */
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-/* Efecto al pasar el cursor */
-button:hover {
-    background-color: #45a049; /* Verde más oscuro */
-    transform: translateY(-2px);
-    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Efecto al hacer clic */
-button:active {
-    background-color: #3d8c41;
-    transform: translateY(0);
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Botones con enlaces */
-button a {
-    color: white;
-    text-decoration: none;
-    font-size: inherit;
-    display: inline-block;
-    text-align: center;
-}
-
-button a:hover {
-    text-decoration: underline;
-}
-
-/* Estilo específico para tablas */
-.table-container button {
-    width: auto; /* Ajusta el ancho al contenido */
-    margin: 0 5px; /* Espaciado entre botones */
-}
-
-
-/* Contenedor de los botones de acción */
-.action-buttons {
-    display: flex;
-    justify-content: space-between; /* Alinea los botones a los extremos */
-    align-items: center; /* Centra verticalmente */
-    gap: 10px; /* Espaciado entre los botones */
-}
-
-/* Botón de Editar */
 .btn-editar {
-    background-color: #4CAF50; /* Verde */
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #3498db;
 }
 
 .btn-editar:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
+    background-color: #2980b9;
 }
 
-/* Botón de Eliminar */
 .btn-eliminar {
-    background-color: #FF4C4C; /* Rojo */
-    color: white;
-    border: none;
-    padding: 8px 12px;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    background-color: #e74c3c;
 }
 
 .btn-eliminar:hover {
-    background-color: #e63939;
-    transform: translateY(-2px);
-    box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.15);
-}
-
-/* Estilo adicional para formularios inline */
-.delete-form {
-    display: inline; /* Asegura que el formulario no rompa la alineación */
-    margin: 0; /* Elimina márgenes */
+    background-color: #c0392b;
 }

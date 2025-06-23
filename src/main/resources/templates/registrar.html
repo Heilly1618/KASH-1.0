@@ -1,65 +1,76 @@
 <!DOCTYPE html>
-<!--
-Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
-Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
--->
-<html xmlns:th="http://www.thymeLeaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
     <head>
-        <title>TODO supply a title</title>
+        <title>Registrar usuario</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="../css/registrar.css">
     </head>
-
     <body>
         <header>
             <div class="logo">
-                <img src="img/logo kash.png" alt="">
+                <img src="../img/logoKash.png" alt="Logo Kash">
                 <h1>KASH</h1>
             </div>
         </header>
-        <form id="myForm" onsubmit="validarFormulario(event)" th:action="@{/guardarUsuario}" th:object="${nuevoUsuario}" method="POST">
+
+        <form id="myForm" th:action="@{/guardarUsuario}" th:object="${nuevoUsuario}" method="POST">
+            <div th:if="${error}" class="error-message">
+                <p th:text="${error}"></p>
+            </div>
+            <div th:if="${success}" class="success-message">
+                <p th:text="${success}"></p>
+            </div>
             <h4>DATOS PERSONALES</h4>
-            <p>Rol: </p>
-            <div class="imagen">
-                <select class="Pregunta" name="rolSeleccionado" id="rolSeleccionado" th:field="*{rolSeleccionado}">
+
+            <label>
+                <p>Rol:</p>
+                <select class="Pregunta" id="rolSeleccionado" th:field="*{rolSeleccionado}" required>
                     <option value="">Seleccionar rol</option>
                     <option value="asesor">Asesor</option>
                     <option value="aprendiz">Aprendiz</option>
                 </select>
-            </div>
-            <label for="name">
-                <p>Nombre completo: </p>
-                <input id="name" class="Pregunta" type="text" name="name" placeholder="Nombre completo" th:field="*{nombres}">
             </label>
-            <label for="first_Lastname">
-                <p>Primer apellido: </p>
-                <input id="first_Lastname" class="Pregunta" type="text" name="first_Lastname" placeholder="Primer apellido" th:field="*{primerA}">
+
+            <label>
+                <p>Nombre completo:</p>
+                <input class="Pregunta" type="text" th:field="*{nombres}" required>
             </label>
-            <label for="second_Lastname">
-                <p>Segundo apellido: </p>
-                <input id="second_Lastname" class="Pregunta" type="text" name="second_Lastname" placeholder="Segundo apellido" th:field="*{segundoA}">
+
+            <label>
+                <p>Primer apellido:</p>
+                <input class="Pregunta" type="text" th:field="*{primerA}" required>
             </label>
-            <label for="date_of_birth">
-                <p>Fecha de nacimiento: </p>
-                <input id="date_of_birth" class="Pregunta" type="date" name="date_of_birth" placeholder="Fecha de nacimiento" th:field="*{fNacimiento}">
+
+            <label>
+                <p>Segundo apellido:</p>
+                <input class="Pregunta" type="text" th:field="*{segundoA}" required>
             </label>
-            <label for="Tipo_Documento">
-                <p>Tipo de documento: </p>
-                <input id="Tipo_Documento" class="Pregunta" list="Tipo" name="Tipo_Documento" placeholder="Tipo de documento" th:field="*{tDocumento}">
+
+            <label>
+                <p>Fecha de nacimiento:</p>
+                <input class="Pregunta" type="date" th:field="*{fNacimiento}" required>
+            </label>
+
+            <label>
+                <p>Tipo de documento:</p>
+                <input class="Pregunta" list="Tipo" th:field="*{tDocumento}" required>
                 <datalist id="Tipo">
                     <option value="Cédula extranjera"></option>
                     <option value="Cédula de ciudadanía"></option>
                     <option value="Tarjeta de identidad"></option>
                 </datalist>
             </label>
-            <label for="Numero_Documento">
-                <p>Número del documento: </p>
-                <input id="Numero_Documento" class="Pregunta" type="number" name="Numero_Documento" placeholder="Número de documento" th:field="*{idUsuario}">
+
+            <label>
+                <p>Número del documento:</p>
+                <input class="Pregunta" type="text" th:field="*{idUsuario}" min="0" required>
             </label>
-            <label for="Trimestre">
-                <p>Trimestre al que pertenece: </p>
-                <select class="Pregunta" name="Trimestre" id="Trimestre"th:field="*{trimestre}">
+
+            <label>
+                <p>Trimestre al que pertenece:</p>
+                <select class="Pregunta" th:field="*{trimestre}" required>
+                    <option value="">Seleccionar trimestre</option>
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -71,175 +82,84 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this temp
             </label>
 
             <h4>DATOS DE CONTACTO</h4>
-            <label for="correo">
-                <p>Correo electronico: </p>
-                <input id="correo" class="Pregunta" type="email" name="correo" placeholder="Correo" th:field="*{correo}">
-            </label>
-            <label for="confirmar_correo">
-                <input id="confirmar_correo" class="Pregunta" type="email" name="confirmar_correo" placeholder="Confirmar correo" >
-            </label>
-            <label for="numero_telefonico">
-                <p>Número de contacto: </p>
-                <input id="numero_telefonico" class="Pregunta" type="number" name="numero_telefonico" placeholder="Número Telefónico" th:field="*{numero}" >
+
+            <label>
+                <p>Correo electrónico:</p>
+                <input class="Pregunta" type="email" th:field="*{correo}" id="correo" required>
             </label>
 
-            <h4>Crear cuenta</h4>
-            <label for="usuario">
+            <label>
+                <p>Confirmar correo:</p>
+                <input class="Pregunta" type="email" id="confirmar_correo" required>
+            </label>
+
+            <label>
+                <p>Número de contacto:</p>
+                <input class="Pregunta" type="number" th:field="*{numero}" min="0" required>
+            </label>
+
+            <h4>CREAR CUENTA</h4>
+
+            <label>
                 <p>Usuario:</p>
-                <input id="usuario" class="Pregunta" type="text" name="usuario" placeholder="Usuario"th:field="*{usuario}">
+                <input class="Pregunta" type="text" th:field="*{usuario}" required>
             </label>
-            <label for="contraseña">
-                <p>Contraseña: </p>
-                <input id="contraseña" class="Pregunta" type="password" name="contraseña" placeholder="Contraseña" th:field="*{pass}">
+
+            <label>
+                <p>Contraseña:</p>
+                <input class="Pregunta" type="password" th:field="*{pass}" id="contraseña" required>
             </label>
-            <label for="Confirmar_contraseña">
-                <input id="Confirmar_contraseña" class="Pregunta" type="password" name="Confirmar_contraseña" placeholder="Confirmar contraseña">
+
+            <label>
+                <p>Confirmar contraseña:</p>
+                <input class="Pregunta" type="password" id="Confirmar_contraseña" required>
             </label>
+
             <button type="submit" class="boton">Registrar</button>
             <p class="centrado"><a th:href="@{/index}">¿Ya tengo cuenta?</a></p>
         </form>
 
-    </body>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                let form = document.getElementById("myForm");
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
+                form.addEventListener("submit", function (event) {
+                    let valid = true;
 
-            function validarFormulario(event) {
-                event.preventDefault(); // Prevenir el envío del formulario si hay errores
+                    // Validación de campos vacíos
+                    let inputs = form.querySelectorAll("input[required], select[required]");
+                    inputs.forEach(input => {
+                        if (!input.value.trim()) {
+                            input.style.border = "2px solid red";
+                            valid = false;
+                        } else {
+                            input.style.border = "";
+                        }
+                    });
 
-                // Obtener elementos del formulario
-                var rolSeleccionado = document.getElementById("rolSeleccionado");
-                var name = document.getElementById("name");
-                var first_Lastname = document.getElementById("first_Lastname");
-                var tipoDocumento = document.getElementById("Tipo_Documento");
-                var numeroDocumento = document.getElementById("Numero_Documento");
-                var trimestre = document.getElementById("Trimestre");
-                var correo = document.getElementById("correo");
-                var confirmar_correo = document.getElementById("confirmar_correo");
-                var numero = document.getElementById("numero_telefonico");
-                var nombre = document.getElementById('usuario');
-                var contraseña = document.getElementById('contraseña');
-                var confirmar_contraseña = document.getElementById('Confirmar_contraseña');
-                var SoloLetras = /^[a-zA-Z]+$/;
-
-                // Eliminar mensajes de error anteriores
-                rolSeleccionado.classList.remove('campo-olbigatorio');
-                name.classList.remove('campo-obligatorio');
-                first_Lastname.classList.remove('campo-obligatorio');
-                tipoDocumento.classList.remove('campo-obligatorio');
-                numeroDocumento.classList.remove('campo-obligatorio');
-                trimestre.classList.remove('campo-obligatorio');
-                correo.classList.remove('campo-obligatorio');
-                confirmar_correo.classList.remove('campo-obligatorio');
-                numero.classList.remove('campo-obligatorio');
-                nombre.classList.remove('campo-obligatorio');
-                contraseña.classList.remove('campo-obligatorio');
-                confirmar_contraseña.classList.remove('campo-obligatorio');
-
-                let valid = true;
-
-                // Validaciones
-                if (rolSeleccionado.value.trim() === '') {
-                    rolSeleccionado.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (name.value.trim() === '') {
-                    name.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (first_Lastname.value.trim() === '') {
-                    first_Lastname.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (tipoDocumento.value.trim() === '') {
-                    tipoDocumento.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (numeroDocumento.value.trim() === '') {
-                    numeroDocumento.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (trimestre.value.trim() === '') {
-                    trimestre.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-
-                if (correo.value.trim() === '') {
-                    correo.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (confirmar_correo.value.trim() === '') {
-                    confirmar_correo.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (numero.value.trim() === '') {
-                    numero.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (correo.value.trim() !== confirmar_correo.value.trim()) {
-                    alert('El correo no coincide.');
-                    correo.classList.add('campo-obligatorio');
-                    confirmar_correo.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-
-                if (nombre.value.trim() === '') {
-                    nombre.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (contraseña.value.trim() === '') {
-                    contraseña.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (confirmar_contraseña.value.trim() === '') {
-                    confirmar_contraseña.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (!SoloLetras.test(nombre.value)) {
-                    alert('El nombre de usuario debe contener solo letras.');
-                    nombre.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-                if (contraseña.value.trim() !== confirmar_contraseña.value.trim()) {
-                    alert('La contraseña no coincide.');
-                    contraseña.classList.add('campo-obligatorio');
-                    confirmar_contraseña.classList.add('campo-obligatorio');
-                    valid = false;
-                }
-
-                // Validación para asegurarse de que la fecha de nacimiento sea mayor a 18 años si el tipo de documento es "Cédula de ciudadanía" o "Cédula extranjera"
-                if (tipoDocumento.value === "Cédula de ciudadanía" || tipoDocumento.value === "Cédula extranjera") {
-                    var fechaNacimiento = document.getElementById("date_of_birth");
-                    var fechaNacimientoValue = new Date(fechaNacimiento.value);
-                    var fechaActual = new Date();
-                    var edad = fechaActual.getFullYear() - fechaNacimientoValue.getFullYear();
-                    var mes = fechaActual.getMonth() - fechaNacimientoValue.getMonth();
-                    if (mes < 0 || (mes === 0 && fechaActual.getDate() < fechaNacimientoValue.getDate())) {
-                        edad--;
-                    }
-
-                    if (edad < 18) {
-                        alert('Debe ser mayor de 18 años para registrar una cédula de ciudadanía o extranjera.');
-                        fechaNacimiento.classList.add('campo-obligatorio');
+                    // Validación de correo
+                    let correo = document.getElementById("correo").value;
+                    let confirmarCorreo = document.getElementById("confirmar_correo").value;
+                    if (correo !== confirmarCorreo) {
+                        alert("Los correos no coinciden.");
+                        document.getElementById("confirmar_correo").style.border = "2px solid red";
                         valid = false;
                     }
-                }
 
-                if (!valid) {
-                    alert('Por favor, complete todos los campos obligatorios.');
-                    return false;
-                }
+                    // Validación de contraseña
+                    let pass = document.getElementById("contraseña").value;
+                    let confirmPass = document.getElementById("Confirmar_contraseña").value;
+                    if (pass !== confirmPass) {
+                        alert("Las contraseñas no coinciden.");
+                        document.getElementById("Confirmar_contraseña").style.border = "2px solid red";
+                        valid = false;
+                    }
 
-                // Si todo es válido, permitir el envío
-                document.getElementById("myForm").submit();
-                alert('Usuario creado con éxito');
-            }
-
-            // Llamada al evento de validación cuando se intente enviar el formulario
-            document.getElementById("myForm").addEventListener("submit", validarFormulario);
-        });
-
-
-    </script>
-
+                    if (!valid) {
+                        event.preventDefault();
+                    }
+                });
+            });
+        </script>
+    </body>
 </html>

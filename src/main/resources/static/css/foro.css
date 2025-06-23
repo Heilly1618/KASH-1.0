@@ -1,387 +1,513 @@
 * {
-  margin: 0;
-  padding: 0;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  background-color: #f0f0f0;
+    background-color: #f0f0f0;
 }
-
+/*Header de la pagina*/
 header {
-  background-color: rgb(94, 179, 25);
-  width: 100%;
-  height: 70px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    background-color: #03314b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    color: white;
+}
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+header .logo {
+    width: 50px;
 }
 
-header img {
-  width: 50px;
+header h1, header h2 {
+    color: white;
+    margin: 0;
+}
+.btn-login {
+    background: linear-gradient(45deg, #28a745, #007bff);
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    transition: 0.3s ease-in-out;
 }
 
-header h1 {
-  text-align: center;
+.btn-login:hover {
+    background: linear-gradient(45deg, #218838, #0056b3);
 }
 
 main {
-  padding: 20px;
+    padding: 20px;
 }
 
-/* Estilos para el modal */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
+/*Foros de la pagina*/
 
-/* Estilos para el contenido del modal */
-.modal-content {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  width: 400px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: relative;
-}
-
-/* Estilo para el botón de cerrar */
-.close {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-form {
-  background-color: rgb(230, 230, 230);
-  width: 200px;
-  padding: 40px;
-  margin: 20px;
-  margin-top: 25px;
-  border-radius: 25px;
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  color: #000;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-input {
-  padding: 10px;
-  border-radius: 10px;
-  border: none;
-  outline: none;
-  width: 200px;
-  margin-top: 5px;
-}
-
-form label {
-  color: rgb(94, 179, 25);
-}
-
-.formulario .enlaces {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-form .boton {
-  text-decoration: none;
-  background-color: rgb(57, 169, 0);
-  color: white;
-  padding: 10px 30px;
-  border-radius: 15px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-/* Estilos para los botones flotantes */
-.btn-flotante, .btn-flotante2 {
-  position: fixed;
-  bottom: 20px;
-  background-color: rgb(4, 50, 77);
-  border: none;
-  border-radius: 50%;
-  padding: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-}
-
-.btn-flotante {
-  right: 20px; /* A la derecha */
-}
-
-.btn-flotante2 {
-  left: 20px; /* A la izquierda */
-}
-
-.btn-flotante img, .btn-flotante2 img {
-  width: 24px;
-  height: 24px;
-}
-
-.btn-flotante:hover, .btn-flotante2:hover {
-  background-color: #0056b3;
-  transform: scale(1.1);
-}
-
-/* Estilos para el formulario PQR */
-.formulario-pqr {
-  display: none;
-  position: fixed;
-  z-index: 2;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.formulario-pqr form {
-  display: flex;
-  background-color: #fff;
-  padding: 30px;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 600px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-  position: relative;
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.formulario-pqr form img {
-  width: 50px;
-  margin-bottom: 20px;
-  align-self: center;
-}
-
-.formulario-pqr form label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: bold;
-  color: #333;
-}
-
-.formulario-pqr input, .formulario-pqr textarea {
-  padding: 12px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  outline: none;
-  width: 100%;
-  margin-bottom: 12px;
-}
-
-.formulario-pqr textarea {
-  resize: vertical;
-}
-
-.formulario-pqr .button-container {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.formulario-pqr button {
-  background-color: rgb(57, 169, 0);
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.3s;
-}
-
-.formulario-pqr button:hover {
-  background-color: rgb(45, 142, 0);
-  transform: scale(1.05);
-}
-
-#cerrarPQR {
-  background-color: #e74c3c;
-}
-
-#cerrarPQR:hover {
-  background-color: #c0392b;
-}
-
-.no-foros {
-  color: #ff0000;
-  font-size: 18px;
-  text-align: center;
-  margin: 20px;
-  font-weight: bold;
-}
-
-.autor-fecha {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 10px;
-}
-
-.contenido {
-  margin-top: 15px;
-  margin-bottom: 15px;
-}
-
-.estrellas {
-  display: flex;
-  align-items: center;
-}
-
-.estrellas input {
-  display: none;
-}
-
-.estrellas label {
-  font-size: 24px;
-  color: #ccc;
-  cursor: pointer;
-  transition: color 0.3s;
-}
-
-.estrellas label:hover,
-.estrellas label:hover ~ label {
-  color: #ffcc00;
-}
-
-.estrellas input:checked + label {
-  color: #ffcc00;
-}
-
-.estrellas input:checked ~ label {
-  color: #ffcc00;
+#foros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;;
+    padding: 20px;
 }
 
 .foro-item {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 15px;
-  margin: 10px 0;
-  background-color: #f9f9f9;
-  transition: box-shadow 0.3s;
+    width: 300px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
 }
 
 .foro-item:hover {
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
 }
 
-.btn-comentar {
-  background-color: rgb(57, 169, 0);
-  color: white;
-  padding: 5px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
 }
 
-.btn-comentar:hover {
-  background-color: rgb(45, 142, 0);
+.card-header {
+    width: 100%;
 }
 
-.botones-comentarios {
-  display: flex;
-  justify-content: space-between;
+.card-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 5px;
 }
 
-#formComentario {
-  background-color: #f4f7f6;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-  width: 80%;
-  max-width: 600px;
-  margin: 20px auto;
-  transition: transform 0.3s, box-shadow 0.3s;
+.card-body {
+    margin-top: 10px;
 }
 
-#formComentario:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+.card-footer {
+    margin-top: 10px;
 }
 
-#formComentario label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 8px;
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
 }
 
-#formComentario input[type="text"],
-#formComentario input[type="password"],
-#formComentario textarea {
-  padding: 15px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  width: 100%;
-  margin-bottom: 20px;
-  background-color: #ffffff;
-  transition: border-color 0.3s;
+button:hover {
+    background: #0056b3;
 }
 
-#formComentario input[type="text"]:focus,
-#formComentario input[type="password"]:focus,
-#formComentario textarea:focus {
-  border-color: #4caf50;
-  outline: none;
+/* Estilos para el modal del foro */
+#modalForo {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+#modalForo .modal-img {
+    width: 100%; /* Ajusta el ancho máximo */
+    max-width: 300px; /* Define un tamaño máximo */
+    height: auto; /* Mantiene la proporción */
+    display: block; /* Evita problemas de alineación */
+    margin: 10px auto; /* Centra la imagen en el modal */
+    border-radius: 10px; /* Bordes redondeados para mejor estética */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1); /* Efecto de sombra suave */
+}
+.modal-content {
+    background: white;
+    padding: 30px; /* Aumento de padding para un espacio más amplio */
+    border-radius: 15px; /* Bordes más redondeados para un look más suave */
+    width: 60%; /* Aumento de ancho para mejor visualización */
+    max-width: 700px; /* Tamaño máximo más grande */
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); /* Sombra más prominente */
+    text-align: left;
+    overflow-y: auto; /* Permite desplazarse si el contenido es muy largo */
+  text-align: left;
 }
 
-#formComentario textarea {
-  resize: vertical;
-  min-height: 100px;
+#modalTema {
+    font-size: 24px; /* Aumentamos el tamaño de la fuente */
+    font-weight: bold;
+    color: #03314b; /* Color del texto más atractivo */
+    margin-bottom: 15px; /* Espacio debajo del título */
 }
 
-#formComentario button[type="submit"] {
-  background-color: #4caf50;
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 100%;
-  transition: background-color 0.3s, transform 0.3s;
+#modalAutor,
+#modalFecha {
+    font-size: 16px;
+    margin: 10px 0;
+    color: #555; /* Color más suave para los detalles */
+}
+#modalContenido {
+    font-size: 16px;
+    line-height: 1.6; /* Mejor legibilidad */
+    color: #333;
+    margin: 20px 0;
+    text-align: justify; /* Mejor alineación del contenido */
 }
 
-#formComentario button[type="submit"]:hover {
-  background-color: #388e3c;
-  transform: translateY(-3px);
+#btnComentar {
+    display: block;
+    margin-left: auto; /* Empuja el botón a la derecha */
+    padding: 10px 20px;
+    background-color: #007bff; /* Color azul */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-#formComentario #cerrar {
-  background-color: #f44336;
-  color: white;
-  padding: 12px 25px;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 100%;
-  transition: background-color 0.3s, transform 0.3s;
+#btnComentar:hover {
+    background-color: #0056b3; /* Color más oscuro al pasar el mouse */
 }
 
-#formComentario #cerrar:hover {
-  background-color: #d32f2f;
-  transform: translateY(-3px);
+/* Oculta el textarea de comentarios */
+#comentarioText {
+    display: none;
 }
 
-#formComentario .form-group {
-  margin-bottom: 15px;
+
+#comentariosZona {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
 }
+
+#comentariosZona h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+    color: #03314b;
+}
+
+#comentariosLista p {
+    font-size: 14px;
+    margin: 10px 0;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 5px;
+    color: #555;
+}
+
+#comentariosLista p:nth-child(even) {
+    background: #e9e9e9; /* Alterna el color de los comentarios para mayor contraste */
+}
+.input-comentar {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #fff;
+    margin-bottom: 10px; /* Separación entre los campos */
+}
+
+.input-comentar:focus {
+    border-color: #007bff; /* Cambio de borde cuando está en foco */
+    outline: none;
+    background-color: #f9f9f9;
+}
+.BotonComentar {
+    display: block;
+    margin-left: auto;
+    padding: 12px 25px; 
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+}
+
+.BotonComentar:hover {
+    background-color: #0056b3;
+}
+
+
+.close {
+    float: right;
+    font-size: 28px; /* Aumento del tamaño de la 'X' */
+    cursor: pointer;
+    color: #03314b;
+    transition: color 0.3s;
+}
+
+.close:hover {
+    color: #007bff; /* Color de la 'X' cambia al pasar el ratón */
+}
+
+/*Comentar Foto*/
+#comentarioModal {
+    display: none; /* Asegúrate de que el modal esté oculto por defecto */
+}
+ /*Botones flotantes*/
+ /* Estilos para los botones flotantes */
+.btn-flotante, .btn-flotante2 {
+    position: fixed;
+    bottom: 20px;
+    background-color: rgb(4, 50, 77);
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+.btn-flotante {
+    right: 20px; /* A la derecha */
+}
+
+.btn-flotante2 {
+    left: 20px; /* A la izquierda */
+}
+
+.btn-flotante img, .btn-flotante2 img {
+    width: 24px;
+    height: 24px;
+}
+
+.btn-flotante:hover, .btn-flotante2:hover {
+    background-color: #0056b3;
+    transform: scale(1.1);
+}
+
+/*formulario ingreso*/
+/* FORMULARIO (dentro del modal) */
+.formulario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80%; /* Cambiado de 100% a 80% para mejor ajuste */
+    max-width: 700px; /* Aumentado de 600px a 700px */
+    padding: 25px; /* Más espacio interno */
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    background-color: white;
+}
+
+.formulario h2 {
+    color: #03314b;
+    margin-bottom: 20px;
+    font-size: 24px; /* Aumentado el tamaño */
+    font-weight: bold;
+}
+
+/* Inputs dentro del formulario */
+.modal-content .formulario label {
+    align-self: flex-start; /* Asegura alineación a la izquierda */
+    font-weight: bold;
+    color: #03314b;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.modal-content .formulario input {
+    width: 100%;
+    padding: 14px; /* Más espacio */
+    border: 2px solid #038C3E;
+    outline: none;
+    font-size: 16px;
+    box-shadow: 0 0 5px rgba(3, 140, 62, 0.5);
+}
+
+/* MODAL DE LOGIN - ÚNICO */
+#loginModalUnique {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* MODAL: Contenido del modal */
+#loginModalUnique .modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    width: 80%; /* Aumentado para ocupar más espacio */
+    max-width: 700px; /* Aumentado de 600px a 700px */
+    text-align: center;
+    position: relative;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* BOTÓN DE CERRAR */
+#loginModalUnique .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.3s;
+}
+
+#loginModalUnique .close:hover {
+    color: #ff0000;
+}
+
+/* BOTÓN DE INGRESAR */
+.formulario button {
+    padding: 14px 28px; /* Botón más grande */
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px; /* Letra más grande */
+    font-weight: bold;
+    width: 100%;
+    max-width: 250px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin: 10px;
+}
+
+.formulario button:hover {
+    background: linear-gradient(135deg, #0056b3, #00408b);
+    transform: scale(1.05);
+}
+
+.formulario button:active {
+    transform: scale(0.98);
+}
+
+/* Estilos para los enlaces dentro del formulario */
+.formulario .enlaces {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.formulario .enlaces a {
+    text-decoration: none;
+    color: #007bff;
+    font-size: 16px;
+    transition: color 0.3s;
+}
+
+.formulario .enlaces a:hover {
+    color: #0056b3;
+}
+
+
+/*Formulario pqrs*/
+
+
+/* Estilos para el formulario PQR */
+.formulario-pqr {
+   display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+
+.formulario-pqr form {
+    display: flex;
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    position: relative;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.formulario-pqr form img {
+    width: 50px;
+    margin-bottom: 20px;
+    align-self: center;
+}
+
+.formulario-pqr form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+.formulario-pqr input, .formulario-pqr textarea {
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    outline: none;
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.formulario-pqr textarea {
+    resize: vertical;
+}
+
+.formulario-pqr .button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.formulario-pqr button {
+    background-color: rgb(57, 169, 0);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.formulario-pqr button:hover {
+    background-color: rgb(45, 142, 0);
+    transform: scale(1.05);
+}
+
+#cerrarPQR {
+    background-color: #e74c3c;
+}
+
+#cerrarPQR:hover {
+    background-color: #c0392b;
+}
+ /*Modal en genera*/
+ .modal{
+     display: none;
+ }
