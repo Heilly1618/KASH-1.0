@@ -1,7 +1,6 @@
 package com.proyecto.KASH.Repository;
 
 import com.proyecto.KASH.entidad.Componente;
-import com.proyecto.KASH.entidad.Usuario;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +16,4 @@ public interface AsesorComponenteRepositorio extends JpaRepository<Componente, L
     List<Componente> findByUsuario_IdUsuario(Long idUsuario);
     
    void deleteByIdAndUsuario_IdUsuario(Long id, Long idUsuario);
-
-    public List<Componente> findByUsuario(Usuario usuario);
 }

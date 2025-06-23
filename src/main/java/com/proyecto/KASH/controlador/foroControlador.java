@@ -16,7 +16,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
-import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -27,7 +26,7 @@ public class foroControlador {
     private foroServicio servicio;
 
     @Autowired
-    private UsuarioServicio2 usuarioServicio;
+    private UsuarioServicio usuarioServicio;
 
     @GetMapping("/foro")
     public String foro(Model modelo) {
@@ -35,41 +34,38 @@ public class foroControlador {
         return "foro";
     }
 
-    
+    @Autowired
+    private UsuarioServicio2 Servicio;
+
     @GetMapping("/ingresar/foro")
-    public String ingresar(@RequestParam String usuario, @RequestParam String pass, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        Usuario usuarioEncontrado = usuarioServicio.findByUsuario(usuario).orElse(null);
+    public String ingresar(@RequestParam String usuario, @RequestParam String pass, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
+        Usuario usuarioValidado = Servicio.findByUsuarioAndPass(usuario, pass).orElse(null);
 
-        if (usuarioEncontrado != null && BCrypt.checkpw(pass, usuarioEncontrado.getPass())) {
-            // Verificar si el usuario está activo
-            if (!"activo".equalsIgnoreCase(usuarioEncontrado.getEstado())) {
-                redirectAttributes.addFlashAttribute("mensajeError", "Su cuenta se encuentra inactiva. Contacte al administrador.");
-                return "redirect:/";
-            }
-            
-            String rol = usuarioEncontrado.getRolSeleccionado();
-            session.setAttribute("usuario", usuarioEncontrado);
+        if (usuarioValidado != null) {
 
-            System.out.println("Usuario encontrado: " + usuarioEncontrado);
-            System.out.println("Rol del usuario: " + rol);
+            System.out.println("Usuario encontrado: " + usuarioValidado);
+            System.out.println("Nombres: " + usuarioValidado.getNombres());
+            System.out.println("Rol: " + usuarioValidado.getRolSeleccionado());
 
-            switch (rol.trim().toLowerCase()) {
+            session.setAttribute("usuarioSesion", usuarioValidado);
+            String rol = usuarioValidado.getRolSeleccionado();
+
+            switch (rol) {
                 case "coordinador":
-                    return "redirect:/foro";
                 case "aprendiz":
                     return "redirect:/foro";
                 case "asesor":
+                    session.setAttribute("usuario", usuarioValidado);
                     return "redirect:/ForoFormulario";
                 default:
-                    redirectAttributes.addFlashAttribute("mensajeError", "Rol no válido.");
-                    return "redirect:/";
+                    redirectAttributes.addFlashAttribute("error", "Rol no válido");
+                    return "redirect:/foro";
             }
         } else {
-            redirectAttributes.addFlashAttribute("mensajeError", "Usuario o contraseña incorrectos.");
-            return "redirect:/";
+            redirectAttributes.addFlashAttribute("error", "Usuario o contraseña incorrectos");
+            return "redirect:/foro";
         }
     }
-
 
     @GetMapping("/foro/imagen/{id}")
     public void obtenerFoto(@PathVariable Long id, HttpServletResponse response) throws IOException, SQLException {

@@ -1,7 +1,6 @@
 package com.proyecto.KASH.controlador;
 
 import com.proyecto.KASH.Repository.PQRSRepository;
-import com.proyecto.KASH.entidad.EstadoPQRS;
 import com.proyecto.KASH.entidad.PQRS;
 import com.proyecto.KASH.entidad.Usuario;
 import com.proyecto.KASH.servicio.EmailService;
@@ -43,12 +42,6 @@ public class pqrsControlador {
             @RequestParam("detalles") String detalles,
             RedirectAttributes redirectAttributes
     ) {
-        System.out.println("pqrsControlador.enviarPQRS() called");
-        System.out.println("idUsuario: " + idUsuario);
-        System.out.println("fecha: " + fecha);
-        System.out.println("tipo: " + tipo);
-        System.out.println("detalles: " + detalles);
-
         Optional<Usuario> usuario = usuarioServicio.buscarPorIdUsuario(idUsuario);
 
         if (usuario.isPresent()) {
@@ -79,8 +72,7 @@ public class pqrsControlador {
             pqrs.setFecha(fechaConvertida);
             pqrs.setTipo(tipo);
             pqrs.setDetalles(detalles);
-            pqrs.setEstado(EstadoPQRS.Activo);   // para estado por defecto
-
+            pqrs.setEstado("Activo"); // Estado por defecto
 
             // Guardar la PQRS
             PQRS pqrsGuardada = pqrsServicio.guardarPQRS(pqrs);
@@ -107,7 +99,7 @@ public class pqrsControlador {
         return "redirect:/foro"; // Retorna a la vista
     }
 
-    @GetMapping("/coordinador/buscarPQRS-simple")
+    @GetMapping("/coordinador/buscarPQRS")
     public String buscarPQRS(@RequestParam(name = "filtro", required = false) String filtro, Model model) {
         List<PQRS> pqrsList;
 
@@ -135,7 +127,7 @@ public class pqrsControlador {
             );
 
             // Cambiar estado a Inactivo
-           pqrs.setEstado(EstadoPQRS.Inactivo); // al responder la PQRS
+            pqrs.setEstado("Inactivo");
             PQRSRepositorio.save(pqrs);
         }
         return "redirect:/coordinador/PQRS";

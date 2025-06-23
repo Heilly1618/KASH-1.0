@@ -1,17 +1,13 @@
 package com.proyecto.KASH.servicio;
 
-import com.itextpdf.text.DocumentException;
 import com.proyecto.KASH.entidad.Usuario;
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.web.multipart.MultipartFile;
+
 
 public interface UsuarioServicio2 {
-
     Optional<Usuario> findByUsuarioAndPass(String usuario, String pass);
-
     public ByteArrayInputStream generarReporteUsuarios(List<Usuario> usuarios) throws Exception;
 
     public Usuario buscarPorId(Long id);
@@ -31,7 +27,6 @@ public interface UsuarioServicio2 {
     List<Usuario> buscarUsuarioPorFiltro(String filtro);
     
     List<Usuario> obtenerUsuariosPorRol(String rol);
-    
     Optional<Usuario> obtenerUsuarioPorId(Long idUsuario);
     
     void guardarUsuario(Usuario usuario);

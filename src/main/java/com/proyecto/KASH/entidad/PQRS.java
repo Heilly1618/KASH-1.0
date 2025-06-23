@@ -1,10 +1,7 @@
-
 package com.proyecto.KASH.entidad;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -41,9 +38,8 @@ public class PQRS {
     @Column(name = "detalles")
     private String detalles;
 
-    @Enumerated(EnumType.ORDINAL)
     @Column(name = "estado")
-    private EstadoPQRS estado;
+    private String estado;
 
     // Getters and Setters
     public Long getId() {
@@ -110,15 +106,13 @@ public class PQRS {
         this.detalles = detalles;
     }
 
-    public EstadoPQRS getEstado() {
-        System.out.println("EstadoPQRS value from database: " + estado);
+    public String getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoPQRS estado) {
+    public void setEstado(String estado) {
         this.estado = estado;
     }
-
 
     @Override
     public String toString() {

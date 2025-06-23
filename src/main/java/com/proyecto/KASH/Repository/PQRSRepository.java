@@ -1,4 +1,3 @@
-
 package com.proyecto.KASH.Repository;
 
 import com.proyecto.KASH.entidad.PQRS;
@@ -10,13 +9,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PQRSRepository extends JpaRepository<PQRS, Long> {
-
-    @Query("SELECT p FROM PQRS p WHERE "
-            + "LOWER(p.nombre) LIKE CONCAT('%', :filtro, '%') OR "
-            + "LOWER(p.email) LIKE CONCAT('%', :filtro, '%') OR "
-            + "LOWER(p.tipo) LIKE CONCAT('%', :filtro, '%') OR "
-            + "LOWER(p.detalles) LIKE CONCAT('%', :filtro, '%') OR "
-            + "STR(p.estado) = UPPER(:filtro)")
+    @Query("SELECT p FROM PQRS p WHERE " +
+           "LOWER(p.nombre) LIKE %:filtro% OR " +
+           "LOWER(p.email) LIKE %:filtro% OR " +
+           "LOWER(p.tipo) LIKE %:filtro% OR " +
+           "LOWER(p.detalles) LIKE %:filtro% OR " +
+           "LOWER(p.estado) LIKE %:filtro%")
     List<PQRS> buscarPorCriterio(@Param("filtro") String filtro);
-
 }
+

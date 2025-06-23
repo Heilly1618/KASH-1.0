@@ -39,11 +39,11 @@
 
             <label>
                 <p>Primer apellido:</p>
-                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="text" th:field="*{primerA}">
-            </label>
 
-            <label>
-                <p>Segundo apellido:</p>
+                <input th:classappend="${camposVacios} ? 'input-error'" class="Pregunta" type="text" th:field="*{primerA}">
+
+                <input class="Pregunta" type="text" th:field="*{primerA}" required>
+            </label>
                 <input class="Pregunta" type="text" th:field="*{segundoA}" >
             </label>
 

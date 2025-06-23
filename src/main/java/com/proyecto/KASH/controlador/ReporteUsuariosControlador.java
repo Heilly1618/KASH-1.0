@@ -4,7 +4,6 @@ import com.proyecto.KASH.Repository.Usuario2Repositorio;
 import com.proyecto.KASH.entidad.Usuario;
 import com.proyecto.KASH.servicio.UsuarioServicio2;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
@@ -13,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -61,25 +59,4 @@ public class ReporteUsuariosControlador {
                 .body(new InputStreamResource(bis));
     }
 
-    
-   @GetMapping("/reporte-personalizado")
-   public String mostrarFormularioReportePersonalizado(){
-        return "coordinador/reporte-personalizado";
-   }
-
-    
-    @PostMapping("/generar-reporte-personalizado")
-    public ResponseEntity<byte[]> generarReportePersonalizado(@RequestParam("campos") List<String> campos) throws Exception {
-        List<Usuario> usuarios = usuarioRepositorio.findAll();
-        ByteArrayInputStream bis = UsuarioService.generarPdfPersonalizado(usuarios, campos);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=reporte-personalizado.pdf"); // <-- Aquí el cambio
-
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(bis.readAllBytes());
-    }
 }

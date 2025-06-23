@@ -33,20 +33,7 @@ public interface Usuario2Repositorio extends JpaRepository<Usuario, Long> {
             + "LOWER(u.correo) LIKE LOWER(CONCAT('%', :filtro, '%')) OR "
             + "LOWER(u.numero) LIKE LOWER(CONCAT('%', :filtro, '%')) OR "
             + "LOWER(u.usuario) LIKE LOWER(CONCAT('%', :filtro, '%')) OR "
-            + "LOWER(u.rolSeleccionado) LIKE LOWER(CONCAT('%', :filtro, '%')) OR "
-            + "LOWER(u.estado) LIKE LOWER(CONCAT('%', :filtro, '%')) OR "
-            + "LOWER(u.etapa) LIKE LOWER(CONCAT('%', :filtro, '%'))")
+            + "LOWER(u.rolSeleccionado) LIKE LOWER(CONCAT('%', :filtro, '%'))")
     List<Usuario> buscarPorFiltro(@Param("filtro") String filtro);
-
-    @Query("SELECT DISTINCT r.aprendiz FROM RespuestaSeleccionada r WHERE r.prueba.id = :pruebaId")
-    List<Usuario> findAprendicesQueRespondieronPrueba(@Param("pruebaId") Long pruebaId);
-
-    Optional<Usuario> findByUsuario(String usuario);
-
-    @Query("SELECT DISTINCT g.nombre FROM Grupo g")
-    List<String> findDistinctComponentes();
-
-    @Query("SELECT g.nombre, COUNT(g) FROM Grupo g GROUP BY g.nombre")
-    List<Object[]> countGruposPorComponente();
 
 }

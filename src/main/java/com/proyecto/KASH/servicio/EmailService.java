@@ -1,6 +1,5 @@
 package com.proyecto.KASH.servicio;
 
-import com.proyecto.KASH.entidad.Asesoria;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
@@ -54,9 +53,5 @@ public class EmailService {
             System.out.println("Error al enviar correos masivos: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    public void notificarAsesoria(Asesoria asesoria) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

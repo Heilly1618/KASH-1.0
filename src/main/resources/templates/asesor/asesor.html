@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<!--
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/Other/html.html to edit this template
+-->
+<html xmlns:th="http://www.thymeLeaf.org">
+    <head>
+        <title>ASESOR</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../../css/asesor/asesor.css">
+    </head>
+    <body>
+        <div class="barra">
+            <div class="selection">
+                <img class="icono" src="../../img/perfil.png" alt="">
+                <a th:href="@{/asesor}" class="link">mi perfil</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/componente.png" alt="">
+                <a th:href="@{/asesor/componente}" class="link">Registrar componentes</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asesoria.png" alt="">
+                <a th:href="@{/asesor/asesorias}" class="link">Grupos</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/confirmar.png" alt="">
+                <a th:href="@{/asesor/confirmar}" class="link">Crear asesorias</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/asistencia.png" alt="">
+                <a th:href="@{/asesor/asistencia}" class="link">Asistencia</a>
+            </div>
+            <div class="selection">
+                <img class="icono" src="../../img/prueba.png" alt="">
+                <a th:href="@{/asesor/prueba}" class="link">Asignar pruebas</a>
+            </div>
+            <div class="cerrar_sesion">
+                <button class="btn-cerrar-sesion"><a th:href="@{/index}" >Cerrar sesión</a></button>
+            </div>
+        </div>
+        <div class="cuerpo">
+            <header>
+                <img class="logo" src="../../img/logoKash.png" alt="">
+                <h2>WELCOME</h2>
+                <h1>KASH</h1>
+            </header>
+            <div class="Perfil">
+                <div class="Datos">
+                    <form th:action="@{/asesor/subirFoto}" method="POST" enctype="multipart/form-data">
+                        <div class="Foto" id="foto-container">
+                            <img th:src="@{/foto/{id}(id=${asesor.idUsuario})}" alt="Foto de perfil" />
+                        </div>
+                        <input type="file" name="foto" accept="image/*" required>
+                        <button type="submit">Subir Foto</button>
+                    </form>
+                    <div class="Datos2">
+                        <p><strong>Usuario:</strong> <span th:text="${asesor.usuario}"></span></p>
+                        <p><strong>Nombre:</strong> <span th:text="(${asesor.nombres} + ' ' + ${asesor.primerA} + ' ' + ${asesor.segundoA})"></span></p>
+                        <p><strong>Tipo de documento:</strong> <span th:text="${asesor.tDocumento}"></span></p>
+                        <p><strong>Número de documento:</strong> <span th:text="${asesor.idUsuario}"></span></p>
+                        <p><strong>Rol:</strong> <span th:text="${asesor.rolSeleccionado}"></span></p>
+                        <p><strong>Trimestre:</strong> <span th:text="${asesor.trimestre}"></span></p>
+                        <p><strong>Correo:</strong> <span th:text="${asesor.correo}"></span></p>
+                        <p><strong>Número de contacto:</strong> <span th:text="${asesor.numero}"></span></p>
+                    </div>
+                </div>
+                <div class="Historial">
+                    <h3>Hitorial de asesorias: </h3>
+                </div>
+            </div>
+        </div>
+
+    </body>
+</html>
