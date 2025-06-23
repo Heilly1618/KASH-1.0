@@ -14,44 +14,43 @@ import org.springframework.stereotype.Service;
 public class PQRSServicioImpl implements PQRSServicio {
 
     @Autowired
-    private PQRSRepository pqrsRepositorio;
+    private PQRSRepository pqrsRepository;
 
     @Override
     @Transactional
     public PQRS guardarPQRS(PQRS pqrs) {
-        return pqrsRepositorio.save(pqrs);
+        System.out.println("PQRSServicioImpl.guardarPQRS() called");
+        System.out.println("PQRS object: " + pqrs);
+        PQRS savedPQRS = pqrsRepository.save(pqrs);
+        System.out.println("PQRS saved successfully with ID: " + savedPQRS.getId());
+        return savedPQRS;
     }
 
     @Override
     public List<PQRS> obtenerTodasPQRS() {
-        return pqrsRepositorio.findAll();
+        System.out.println("PQRSServicioImpl.obtenerTodasPQRS() called");
+        return pqrsRepository.findAll();
     }
 
     @Override
     public PQRS obtenerPQRSPorId(Long id) {
-        Optional<PQRS> pqrs = pqrsRepositorio.findById(id);
+        Optional<PQRS> pqrs = pqrsRepository.findById(id);
         return pqrs.orElse(null);
     }
 
     @Override
     @Transactional
     public void eliminarPQRS(Long id) {
-        pqrsRepositorio.deleteById(id);
-    }
-
-    public List<PQRS> obtenerTodasLasPQRS() {
-        return pqrsRepositorio.findAll();
+        pqrsRepository.deleteById(id);
     }
 
     @Override
     public List<PQRS> listarTodas() {
-        return pqrsRepositorio.findAll();
+        return pqrsRepository.findAll();
     }
 
     @Override
     public List<PQRS> buscarPorCriterio(String filtro) {
-        return pqrsRepositorio.buscarPorCriterio(filtro.toLowerCase());// Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        return pqrsRepository.buscarPorCriterio(filtro.toLowerCase());
     }
-
-
 }

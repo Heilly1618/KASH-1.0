@@ -1,3 +1,4 @@
+
 package com.proyecto.KASH.controlador;
 
 import com.proyecto.KASH.Repository.foroRepositorio;
@@ -252,12 +253,13 @@ public class CoordinadorControlador {
             @RequestParam(required = false) String estado,
             Model model, 
             HttpSession session) {
+        System.out.println("CoordinadorControlador.mostrarPQRS() called");
         Usuario coordinador = (Usuario) session.getAttribute("usuario");
         if (coordinador == null) {
             return "redirect:/index";
         }
         
-        List<PQRS> listaPQRS = pqrsServicio.obtenerTodasLasPQRS();
+        List<PQRS> listaPQRS = pqrsServicio.obtenerTodasPQRS();
         
         // Aplicar filtros
         if (filtro != null && !filtro.trim().isEmpty()) {

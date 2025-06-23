@@ -43,6 +43,12 @@ public class pqrsControlador {
             @RequestParam("detalles") String detalles,
             RedirectAttributes redirectAttributes
     ) {
+        System.out.println("pqrsControlador.enviarPQRS() called");
+        System.out.println("idUsuario: " + idUsuario);
+        System.out.println("fecha: " + fecha);
+        System.out.println("tipo: " + tipo);
+        System.out.println("detalles: " + detalles);
+
         Optional<Usuario> usuario = usuarioServicio.buscarPorIdUsuario(idUsuario);
 
         if (usuario.isPresent()) {

@@ -13,4 +13,6 @@ public interface AprendizAsistenciaRepositorio extends JpaRepository<Asistencia,
     List<Asistencia> findByUsuarioIdUsuario(Long idUsuario);
     List<Asistencia> findByUsuarioIdUsuarioAndFecha(Long idUsuario, LocalDate fecha);
 
+    public List<Asistencia> findByUsuarioIdUsuarioAndAsesoriaId(Long idUsuario, int id);
+
 }
